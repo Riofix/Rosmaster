@@ -1,0 +1,28 @@
+[0.434s] Invoking command in '/home/sunrise/robot_ws/src/robot_base': PYTHONPATH=/home/sunrise/robot_ws/build/robot_base/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/robot_base build --build-base /home/sunrise/robot_ws/build/robot_base/build install --record /home/sunrise/robot_ws/build/robot_base/install.log --single-version-externally-managed install_data
+[0.584s] running egg_info
+[0.584s] writing ../../build/robot_base/robot_base.egg-info/PKG-INFO
+[0.584s] writing dependency_links to ../../build/robot_base/robot_base.egg-info/dependency_links.txt
+[0.584s] writing entry points to ../../build/robot_base/robot_base.egg-info/entry_points.txt
+[0.584s] writing requirements to ../../build/robot_base/robot_base.egg-info/requires.txt
+[0.585s] writing top-level names to ../../build/robot_base/robot_base.egg-info/top_level.txt
+[0.586s] reading manifest file '../../build/robot_base/robot_base.egg-info/SOURCES.txt'
+[0.586s] writing manifest file '../../build/robot_base/robot_base.egg-info/SOURCES.txt'
+[0.587s] running build
+[0.587s] running build_py
+[0.587s] copying robot_base/serial_driver.py -> /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+[0.587s] copying robot_base/base_node.py -> /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+[0.587s] running install
+[0.587s] running install_lib
+[0.588s] copying /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base/serial_driver.py -> /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+[0.588s] copying /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base/base_node.py -> /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+[0.588s] byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/serial_driver.py to serial_driver.cpython-310.pyc
+[0.589s] byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/protocol_parser.py to protocol_parser.cpython-310.pyc
+[0.590s] Sorry: IndentationError: unexpected unindent (protocol_parser.py, line 185)
+[0.591s] byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/base_node.py to base_node.cpython-310.pyc
+[0.591s] running install_data
+[0.591s] running install_egg_info
+[0.593s] removing '/home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base-0.0.0-py3.10.egg-info' (and everything under it)
+[0.593s] Copying ../../build/robot_base/robot_base.egg-info to /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base-0.0.0-py3.10.egg-info
+[0.593s] running install_scripts
+[0.607s] writing list of installed files to '/home/sunrise/robot_ws/build/robot_base/install.log'
+[0.623s] Invoked command in '/home/sunrise/robot_ws/src/robot_base' returned '0': PYTHONPATH=/home/sunrise/robot_ws/build/robot_base/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/robot_base build --build-base /home/sunrise/robot_ws/build/robot_base/build install --record /home/sunrise/robot_ws/build/robot_base/install.log --single-version-externally-managed install_data

@@ -1,0 +1,41 @@
+running egg_info
+creating ../../build/robot_base/robot_base.egg-info
+writing ../../build/robot_base/robot_base.egg-info/PKG-INFO
+writing dependency_links to ../../build/robot_base/robot_base.egg-info/dependency_links.txt
+writing entry points to ../../build/robot_base/robot_base.egg-info/entry_points.txt
+writing requirements to ../../build/robot_base/robot_base.egg-info/requires.txt
+writing top-level names to ../../build/robot_base/robot_base.egg-info/top_level.txt
+writing manifest file '../../build/robot_base/robot_base.egg-info/SOURCES.txt'
+reading manifest file '../../build/robot_base/robot_base.egg-info/SOURCES.txt'
+writing manifest file '../../build/robot_base/robot_base.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/sunrise/robot_ws/build/robot_base/build
+creating /home/sunrise/robot_ws/build/robot_base/build/lib
+creating /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+copying robot_base/serial_driver.py -> /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+copying robot_base/protocol_parser.py -> /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+copying robot_base/__init__.py -> /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+copying robot_base/base_node.py -> /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base
+running install
+running install_lib
+creating /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+copying /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base/serial_driver.py -> /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+copying /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base/protocol_parser.py -> /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+copying /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base/__init__.py -> /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+copying /home/sunrise/robot_ws/build/robot_base/build/lib/robot_base/base_node.py -> /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base
+byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/serial_driver.py to serial_driver.cpython-310.pyc
+byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/protocol_parser.py to protocol_parser.cpython-310.pyc
+Sorry: IndentationError: unexpected unindent (protocol_parser.py, line 185)
+byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base/base_node.py to base_node.cpython-310.pyc
+running install_data
+creating /home/sunrise/robot_ws/install/robot_base/share/ament_index
+creating /home/sunrise/robot_ws/install/robot_base/share/ament_index/resource_index
+creating /home/sunrise/robot_ws/install/robot_base/share/ament_index/resource_index/packages
+copying resource/robot_base -> /home/sunrise/robot_ws/install/robot_base/share/ament_index/resource_index/packages
+copying package.xml -> /home/sunrise/robot_ws/install/robot_base/share/robot_base
+running install_egg_info
+Copying ../../build/robot_base/robot_base.egg-info to /home/sunrise/robot_ws/install/robot_base/lib/python3.10/site-packages/robot_base-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/sunrise/robot_ws/build/robot_base/install.log'
