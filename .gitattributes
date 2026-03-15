@@ -1,0 +1,6 @@
+"* text=auto" 
+"*.c text eol=lf" 
+"*.h text eol=lf" 
+"*.json text eol=lf" 
+"*.uvoptx binary" 
+"*.uvprojx binary" 
