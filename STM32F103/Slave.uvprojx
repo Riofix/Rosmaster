@@ -53,7 +53,7 @@
           <OutputName>Slave</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
@@ -135,11 +135,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>-1</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -536,6 +536,11 @@
               <FilePath>.\Src\APP\app_protocol.c</FilePath>
             </File>
             <File>
+              <FileName>app_protocol.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\APP\app_protocol.h</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Src\APP\main.c</FilePath>
@@ -639,6 +644,16 @@
               <FileName>protocol_emm.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Src\BSP\protocol_emm.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\BSP\bsp_pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_pwm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\BSP\bsp_pwm.h</FilePath>
             </File>
           </Files>
         </Group>

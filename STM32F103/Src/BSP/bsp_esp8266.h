@@ -28,7 +28,7 @@ extern void Delay_ms(uint16_t nms);
     #define WIFI_SSID       "Redmi K70"
     #define WIFI_PWD        "Color4470"
     #define SERVER_IP       "10.26.31.175" // 电脑在局域网的IP
-    #define SERVER_PORT     "8080"
+    #define SERVER_PORT     "3456"
 #else
     // AP 模式参数 (创建自己的热点)
     #define AP_SSID         "STM32_Robot"   // 发出的WIFI名字

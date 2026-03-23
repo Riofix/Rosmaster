@@ -39,6 +39,7 @@ uint8_t ESP8266_Init_Transparent(void) {
     
     // 连接外部路由器
     sprintf(cmd_buf, "AT+CWJAP=\"%s\",\"%s\"\r\n", WIFI_SSID, WIFI_PWD);
+		ESP8266_DELAY_MS(2000);
     if (!ESP8266_SendCmd(cmd_buf, "OK", ESP_TIMEOUT_WIFI)) return 0; 
     
     // 连接 TCP 服务器
