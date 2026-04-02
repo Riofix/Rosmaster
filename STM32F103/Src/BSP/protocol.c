@@ -1,7 +1,7 @@
 /**
  * @file protocol.c
  * @brief 串口通信协议解析与发送实现文件
- * @details 处理通信协议的接收状态机解析、数据校验以及数据包的组装与发送
+ * @details 处理通信协议的接收状态机解析、数据校验以及数据包的组装与发送 (基于 USART2 环形缓冲数据流)
  */
 
 #include "protocol.h"
@@ -23,7 +23,6 @@ typedef enum {
 static ParserState_t state = STATE_WAIT_HEADER;  // 当前接收状态机的状态
 static Protocol_Packet_t temp_packet;            // 用于存放接收过程中的数据包缓存
 static uint16_t data_cnt = 0;                    // 当前已接收的数据字节数计数器
-static uint16_t read_idx = 0;                    // 环形缓冲区的读取索引
 static Protocol_Callback_t user_handler = 0;     // 协议解析成功后的应用层回调函数
 
 /**
@@ -48,15 +47,13 @@ static uint8_t CalculateChecksum(Protocol_Packet_t* p) {
 }
 
 /**
- * @brief 协议数据处理轮询函数
+ * @brief 协议数据处理轮询函数 (流式处理机制)
  */
 void Protocol_Process(void) {
-    uint8_t* rx_buf = USART2_GetRxBuffer();         // 获取串口接收环形缓冲区首地址
-    uint16_t write_idx = USART2_GetRxWriteIndex();  // 获取当前缓冲区写入的最新索引
-
-    // 只要有未处理的数据（读索引 != 写索引）就一直处理
-    while (read_idx != write_idx) {
-        uint8_t byte = rx_buf[read_idx]; // 取出一个字节数据
+    // 只要底层驱动报告有可读数据，就一直抽取并送入状态机
+    while (USART2_Available() > 0) {
+        // 读取一个字节，底层会自动推进 read_idx
+        uint8_t byte = USART2_ReadByte(); 
 
         switch (state) {
             case STATE_WAIT_HEADER:
@@ -103,8 +100,6 @@ void Protocol_Process(void) {
                 state = STATE_WAIT_HEADER;
                 break;
         }
-        // 更新读索引并处理环形缓冲区
-        read_idx = (read_idx + 1) % USART2_RX_BUFFER_SIZE;
     }
 }
 

@@ -274,7 +274,7 @@ void OLED_Init(void)
 	
 	for (i = 0; i < 1000; i++)			//上电延时
 	{
-		for (j = 0; j < 1000; j++);
+		for (j = 0; j < 10000; j++);
 	}
 	
 	OLED_I2C_Init();			//端口初始化
