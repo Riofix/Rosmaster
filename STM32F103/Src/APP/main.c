@@ -3,6 +3,7 @@
 #include "bsp_systick.h"
 #include "bsp_usart.h"
 #include "protocol.h"
+#include "app_protocol.h"
 #include "stm32f10x.h"
 #include <stdio.h>
 
@@ -40,39 +41,28 @@ int main(void) {
     OLED_ShowString(4, 1, "3.Reset Board");
   }
 
-  /* 4. 主循环处理 */
+  /* 4. 底层协议与应用层初始化 */
+  App_Protocol_Init();
+
+  /* 5. 主循环处理 */
   while (1) {
     // ==============================================================
-    // 【测试案例】：网络透传连通性回环测试 (Echo Test)
-    // 作用：从电脑端(网络助手)发字符到底板，底板立刻原样发回，并在OLED屏显示
+    // 【正式业务逻辑】：
+    // 1. 底层解析数据封包进队列 (串口 -> 缓冲 -> 解析 -> 入队)
+    // 2. 将下位机电机信息传递 
+    // 3. 应用层取出完整包执行建表分发
     // ==============================================================
-    while (USART2_Available() > 0) {
-      // 1. 从新的环形缓冲区抽出一个字节数据
-      uint8_t rx_byte = USART2_ReadByte();
-
-      // 2. 立刻原路返回给 ESP8266（这就是通过WiFi跨空发给了您的电脑）
-      USART2_SendByte(rx_byte);
-
-      // 3. 将收到的字符实时刷新在 OLED 的第 4 行，直观确认收到数据
-      char show_str[16];
-      // 只显示可视字符以防乱码，非可视字符原样显示为十六进制
-      if (rx_byte >= 32 && rx_byte <= 126) {
-        sprintf(show_str, "Rx: '%c' (0x%02X)", rx_byte, rx_byte);
-      } else {
-        sprintf(show_str, "Rx: HEX (0x%02X)", rx_byte);
-      }
-      OLED_ShowString(4, 1, show_str);
-    }
-
-    // ==============================================================
-    // 【正式业务逻辑】：当确认上面的 WiFi 测试通过后，
-    // 您只需把上面的 回环测试 注释掉，然后把下面的 Protocol_Process(); 解开注释
-    // 就可以走正式的电机控制协议了！
-    // ==============================================================
-    // Protocol_Process();
+    
+    // 负责从 USART2 缓冲区抽取并解析，拼成包并 enqueue
+    Protocol_Process();
+    
+    // 负责接收下位机反馈
     // Protocol_Emm_Process();
+    
+    // 负责从队列中拿包并且映射到对应的处理函数中去执行
+    App_Protocol_Tick();
 
-    // 只要 10ms 的短延时，保证轮询的敏捷度，且不彻底锁死 CPU
-    Delay_ms(10);
+    // 只要极短的延时，保证轮询的敏捷度，且不彻底锁死 CPU
+    Delay_ms(2);
   }
 }

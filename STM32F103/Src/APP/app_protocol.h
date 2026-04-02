@@ -3,24 +3,25 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "protocol.h"
+#include "../BSP/protocol.h"
 
-// 默认从机ID
-#define DEFAULT_SLAVE_ID 0x0A
+// ======================== RDK X5 -> STM32 接收命令宏定义 (13条) ==========================
+// ----- 1. 控制指令 ----- 
+#define CMD_RX_EN_CONTROL           0x50  // 脱机/使能控制
+#define CMD_RX_VEL_CONTROL          0x51  // 速度模式控制
+#define CMD_RX_POS_CONTROL          0x52  // 位置模式控制
+#define CMD_RX_STOP_NOW             0x53  // 急停
+#define CMD_RX_SYNC_MOTION          0x54  // 多机同步触发
+#define CMD_RX_ORIGIN_SET_O         0x55  // 设置单圈回零位置
+#define CMD_RX_ORIGIN_MODIFY_PARAMS 0x56  // 修改回零参数
+#define CMD_RX_ORIGIN_TRIGGER       0x57  // 触发回零
+#define CMD_RX_ORIGIN_INTERRUPT     0x58  // 强制中断回零
+#define CMD_RX_MODIFY_CTRL_MODE     0x59  // 修改开环/闭环控制模式
+#define CMD_RX_RESET_CUR_POS        0x5A  // 重置当前位置为0
+#define CMD_RX_RESET_CLOG_PRO       0x5B  // 解除堵转保护
 
-// 内部Flash最后几页用于保存参数 
-// (F103C8T6 64K Flash -> Page 63: 0x0800FC00 作为泛用安全地址)
-#define FLASH_PARAM_ADDR 0x0800FC00
-
-// ======================== RDK X5 -> STM32 接收命令宏定义 ==========================
-#define CMD_RX_READ_PARAM 0x50  // 精细参数查询
-#define CMD_RX_CTRL_SPEED 0x51  // 速度模式控制
-#define CMD_RX_CTRL_POS   0x52  // 位置模式控制
-#define CMD_RX_STOP       0x53  // 急停/清除堵转
-#define CMD_RX_ENABLE     0x54  // 电机脱机/使能控制
-#define CMD_RX_ORIGIN     0x55  // 触发回零
-#define CMD_RX_SYNC_RUN   0x56  // 多机同步触发
-#define CMD_RX_SET_ID     0x59  // 更改STM32开发板ID
+// ----- 2. 查询指令 -----
+#define CMD_RX_READ_SYS_PARAMS      0x5C  // 读取系统参数
 
 // ======================== STM32 -> RDK X5 发送应答命令宏 ==========================
 #define CMD_TX_ACK_PARAM  0x60  // 参数查询返回
@@ -33,9 +34,8 @@
 #define ERR_PARAM_INVALID 0x02
 #define ERR_UNKNOWN_CMD   0x03
 
-extern uint8_t g_system_node_id;
-
 void App_Protocol_Init(void);
-void App_Protocol_Handler(Protocol_Packet_t* packet);
+void App_Protocol_Packet_Callback(Protocol_Packet_t* packet); // 解析完毕回调
+void App_Protocol_Tick(void); // 放在 main 循环的主轮询函数
 
 #endif
