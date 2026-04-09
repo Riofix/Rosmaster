@@ -222,3 +222,8 @@ uint16_t USART2_Read(uint8_t *buf, uint16_t len) {
   }
   return count;
 }
+
+void USART_All_Init(uint32_t baudrate1, uint32_t baudrate2) {
+  USART1_Init(baudrate1);
+  USART2_Init(baudrate2);
+}

@@ -32,4 +32,5 @@ uint16_t USART2_Available(void);
 uint8_t USART2_ReadByte(void);
 uint16_t USART2_Read(uint8_t *buf, uint16_t len);
 
+void USART_All_Init(uint32_t baudrate1, uint32_t baudrate2);
 #endif

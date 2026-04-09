@@ -555,6 +555,16 @@
               <FileType>5</FileType>
               <FilePath>.\Src\APP\stm32f10x_conf.h</FilePath>
             </File>
+            <File>
+              <FileName>msg_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\APP\msg_queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>msg_queue.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\APP\msg_queue.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -654,6 +664,16 @@
               <FileName>bsp_pwm.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Src\BSP\bsp_pwm.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_mpu6050.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\BSP\bsp_mpu6050.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_mpu6050.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\BSP\bsp_mpu6050.h</FilePath>
             </File>
           </Files>
         </Group>
