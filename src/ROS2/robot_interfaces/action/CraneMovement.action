@@ -1,0 +1,15 @@
+# 耗时类动作请求：针对两个EMM步进电机，由于物理运转需要时间，使用 Action 发起异步追踪
+
+# ------ Goal (任务目标) ------
+uint8 AXIS_TRACK = 1      # 操作环形轨道上的平移横移
+uint8 AXIS_HOIST = 2      # 操作吊具抓具的升降高度
+
+uint8 axis_id             # 选择希望致动的电机的物理轴
+float32 target_position   # 系统希望目标抵达的最终物理位置 (单位后续同协议层商定)
+---
+# ------ Result (任务最终总结) ------
+bool success              # 动作历程是否安全且准确到达
+uint8 error_code          # 附带潜在硬件层错误反馈 (若有)
+---
+# ------ Feedback (行进过程中的心跳回传) ------
+float32 current_position  # EMM闭环当前正在更新的坐标进度，防超时盲区用

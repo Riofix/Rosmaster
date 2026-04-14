@@ -1,8 +1,7 @@
 from setuptools import setup
 import os
-from glob import glob
 
-package_name = 'robot_bringup'
+package_name = 'robot_protocol'
 
 setup(
     name=package_name,
@@ -11,18 +10,20 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # 这一句是保证您写的 launch 脚本能被 colcon 安装到运行环境里的关键
-        (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='sunrise',
     maintainer_email='user@todo.todo',
-    description='Bringup launch scripts',
+    description='Protocol parser and packer',
     license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'chassis_parser = robot_protocol.chassis_parser_node:main',
+            'chassis_packer = robot_protocol.chassis_packer_node:main',
+            'crane_parser = robot_protocol.crane_parser_node:main',
+            'crane_packer = robot_protocol.crane_packer_node:main'
         ],
     },
 )

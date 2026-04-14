@@ -1,0 +1,16 @@
+# 瞬动类服务请求：用于开启吸尘器、开关舱门等瞬间生效且无需复杂持续反馈的动作
+
+# 目标类型枚举
+uint8 TRIGGER_VACUUM = 1  # 调控无刷吸尘电机
+uint8 TRIGGER_OUTLET = 2  # 调控舵机物料出料口
+
+uint8 trigger_type        # 选中你要触发的目标 (1 或 2)
+
+# 参数含义：
+# 如果触发吸尘器 (TRIGGER_VACUUM)，传占空比 0-100
+# 如果触发物料出料口 (TRIGGER_OUTLET)，传开关标志位 (1=开，0=关) 或底层其实际控制角度
+int32 target_value
+---
+# 响应返回
+bool success              # 执行命令是否成功下发给STM32
+string message            # 若失败可附带解释说明信息

@@ -1,14 +1,15 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>robot_base</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="1789518998@qq.com">sunrise</maintainer>
-  <license>TODO: License declaration</license>
+  <name>robot_link</name>
+  <version>1.0.0</version>
+  <description>The purely transparent physical link layer for Serial and TCP</description>
+  <maintainer email="user@todo.todo">sunrise</maintainer>
+  <license>MIT</license>
 
   <depend>rclpy</depend>
-  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>robot_interfaces</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
