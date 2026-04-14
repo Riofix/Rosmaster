@@ -5,10 +5,11 @@
 #include <stdint.h>
 
 /* PWM Channel Descriptor Table Driver
- * CH1: PA6 -> TIM3_CH1 -> BLDC motor
- * CH2: PB0 -> TIM3_CH3 -> Servo 1
- * CH3: PB1 -> TIM3_CH4 -> Servo 2
- * Timer: 72MHz/(71+1)=1MHz, 1tick=1us, Period=20000us=50Hz */
+ * --------------------------------------
+ * CH1: PA6 -> TIM3_CH1 -> BLDC motor (10kHz)
+ * CH2: PB8 -> TIM4_CH3 -> Servo 1     (50Hz)
+ * CH3: PB9 -> TIM4_CH4 -> Servo 2     (50Hz)
+ * -------------------------------------- */
 
 typedef enum {
     PWM_CH1    = 0,
@@ -17,7 +18,6 @@ typedef enum {
     PWM_CH_MAX = 3
 } PWM_Channel_t;
 
-#define PWM_PERIOD_US    20000u
 #define PWM_SERVO_MIN_US 500u
 #define PWM_SERVO_MAX_US 2500u
 

@@ -190,3 +190,13 @@ void MPU_ComplementaryFilter(MPU_RawData_t *raw, float dt) {
     if (g_mpu_attitude.yaw >  180.0f) g_mpu_attitude.yaw -= 360.0f;
     if (g_mpu_attitude.yaw < -180.0f) g_mpu_attitude.yaw += 360.0f;
 }
+
+/**
+ * @brief  获取当前经过校准的 Z 轴角速度 (度/秒)
+ * @retval Z轴角速度, 正值代表逆时针旋转
+ */
+float MPU_Get_GyroZ_DPS(void) {
+    MPU_RawData_t raw;
+    if (MPU_ReadRawData(&raw) != 0) return 0.0f;
+    return ((float)raw.gz - s_gyro_offset[2]) / GYRO_SCALE;
+}

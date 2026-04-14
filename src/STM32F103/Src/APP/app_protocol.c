@@ -5,10 +5,15 @@
 
 #include "app_protocol.h"
 #include "Emm_V5.h"
+#include "app_tracker.h"
+#include "bsp_iic.h"
 #include "bsp_mpu6050.h"
 #include "bsp_pwm.h"
+#include "bsp_systick.h"
 #include "msg_queue.h"
+#include "protocol_emm.h"
 #include <stddef.h>
+#include <string.h>
 
 // MPU 自动上报模式标志 (0=关闭, 1=开启)
 static uint8_t g_mpu_stream = 0;
@@ -255,6 +260,39 @@ static void Handle_MPU_STREAM_OFF(uint8_t *data, uint8_t len) {
   uint8_t ok = 0x00;
   Protocol_PackAndSend(CMD_TX_ACK_OK, &ok, 1);
 }
+
+static uint32_t s_emm_rx_cnt = 0;    // EMM 反馈包计数器
+static int32_t s_last_abs_ticks = 0; // 缓存最后一包电机的绝对脉冲数
+
+// 0x79 里程计查询
+static void Handle_ODOM_QUERY(uint8_t *data, uint8_t len) {
+  (void)data;
+  (void)len;
+  float pos, target;
+  uint8_t mode;
+  Tracker_GetState(&pos, &target, &mode);
+
+  uint8_t tx_buf[13]; // 4(pos) + 4(target) + 1(mode) + 4(raw_ticks)
+  memcpy(&tx_buf[0], &pos, 4);
+  memcpy(&tx_buf[4], &target, 4);
+  tx_buf[8] = mode;
+  memcpy(&tx_buf[9], &s_last_abs_ticks, 4);
+
+  Protocol_PackAndSend(CMD_TX_TRACKER_DATA, tx_buf, 13);
+}
+
+// 0x7A 设置目标里程 (单位: 毫米)
+static void Handle_TRACKER_SET_GOAL(uint8_t *data, uint8_t len) {
+  if (len < 4)
+    return;
+  float target_mm;
+  memcpy(&target_mm, data, 4);
+  Tracker_SetTarget(target_mm);
+
+  uint8_t ok = 0x00;
+  Protocol_PackAndSend(CMD_TX_ACK_OK, &ok, 1);
+}
+
 // ======================= 表驱动核心 =======================
 
 typedef void (*CmdHandler_t)(uint8_t *data, uint8_t len);
@@ -292,19 +330,46 @@ static const CmdTable_t other_cmd_table[] = {
     {CMD_RX_MPU_READ, Handle_MPU_READ},
     {CMD_RX_MPU_CALIB, Handle_MPU_CALIB},
     {CMD_RX_MPU_STREAM_ON, Handle_MPU_STREAM_ON},
-    {CMD_RX_MPU_STREAM_OFF, Handle_MPU_STREAM_OFF}};
+    {CMD_RX_MPU_STREAM_OFF, Handle_MPU_STREAM_OFF},
+    {CMD_RX_ODOM_QUERY, Handle_ODOM_QUERY},
+    {CMD_RX_TRACKER_SET_GOAL, Handle_TRACKER_SET_GOAL}};
 #define OTHER_CMD_TABLE_SIZE                                                   \
   (sizeof(other_cmd_table) / sizeof(other_cmd_table[0]))
 
 // ======================= 机制实现 =======================
 
 /**
+ * @brief EMM 电机反馈回调，将上报的参数送入 Tracker
+ */
+static void App_Protocol_Emm_Callback(Emm_Feedback_t *msg) {
+  /* 0x36 为 S_CPOS (当前位置) 反馈, 兼容部分带状态位的固件(Len=5) */
+  if (msg->func == 0x36 && msg->len >= 4) {
+    s_emm_rx_cnt++; // 收到有效包，计数增加
+
+    // 如果带状态位，数据可能偏移或长度不同，但通常前4字节或后4字节是位置
+    // 还原为大端序 (Big-Endian) 解析尝试: D3 D2 D1 D0
+    int32_t abs_ticks = (int32_t)((msg->data[0] << 24) | (msg->data[1] << 16) |
+                                  (msg->data[2] << 8) | msg->data[3]);
+
+    // 缓存原始值供诊断指令使用
+    extern int32_t s_last_abs_ticks;
+    s_last_abs_ticks = abs_ticks;
+
+    Tracker_Update(abs_ticks, MPU_Get_GyroZ_DPS());
+  }
+}
+
+/**
  * @brief 协议初始化，绑定解析回调并初始化队列
  */
 void App_Protocol_Init(void) {
   MsgQueue_Init();
+  Tracker_Init();
+
   // 注册回调：Protocol解析完的一包会进到下面的 Callback 里
   Protocol_Init(App_Protocol_Packet_Callback);
+  // 注册 EMM 电机反馈回调
+  Protocol_Emm_Init(App_Protocol_Emm_Callback);
 }
 
 /**
@@ -323,10 +388,6 @@ void App_Protocol_Tick(void) {
 
   // 如果队列中有可用指令包
   if (MsgQueue_Dequeue(&packet)) {
-
-    if (packet.len == 0)
-      return;
-
     bool handled = false;
 
     // --- 查 EMM 步进电机指令表 (0x50~0x5C) ---
@@ -367,5 +428,14 @@ void App_Protocol_Tick(void) {
       Protocol_PackAndSend(CMD_TX_MPU_DATA, (uint8_t *)&g_mpu_attitude,
                            sizeof(MPU_Attitude_t));
     }
+  }
+
+  // ---- 自动轮询 EMM 电机位置 (20Hz / 50ms) ----
+  static uint32_t emm_poll_tick = 0;
+  if (++emm_poll_tick >= 25) { // 2ms * 25 = 50ms
+    emm_poll_tick = 0;
+    /* 主动查询 Tracker 对应电机的当前位置 (S_CPOS = 10 ->
+     * 0x5C指令中对应的参数码) */
+    Emm_V5_Read_Sys_Params(TRACKER_MOTOR_ADDR, S_CPOS);
   }
 }

@@ -1,10 +1,11 @@
 #include "OLED.h"
 #include "app_protocol.h"
 #include "bsp_esp8266.h"
+#include "bsp_iic.h"
 #include "bsp_pwm.h"
 #include "bsp_systick.h"
 #include "bsp_usart.h"
-#include "protocol.h"
+#include "protocol_emm.h"
 #include "stm32f10x.h"
 #include <stdio.h>
 
@@ -13,10 +14,12 @@ int main(void) {
   Systick_Init();
 
   USART_All_Init(115200, 115200);
+	IIC_Init();
   MPU_Init();
-  PWM_Init();   /* Initialize all 3 PWM channels (PA6/PB0/PB1) */
-
+  PWM_Init(); /* Initialize all 3 PWM channels (PA6/PB0/PB1) */
+	
   Delay_ms(1000);
+
   OLED_Init();
 
   OLED_Clear();
@@ -60,7 +63,7 @@ int main(void) {
     Protocol_Process();
 
     // 负责接收下位机反馈
-    // Protocol_Emm_Process();
+    Protocol_Emm_Process();
 
     // 负责从队列中拿包并且映射到对应的处理函数中去执行
     App_Protocol_Tick();

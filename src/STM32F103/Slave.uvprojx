@@ -565,6 +565,16 @@
               <FileType>5</FileType>
               <FilePath>.\Src\APP\msg_queue.h</FilePath>
             </File>
+            <File>
+              <FileName>app_tracker.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\APP\app_tracker.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_tracker.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\APP\app_tracker.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -131,6 +131,9 @@ void MPU_ComplementaryFilter(MPU_RawData_t *raw, float dt);
 /** @brief 静止状态下采集 MPU_CALIB_SAMPLES 次, 计算陀螺零偏并存储 */
 void MPU_Calibrate(void);
 
+/** @brief 获取当前经过校准的 Z 轴角速度 (单位: °/s) */
+float MPU_Get_GyroZ_DPS(void);
+
 /* 底层寄存器访问 (内部使用, 对外也可调用) */
 uint8_t MPU_WriteReg(uint8_t reg, uint8_t data);
 uint8_t MPU_ReadReg (uint8_t reg, uint8_t *data);

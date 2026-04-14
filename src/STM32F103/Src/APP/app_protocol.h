@@ -36,6 +36,9 @@
 #define CMD_RX_MPU_CALIB 0x76      // MPU校准
 #define CMD_RX_MPU_STREAM_ON 0x77  // MPU自动上报开启
 #define CMD_RX_MPU_STREAM_OFF 0x78 // MPU自动上报关闭
+#define CMD_RX_ODOM_QUERY     0x79 // 里程计查询
+#define CMD_RX_TRACKER_SET_GOAL 0x7A // 设置追踪目标位置
+
 
 // ======================== STM32 -> RDK X5 发送应答命令宏 ==========================
 #define CMD_TX_ACK_PARAM  0x60  // 参数查询返回
@@ -43,6 +46,7 @@
 #define CMD_TX_ACK_ERR    0x62  // 异常报警应答
 #define CMD_TX_REPORT_POS 0x63  // 位置达标主动上报
 #define CMD_TX_MPU_DATA   0x64  // MPU 姿态数据上报 (Roll/Pitch/Yaw, 各4字节float, 共12字节)
+#define CMD_TX_TRACKER_DATA 0x65 // 里程计上报 (pos/target 各4字节float, mode 1字节)
 
 // 错误码定义
 #define ERR_FLASH_WRITE 0x01

@@ -109,10 +109,10 @@ static uint8_t ESP8266_Config(void) {
  * @retval 1 初始化成功，0 初始化失败
  */
 uint8_t ESP8266_Init(void) {
-    uint8_t retry_count = 3;
-    while (retry_count--) {
+//    uint8_t retry_count = 3;
+    while (1) {
         if (ESP8266_Config() == 1) return 1;
         ESP8266_DELAY_MS(1000);
     }
-    return 0;
+//    return 0;
 }

@@ -7,31 +7,32 @@
  * IIC 物理层引脚定义 (软件模拟 I2C, GPIOB)
  * SCL -> PB6   SDA -> PB7
  * ------------------------------------------------------- */
-#define IIC_CLK         RCC_APB2Periph_GPIOB
-#define IIC_Port        GPIOB
-#define IIC_Pin_SCL     GPIO_Pin_6
-#define IIC_Pin_SDA     GPIO_Pin_7
+#define IIC_CLK RCC_APB2Periph_GPIOB
+#define IIC_Port GPIOB
+#define IIC_Pin_SCL GPIO_Pin_6
+#define IIC_Pin_SDA GPIO_Pin_7
 
 /* -------------------------------------------------------
  * 引脚电平操作宏
  * ------------------------------------------------------- */
-#define IIC_SCL_HIGH()  GPIO_SetBits(IIC_Port, IIC_Pin_SCL)
-#define IIC_SCL_LOW()   GPIO_ResetBits(IIC_Port, IIC_Pin_SCL)
-#define IIC_SDA_HIGH()  GPIO_SetBits(IIC_Port, IIC_Pin_SDA)
-#define IIC_SDA_LOW()   GPIO_ResetBits(IIC_Port, IIC_Pin_SDA)
-#define IIC_SDA_READ()  GPIO_ReadInputDataBit(IIC_Port, IIC_Pin_SDA)
+#define IIC_SCL_HIGH() GPIO_SetBits(IIC_Port, IIC_Pin_SCL)
+#define IIC_SCL_LOW() GPIO_ResetBits(IIC_Port, IIC_Pin_SCL)
+#define IIC_SDA_HIGH() GPIO_SetBits(IIC_Port, IIC_Pin_SDA)
+#define IIC_SDA_LOW() GPIO_ResetBits(IIC_Port, IIC_Pin_SDA)
+#define IIC_SDA_READ() GPIO_ReadInputDataBit(IIC_Port, IIC_Pin_SDA)
 
 /* =======================================================
  * 物理层基础接口 (底层时序)
  * ======================================================= */
-void    IIC_Init(void);                         // IIC GPIO 初始化
-int     IIC_Start(void);                        // 产生 START 信号
-void    IIC_Stop(void);                         // 产生 STOP 信号
-void    IIC_Send_Byte(uint8_t Byte);            // 发送一个字节
-uint8_t IIC_Read_Byte(unsigned char ack);       // 读取一个字节 (ack=1发应答, ack=0发非应答)
-void    IIC_Ack(void);                          // 主机发送 ACK
-void    IIC_NAck(void);                         // 主机发送 NACK
-uint8_t IIC_Wait_Ack(void);                     // 等待从机 ACK (返回0成功, 返回1超时)
+void IIC_Init(void);              // IIC GPIO 初始化
+int IIC_Start(void);              // 产生 START 信号
+void IIC_Stop(void);              // 产生 STOP 信号
+void IIC_Send_Byte(uint8_t Byte); // 发送一个字节
+uint8_t
+IIC_Read_Byte(unsigned char ack); // 读取一个字节 (ack=1发应答, ack=0发非应答)
+void IIC_Ack(void);               // 主机发送 ACK
+void IIC_NAck(void);              // 主机发送 NACK
+uint8_t IIC_Wait_Ack(void);       // 等待从机 ACK (返回0成功, 返回1超时)
 
 /* =======================================================
  * 高级封装接口 (面向设备的寄存器读写)
@@ -80,11 +81,13 @@ uint8_t IICwriteBit(uint8_t dev, uint8_t reg, uint8_t bitNum, uint8_t data);
  * @param  data      写入值 (操作前会自动移位对齐)
  * @retval 1 成功, 0 失败
  */
-uint8_t IICwriteBits(uint8_t dev, uint8_t reg, uint8_t bitStart, uint8_t length, uint8_t data);
+uint8_t IICwriteBits(uint8_t dev, uint8_t reg, uint8_t bitStart, uint8_t length,
+                     uint8_t data);
 
 /* =======================================================
  * 调试工具
  * ======================================================= */
-void IIC_Scanf_addr(void);  // 扫描总线上所有在线设备并打印地址
+void IIC_Scanf_addr(void); // 扫描总线上所有在线设备并打印地址
+void IIC_PUSH_DOWN_BUS(void);
 
 #endif /* __BSP_IIC_H */
