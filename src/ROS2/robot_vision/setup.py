@@ -1,7 +1,8 @@
 from setuptools import setup
 import os
+from glob import glob
 
-package_name = 'robot_protocol'
+package_name = 'robot_vision'
 
 setup(
     name=package_name,
@@ -11,19 +12,16 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'opencv-python'],
     zip_safe=True,
     maintainer='sunrise',
     maintainer_email='user@todo.todo',
-    description='Protocol parser and packer',
+    description='OpenCV robot vision layer',
     license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'chassis_parser = robot_protocol.chassis_parser_node:main',
-            'chassis_packer = robot_protocol.chassis_packer:main',
-            'crane_parser = robot_protocol.crane_parser_node:main',
-            'crane_packer = robot_protocol.crane_packer:main',
+            'dual_cam_node = robot_vision.dual_cam_node:main'
         ],
     },
 )

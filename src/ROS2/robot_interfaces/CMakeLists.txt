@@ -14,6 +14,9 @@ find_package(action_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/DeviceState.msg"
   "msg/CraneState.msg"
+  "msg/Detection.msg"
+  "msg/DetectionList.msg"
+  "msg/WorldState.msg"
   "srv/CraneTrigger.srv"
   "action/CraneMovement.action"
   DEPENDENCIES std_msgs action_msgs

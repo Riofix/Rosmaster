@@ -38,6 +38,7 @@
 #define CMD_RX_MPU_STREAM_OFF 0x78 // MPU自动上报关闭
 #define CMD_RX_ODOM_QUERY     0x79 // 里程计查询
 #define CMD_RX_TRACKER_SET_GOAL 0x7A // 设置追踪目标位置
+#define CMD_RX_SHOW_OLED 0x7B				// OLED显示数据
 
 
 // ======================== STM32 -> RDK X5 发送应答命令宏 ==========================
@@ -49,9 +50,9 @@
 #define CMD_TX_TRACKER_DATA 0x65 // 里程计上报 (pos/target 各4字节float, mode 1字节)
 
 // 错误码定义
-#define ERR_FLASH_WRITE 0x01
-#define ERR_PARAM_INVALID 0x02
-#define ERR_UNKNOWN_CMD 0x03
+#define ERR_FLASH_WRITE 0x01       // Flash 写入错误
+#define ERR_PARAM_INVALID 0x02     // 参数无效
+#define ERR_UNKNOWN_CMD 0x03       // 未知命令
 
 void App_Protocol_Init(void);
 void App_Protocol_Packet_Callback(Protocol_Packet_t *packet); // 解析完毕回调

@@ -24,23 +24,26 @@ MPU_Attitude_t g_mpu_attitude = {0.0f, 0.0f, 0.0f};
 static float s_gyro_offset[3] = {0.0f, 0.0f, 0.0f};
 
 /* 加速度计灵敏度: ±2g -> 16384 LSB/g */
-#define ACCEL_SCALE     16384.0f
+#define ACCEL_SCALE 16384.0f
 /* 陀螺仪灵敏度: ±500°/s -> 65.5 LSB/(°/s) */
-#define GYRO_SCALE      65.5f
+#define GYRO_SCALE 65.5f
 
 /* =======================================================
  * 底层寄存器读写封装
  * ======================================================= */
 
-uint8_t MPU_WriteReg(uint8_t reg, uint8_t data) {
+uint8_t MPU_WriteReg(uint8_t reg, uint8_t data)
+{
     return IICwriteByte(MPU_ADDR, reg, data);
 }
 
-uint8_t MPU_ReadReg(uint8_t reg, uint8_t *data) {
+uint8_t MPU_ReadReg(uint8_t reg, uint8_t *data)
+{
     return IICreadByte(MPU_ADDR, reg, data);
 }
 
-uint8_t MPU_ReadRegs(uint8_t reg, uint8_t *buf, uint8_t len) {
+uint8_t MPU_ReadRegs(uint8_t reg, uint8_t *buf, uint8_t len)
+{
     return IICreadBytes(MPU_ADDR, reg, len, buf);
 }
 
@@ -52,12 +55,14 @@ uint8_t MPU_ReadRegs(uint8_t reg, uint8_t *buf, uint8_t len) {
  * @brief  MPU6050 初始化
  * @retval 0: 成功, 1: WHO_AM_I 验证失败
  */
-uint8_t MPU_Init(void) {
+uint8_t MPU_Init(void)
+{
     uint8_t device_id = 0;
 
     /* 先验证器件 ID */
     MPU_ReadReg(MPU_DEVICE_ID_REG, &device_id);
-    if (device_id != 0x68) {
+    if (device_id != 0x68)
+    {
         return 1; // 器件不存在或 I2C 通信失败
     }
 
@@ -81,7 +86,7 @@ uint8_t MPU_Init(void) {
 
     /* 禁用 FIFO, 禁用中断 */
     MPU_WriteReg(MPU_FIFO_EN_REG, 0x00);
-    MPU_WriteReg(MPU_INT_EN_REG,  0x00);
+    MPU_WriteReg(MPU_INT_EN_REG, 0x00);
 
     return 0;
 }
@@ -95,22 +100,24 @@ uint8_t MPU_Init(void) {
  * @param  raw  输出结构体指针
  * @retval 0: 成功, 1: I2C 读取失败
  */
-uint8_t MPU_ReadRawData(MPU_RawData_t *raw) {
+uint8_t MPU_ReadRawData(MPU_RawData_t *raw)
+{
     uint8_t buf[14];
 
     /* 从 0x3B 连续读 14 字节: AX(2) AY(2) AZ(2) TEMP(2) GX(2) GY(2) GZ(2) */
-    if (MPU_ReadRegs(MPU_ACCEL_XOUTH_REG, buf, 14) != 14) {
+    if (MPU_ReadRegs(MPU_ACCEL_XOUTH_REG, buf, 14) != 14)
+    {
         return 1;
     }
 
     /* 大端拼接 */
-    raw->ax   = (int16_t)((buf[0]  << 8) | buf[1]);
-    raw->ay   = (int16_t)((buf[2]  << 8) | buf[3]);
-    raw->az   = (int16_t)((buf[4]  << 8) | buf[5]);
-    raw->temp = (int16_t)((buf[6]  << 8) | buf[7]);
-    raw->gx   = (int16_t)((buf[8]  << 8) | buf[9]);
-    raw->gy   = (int16_t)((buf[10] << 8) | buf[11]);
-    raw->gz   = (int16_t)((buf[12] << 8) | buf[13]);
+    raw->ax = (int16_t)((buf[0] << 8) | buf[1]);
+    raw->ay = (int16_t)((buf[2] << 8) | buf[3]);
+    raw->az = (int16_t)((buf[4] << 8) | buf[5]);
+    raw->temp = (int16_t)((buf[6] << 8) | buf[7]);
+    raw->gx = (int16_t)((buf[8] << 8) | buf[9]);
+    raw->gy = (int16_t)((buf[10] << 8) | buf[11]);
+    raw->gz = (int16_t)((buf[12] << 8) | buf[13]);
 
     return 0;
 }
@@ -123,12 +130,14 @@ uint8_t MPU_ReadRawData(MPU_RawData_t *raw) {
  * @brief  静止放置板子, 采集 MPU_CALIB_SAMPLES 次陀螺数据计算零偏
  *         校准期间约需 MPU_CALIB_SAMPLES × dt = 0.4s
  */
-void MPU_Calibrate(void) {
+void MPU_Calibrate(void)
+{
     MPU_RawData_t raw;
     float sum[3] = {0.0f, 0.0f, 0.0f};
     int i;
 
-    for (i = 0; i < MPU_CALIB_SAMPLES; i++) {
+    for (i = 0; i < MPU_CALIB_SAMPLES; i++)
+    {
         MPU_ReadRawData(&raw);
         sum[0] += (float)raw.gx;
         sum[1] += (float)raw.gy;
@@ -157,9 +166,10 @@ void MPU_Calibrate(void) {
  * @param  raw  当次读取的原始数据
  * @param  dt   调用间隔 (秒), 应与主循环一致 (建议 MPU_SAMPLE_DT = 0.002f)
  */
-void MPU_ComplementaryFilter(MPU_RawData_t *raw, float dt) {
+void MPU_ComplementaryFilter(MPU_RawData_t *raw, float dt)
+{
     /* ---- 1. 转换为物理量 ---- */
-    float ax = (float)raw->ax / ACCEL_SCALE;  // 单位: g
+    float ax = (float)raw->ax / ACCEL_SCALE; // 单位: g
     float ay = (float)raw->ay / ACCEL_SCALE;
     float az = (float)raw->az / ACCEL_SCALE;
 
@@ -170,33 +180,35 @@ void MPU_ComplementaryFilter(MPU_RawData_t *raw, float dt) {
 
     /* ---- 2. 加速度计解算静态 Roll / Pitch ---- */
     /* Roll:  绕 X 轴倾斜角 */
-    float roll_acc  = atan2f(ay, az) * (180.0f / 3.14159265f);
+    float roll_acc = atan2f(ay, az) * (180.0f / 3.14159265f);
     /* Pitch: 绕 Y 轴倾斜角 */
     float pitch_acc = atan2f(-ax, sqrtf(ay * ay + az * az)) * (180.0f / 3.14159265f);
 
     /* ---- 3. 互补滤波融合 ---- */
     /* Roll  = α*(roll  + gx*dt) + (1-α)*roll_acc  */
-    g_mpu_attitude.roll  = MPU_COMP_ALPHA * (g_mpu_attitude.roll  + gx_dps * dt)
-                         + (1.0f - MPU_COMP_ALPHA) * roll_acc;
+    g_mpu_attitude.roll = MPU_COMP_ALPHA * (g_mpu_attitude.roll + gx_dps * dt) + (1.0f - MPU_COMP_ALPHA) * roll_acc;
 
     /* Pitch = α*(pitch + gy*dt) + (1-α)*pitch_acc */
-    g_mpu_attitude.pitch = MPU_COMP_ALPHA * (g_mpu_attitude.pitch + gy_dps * dt)
-                         + (1.0f - MPU_COMP_ALPHA) * pitch_acc;
+    g_mpu_attitude.pitch = MPU_COMP_ALPHA * (g_mpu_attitude.pitch + gy_dps * dt) + (1.0f - MPU_COMP_ALPHA) * pitch_acc;
 
     /* Yaw: 仅靠陀螺积分 (无磁力计, 长期漂移) */
-    g_mpu_attitude.yaw  += gz_dps * dt;
+    g_mpu_attitude.yaw += gz_dps * dt;
 
     /* Yaw 限制在 [-180, 180] */
-    if (g_mpu_attitude.yaw >  180.0f) g_mpu_attitude.yaw -= 360.0f;
-    if (g_mpu_attitude.yaw < -180.0f) g_mpu_attitude.yaw += 360.0f;
+    if (g_mpu_attitude.yaw > 180.0f)
+        g_mpu_attitude.yaw -= 360.0f;
+    if (g_mpu_attitude.yaw < -180.0f)
+        g_mpu_attitude.yaw += 360.0f;
 }
 
 /**
  * @brief  获取当前经过校准的 Z 轴角速度 (度/秒)
  * @retval Z轴角速度, 正值代表逆时针旋转
  */
-float MPU_Get_GyroZ_DPS(void) {
+float MPU_Get_GyroZ_DPS(void)
+{
     MPU_RawData_t raw;
-    if (MPU_ReadRawData(&raw) != 0) return 0.0f;
+    if (MPU_ReadRawData(&raw) != 0)
+        return 0.0f;
     return ((float)raw.gz - s_gyro_offset[2]) / GYRO_SCALE;
 }

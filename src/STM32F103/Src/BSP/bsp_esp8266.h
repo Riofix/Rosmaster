@@ -15,12 +15,16 @@
 
 /* ==================== 网络配置参数 ==================== */
 #if ENABLE_AP == 0
-    // STA 模式参数
-    #define WIFI_SSID       "Digua"
-    #define WIFI_PWD        "12345678"
-    // 注意: Ubuntu nmcli 默认启动的热点网关通常是 10.42.0.1，请确保和实际网卡网关统一
-    #define SERVER_IP       "10.42.0.1" 
-    #define SERVER_PORT     "8080"
+//    // STA 模式参数
+//    #define WIFI_SSID       "Digua"
+//    #define WIFI_PWD        "12345678"
+//    #define SERVER_IP       "10.42.0.1" 
+//    #define SERVER_PORT     "8080"
+		// STA 模式参数
+    #define WIFI_SSID       "Redmi K70"
+    #define WIFI_PWD        "Color4470"
+    #define SERVER_IP       "10.95.32.175" 
+    #define SERVER_PORT     "3456"
 #else
     // AP 模式参数
     #define AP_SSID         "STM32_Robot"

@@ -9,15 +9,16 @@
 #include "stm32f10x.h"
 #include <stdio.h>
 
-int main(void) {
+int main(void)
+{
   /* Hardware initialization */
   Systick_Init();
 
   USART_All_Init(115200, 115200);
-	IIC_Init();
+  IIC_Init();
   MPU_Init();
   PWM_Init(); /* Initialize all 3 PWM channels (PA6/PB0/PB1) */
-	
+
   Delay_ms(1000);
 
   OLED_Init();
@@ -28,7 +29,8 @@ int main(void) {
   OLED_ShowString(3, 1, "Please Wait... ");
 
   /* 3. 执行 ESP8266 智能配网与透传配置核心 */
-  if (ESP8266_Init() == 1) {
+  if (ESP8266_Init() == 1)
+  {
     // ================= 配置成功 =================
     OLED_Clear();
     OLED_ShowString(1, 1, "WiFi Connected!");
@@ -36,9 +38,18 @@ int main(void) {
     OLED_ShowString(3, 1, "Pass-Thru Ready");
     OLED_ShowString(4, 1, "Waiting Data...");
 
+    Delay_ms(1000);
+    OLED_Clear();
+		OLED_ShowString(1, 1, "WIFI");
+    OLED_ShowString(2, 1, WIFI_SSID);
+    OLED_ShowString(3, 1, "IP:");
+    OLED_ShowString(3, 4, SERVER_IP);
+
     // 测试：透传通道建立后，主动向电脑的网络助手发一句话
     ESP8266_SEND_DATA((uint8_t *)"Hello Server! I am STM32.\r\n", 27);
-  } else {
+  }
+  else
+  {
     // ================= 配置失败 =================
     OLED_Clear();
     OLED_ShowString(1, 1, "ESP Config FAIL");
@@ -51,7 +62,8 @@ int main(void) {
   App_Protocol_Init();
 
   /* 5. 主循环处理 */
-  while (1) {
+  while (1)
+  {
     // ==============================================================
     // 【正式业务逻辑】：
     // 1. 底层解析数据封包进队列 (串口 -> 缓冲 -> 解析 -> 入队)

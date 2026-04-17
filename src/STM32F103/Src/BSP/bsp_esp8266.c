@@ -105,7 +105,7 @@ static uint8_t ESP8266_Config(void) {
 /* ==================== 外部接口函数 ==================== */
 
 /**
- * @brief ESP8266初始化（带重试机制）
+ * @brief ESP8266初始化
  * @retval 1 初始化成功，0 初始化失败
  */
 uint8_t ESP8266_Init(void) {

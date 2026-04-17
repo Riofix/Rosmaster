@@ -3,17 +3,17 @@
 
 /*引脚配置*/
 #define OLED_W_SCL(x) GPIO_WriteBit(GPIOC, GPIO_Pin_14, (BitAction)(x))
-#define OLED_W_SDA(x) GPIO_WriteBit(GPIOC, GPIO_Pin_15, (BitAction)(x))
+#define OLED_W_SDA(x) GPIO_WriteBit(GPIOC, GPIO_Pin_13, (BitAction)(x))
 
 /*引脚初始化*/
 void OLED_I2C_Init(void) {
-  /* PC14/15 属于备份区域引脚，速度有限但足以驱动 OLED */
+  /* PC13/14 属于备份区域引脚，速度有限但足以驱动 OLED */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; // PC14/15 限制在 2MHz
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; // PC13/14 限制在 2MHz
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_13;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 
   OLED_W_SCL(1);

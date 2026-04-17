@@ -29,8 +29,8 @@ class TcpLinkServerNode(Node):
             "192.168.1.103": "crane_right"
         }
 
-        # 保存活动客户端流
-        self.clients = {}  # {device_name: StreamWriter}
+        # 保存活动客户端流 (注意: 不能命名为 clients，与 rclpy Node 内部保留属性冲突)
+        self._tcp_clients = {}  # {device_name: StreamWriter}
         
         # 为每个设备动态注册 Publisher 和 Subscriber 
         self.rx_pubs = {}
@@ -62,7 +62,7 @@ class TcpLinkServerNode(Node):
             return
             
         device_name = self.ip_mapping[ip]
-        self.clients[device_name] = writer
+        self._tcp_clients[device_name] = writer
         self.get_logger().info(f"设备上线: [{device_name}] IP:{ip}")
         
         # 发布上线状态
@@ -71,12 +71,12 @@ class TcpLinkServerNode(Node):
         # 动态创建 ROS 桥接通道 (如果没有创建过)
         if device_name not in self.rx_pubs:
             self.rx_pubs[device_name] = self.create_publisher(UInt8MultiArray, f'/{device_name}/tcp_rx_raw', 50)
-            # 通过 lambda 捕获当前 device_name 作为参数
             def make_tx_callback(dev_id):
                 def tx_callback(msg: UInt8MultiArray):
-                    if dev_id in self.clients:
-                        w = self.clients[dev_id]
-                        w.write(bytes(msg.data))
+                    if dev_id in self._tcp_clients:
+                        w = self._tcp_clients[dev_id]
+                        # 在 asyncio 线程里安全地写入数据
+                        asyncio.run_coroutine_threadsafe(self._async_write(w, bytes(msg.data)), self._loop)
                 return tx_callback
             self.tx_subs[device_name] = self.create_subscription(
                 UInt8MultiArray, f'/{device_name}/tcp_tx_raw', make_tx_callback(device_name), 50)
@@ -84,16 +84,12 @@ class TcpLinkServerNode(Node):
         # 进入物理读取死循环
         while rclpy.ok():
             try:
-                # 最多读取 1024 字节块
                 data = await reader.read(1024)
                 if not data:
-                    break # Socket 关闭
-                
-                # 原封不动抛入 ROS 网络
+                    break
                 msg = UInt8MultiArray()
                 msg.data = list(data)
                 self.rx_pubs[device_name].publish(msg)
-                
             except Exception as e:
                 self.get_logger().error(f"设备读取异常 {device_name}: {e}")
                 break
@@ -101,9 +97,17 @@ class TcpLinkServerNode(Node):
         # 设备下线处理
         self.get_logger().warn(f"设备下线: [{device_name}]")
         self._publish_status(device_name, ip, DeviceState.STATUS_OFFLINE)
-        if device_name in self.clients:
-            del self.clients[device_name]
+        if device_name in self._tcp_clients:
+            del self._tcp_clients[device_name]
         writer.close()
+
+    async def _async_write(self, writer, data: bytes):
+        """在 asyncio 线程中安全写入并 flush 发送缓冲区"""
+        try:
+            writer.write(data)
+            await writer.drain()
+        except Exception as e:
+            self.get_logger().error(f"TCP 写入异常: {e}")
 
     def _publish_status(self, name, ip, status):
         msg = DeviceState()

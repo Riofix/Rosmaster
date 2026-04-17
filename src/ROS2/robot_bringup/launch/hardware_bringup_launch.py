@@ -68,8 +68,16 @@ def generate_launch_description():
             output='screen',
             parameters=[{'crane_id': crane_id}]
         )
+        c_controller = Node(
+            package='robot_control',
+            executable='crane_controller',
+            name=f'{crane_id}_controller',
+            output='screen',
+            parameters=[{'crane_id': crane_id}]
+        )
         ld.add_action(c_parser)
         ld.add_action(c_packer)
+        ld.add_action(c_controller)
 
     """
     此 Launch 脚本在瞬间并发启动了 11 个独立隔离的进程:
