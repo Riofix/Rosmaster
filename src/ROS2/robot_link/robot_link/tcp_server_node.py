@@ -1,127 +1,121 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import UInt8MultiArray
-from robot_interfaces.msg import DeviceState
-import asyncio
+import socket
 import threading
 
-class TcpLinkServerNode(Node):
-    """
-    负责 ESP8266 接入的 TCP 物理链路服务器
-    功能：
-    1. 监听 8080 端口，接受 STM32 吊具下位机长连接
-    2. 基于静态 IP 白名单进行设备名称映射 (Blind Operation 核心机制)
-    3. 动态发布每个吊具独立的收发话题 (例如 /crane_left/tcp_rx_raw)
-    """
+class TcpServerNode(Node):
     def __init__(self):
-        super().__init__('tcp_server_link_node')
+        super().__init__('TcpServerNode')
         
+        # 1. 声明参数
         self.declare_parameter('port', 8080)
-        self.bind_port = self.get_parameter('port').value
-        
-        # 静态 IP 映射表 (在这里彻底隐藏下游 IP，将其转换为对上层友好的 namespace)
-        self.ip_mapping = {
-            "192.168.1.101": "crane_left",
-            "192.168.1.102": "crane_middle",
-            "192.168.1.103": "crane_right"
+        self.declare_parameter('ip_left', '192.168.1.101')
+        self.declare_parameter('ip_mid', '192.168.1.102')
+        self.declare_parameter('ip_right', '192.168.1.103')
+
+        self.port = self.get_parameter('port').value
+        self.ip_map = {
+            self.get_parameter('ip_left').value: 'handle_left',
+            self.get_parameter('ip_mid').value: 'handle_mid',
+            self.get_parameter('ip_right').value: 'handle_right'
         }
 
-        # 保存活动客户端流 (注意: 不能命名为 clients，与 rclpy Node 内部保留属性冲突)
-        self._tcp_clients = {}  # {device_name: StreamWriter}
+        # 存储已连接的客户端 { 'handle_left': socket_obj }
+        self.clients = {}
+
+        # 2. 发布者：发布接收到的原始字节，增加一个来源标识字段（通过自定义消息或在数据前加前缀，
+        # 这里为了简单，我们发布包含设备信息的 UInt8MultiArray）
+        self.rx_pub = self.create_publisher(UInt8MultiArray, '/tcp_rx_raw', 10)
+
+        # 3. 订阅者：接收要发送给 TCP 客户端的原始字节
+        # 格式约定：数据包的第一个字节作为目标标识（0:left, 1:mid, 2:right），后续为实际负载
+        self.create_subscription(UInt8MultiArray, '/tcp_tx_raw', self.tx_callback, 10)
+
+        # 4. 启动服务器线程
+        self.server_thread = threading.Thread(target=self.run_server, daemon=True)
+        self.server_thread.start()
         
-        # 为每个设备动态注册 Publisher 和 Subscriber 
-        self.rx_pubs = {}
-        self.tx_subs = {}
+        self.get_logger().info(f'TCP Server Node started on port {self.port}')
 
-        # 状态播报器
-        self.status_pub = self.create_publisher(DeviceState, '/device_status', 10)
-
-        # 启动 Asyncio 线程
-        self._loop = asyncio.new_event_loop()
-        self._thread = threading.Thread(target=self._start_async_server, daemon=True)
-        self._thread.start()
-
-    def _start_async_server(self):
-        asyncio.set_event_loop(self._loop)
-        coro = asyncio.start_server(self._handle_client, '0.0.0.0', self.bind_port)
-        server = self._loop.run_until_complete(coro)
-        self.get_logger().info(f"TCP 链路服务器已启动，正监听端口: {self.bind_port}")
-        self._loop.run_forever()
-
-    async def _handle_client(self, reader, writer):
-        addr = writer.get_extra_info('peername')
-        ip = addr[0]
+    def run_server(self):
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
-        # 进行盲操作核心转换
-        if ip not in self.ip_mapping:
-            self.get_logger().warn(f"拒绝未知设备连接: {ip}")
-            writer.close()
-            return
+        try:
+            server_socket.bind(('0.0.0.0', self.port))
+            server_socket.listen(5)
             
-        device_name = self.ip_mapping[ip]
-        self._tcp_clients[device_name] = writer
-        self.get_logger().info(f"设备上线: [{device_name}] IP:{ip}")
+            while rclpy.ok():
+                client_sock, addr = server_socket.accept()
+                client_ip = addr[0]
+                device_name = self.ip_map.get(client_ip)
+                
+                if device_name:
+                    self.get_logger().info(f'{device_name} connected from {client_ip}')
+                    self.clients[device_name] = client_sock
+                    threading.Thread(target=self.receive_loop, args=(client_sock, device_name), daemon=True).start()
+                else:
+                    self.get_logger().warn(f'Unknown IP {client_ip} rejected.')
+                    client_sock.close()
+        except Exception as e:
+            self.get_logger().error(f'Server error: {e}')
+        finally:
+            server_socket.close()
+
+    def receive_loop(self, client_sock, device_name):
+        """接收数据并发布到 /tcp_rx_raw"""
+        # 定义标识：left=0, mid=1, right=2
+        device_id = list(self.ip_map.values()).index(device_name)
         
-        # 发布上线状态
-        self._publish_status(device_name, ip, DeviceState.STATUS_IDLE)
-
-        # 动态创建 ROS 桥接通道 (如果没有创建过)
-        if device_name not in self.rx_pubs:
-            self.rx_pubs[device_name] = self.create_publisher(UInt8MultiArray, f'/{device_name}/tcp_rx_raw', 50)
-            def make_tx_callback(dev_id):
-                def tx_callback(msg: UInt8MultiArray):
-                    if dev_id in self._tcp_clients:
-                        w = self._tcp_clients[dev_id]
-                        # 在 asyncio 线程里安全地写入数据
-                        asyncio.run_coroutine_threadsafe(self._async_write(w, bytes(msg.data)), self._loop)
-                return tx_callback
-            self.tx_subs[device_name] = self.create_subscription(
-                UInt8MultiArray, f'/{device_name}/tcp_tx_raw', make_tx_callback(device_name), 50)
-
-        # 进入物理读取死循环
         while rclpy.ok():
             try:
-                data = await reader.read(1024)
+                data = client_sock.recv(1024)
                 if not data:
                     break
-                msg = UInt8MultiArray()
-                msg.data = list(data)
-                self.rx_pubs[device_name].publish(msg)
-            except Exception as e:
-                self.get_logger().error(f"设备读取异常 {device_name}: {e}")
-                break
                 
-        # 设备下线处理
-        self.get_logger().warn(f"设备下线: [{device_name}]")
-        self._publish_status(device_name, ip, DeviceState.STATUS_OFFLINE)
-        if device_name in self._tcp_clients:
-            del self._tcp_clients[device_name]
-        writer.close()
+                msg = UInt8MultiArray()
+                # 协议解耦：在原始数据前插入一个字节的设备 ID，方便解析节点区分来源
+                msg.data = [device_id] + list(data)
+                self.rx_pub.publish(msg)
+            except:
+                break
+        
+        self.get_logger().warn(f'{device_name} disconnected.')
+        if device_name in self.clients:
+            del self.clients[device_name]
+        client_sock.close()
 
-    async def _async_write(self, writer, data: bytes):
-        """在 asyncio 线程中安全写入并 flush 发送缓冲区"""
-        try:
-            writer.write(data)
-            await writer.drain()
-        except Exception as e:
-            self.get_logger().error(f"TCP 写入异常: {e}")
-
-    def _publish_status(self, name, ip, status):
-        msg = DeviceState()
-        msg.device_name = name
-        msg.ip_address = ip
-        msg.current_status = status
-        self.status_pub.publish(msg)
+    def tx_callback(self, msg):
+        """
+        从 /tcp_tx_raw 接收数据并分发给对应的 TCP 客户端
+        msg.data 格式: [device_id, raw_byte1, raw_byte2, ...]
+        """
+        if len(msg.data) < 2:
+            return
+            
+        device_id = msg.data[0]
+        payload = bytes(msg.data[1:])
+        
+        device_names = list(self.ip_map.values())
+        if device_id < len(device_names):
+            target_name = device_names[device_id]
+            if target_name in self.clients:
+                try:
+                    self.clients[target_name].send(payload)
+                except Exception as e:
+                    self.get_logger().error(f'TCP send error to {target_name}: {e}')
 
 def main(args=None):
     rclpy.init(args=args)
-    node = TcpLinkServerNode()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    node = TcpServerNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

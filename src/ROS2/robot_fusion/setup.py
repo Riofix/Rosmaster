@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'world_model_node = robot_fusion.world_model_node:main'
+            'fusion_node = robot_fusion.fusion_node:main'
         ],
     },
 )

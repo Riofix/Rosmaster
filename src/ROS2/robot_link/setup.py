@@ -23,8 +23,8 @@ setup(
     entry_points={
         'console_scripts': [
             'hotspot_node = robot_link.hotspot_node:main',
+            'tcp_server_node = robot_link.tcp_server_node:main',
             'serial_node = robot_link.serial_node:main',
-            'tcp_server_node = robot_link.tcp_server_node:main'
         ],
     },
 )

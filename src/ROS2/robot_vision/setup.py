@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'dual_cam_node = robot_vision.dual_cam_node:main'
+            'vision_node = robot_vision.vision_node:main',
         ],
     },
 )

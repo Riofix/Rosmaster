@@ -20,10 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'chassis_parser = robot_protocol.chassis_parser_node:main',
-            'chassis_packer = robot_protocol.chassis_packer:main',
-            'crane_parser = robot_protocol.crane_parser_node:main',
-            'crane_packer = robot_protocol.crane_packer:main',
+            'protocol_node = robot_protocol.protocol_node:main'
         ],
     },
 )

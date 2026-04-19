@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'dispatcher_node = robot_control.dispatcher_node:main'
+            'control_node = robot_control.control_node:main',
         ],
     },
 )
