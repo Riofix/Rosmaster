@@ -170,7 +170,7 @@ class ProtocolNode(Node):
             if buf[0] != 0xFF or buf[1] != 0xFB:
                 buf.pop(0); continue
             length = buf[2]
-            total_len = length + 3
+            total_len = length + 2
             if len(buf) < total_len: break
             packet = buf[:total_len]
             if sum(packet[2:-1]) % 256 == packet[-1]:

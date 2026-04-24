@@ -84,8 +84,8 @@ class ControlNode(Node):
         }
 
         # --- PID 实例初始化 (针对底盘) ---
-        # 参数建议：Kp=0.28, Ki=0.08, Kd=0.1, MaxAccel=1000 (根据你demo)
-        self.chassis_pid = PositionPID(kp=0.28, ki=0.08, kd=0.1, max_out=600, max_i=200, max_accel=1200.0)
+        # 参数建议：Kp=0.28, Ki=0.08, Kd=0.1, MaxAccel=2000 (根据你demo)
+        self.chassis_pid = PositionPID(kp=0.28, ki=0.08, kd=0.1, max_out=1500.0, max_i=200, max_accel=1000.0)
         
         # 任务状态管理
         self.current_chassis_task_id = 0
