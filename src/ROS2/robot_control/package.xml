@@ -8,8 +8,7 @@
   <license>MIT</license>
 
   <depend>rclpy</depend>
-  <depend>robot_interfaces</depend>
-
+  
   <export>
     <build_type>ament_python</build_type>
   </export>
