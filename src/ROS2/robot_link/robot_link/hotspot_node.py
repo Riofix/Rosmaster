@@ -1,67 +1,77 @@
 import rclpy
 from rclpy.node import Node
 import subprocess
+import sys
 
-class HotspotNode(Node):
+class HotspotSetupNode(Node):
     def __init__(self):
-        # 节点名称正式定为 HotspotNode
-        super().__init__('HotspotNode')
+        super().__init__('hotspot_setup_node')
         
-        # 声明 ROS 2 参数 (解耦设计)
+        # 1. 声明参数，方便以后通过 launch 文件或命令行修改
         self.declare_parameter('ssid', 'Digua')
         self.declare_parameter('password', '12345678')
         self.declare_parameter('interface', 'wlan0')
-        self.declare_parameter('ip_address', '192.168.1.1/24')
+        self.declare_parameter('ip_address', '10.42.0.1/24')
 
-        # 执行网络配置逻辑
-        self.configure_network()
+    def activate_hotspot(self):
+        # 获取参数值
+        ssid = self.get_parameter('ssid').value
+        password = self.get_parameter('password').value
+        iface = self.get_parameter('interface').value
+        ip_addr = self.get_parameter('ip_address').value
 
-    def configure_network(self):
-        ssid = self.get_parameter('ssid').get_parameter_value().string_value
-        password = self.get_parameter('password').get_parameter_value().string_value
-        iface = self.get_parameter('interface').get_parameter_value().string_value
-        ip_addr = self.get_parameter('ip_address').get_parameter_value().string_value
-
-        self.get_logger().info(f'Configuring WiFi Hotspot: {ssid}...')
+        self.get_logger().info(f'正在通过 nmcli 配置热点: {ssid}...')
 
         try:
-            # 1. 删除可能存在的旧连接，确保干净的配置环境
-            subprocess.run(['nmcli', 'connection', 'delete', 'Hotspot'], capture_output=True)
+            # 步骤 A: 删除旧连接（防止配置冲突）
+            # 提示：nmcli 配置是持久化的，删除旧的可以确保应用新参数
+            subprocess.run(['sudo', 'nmcli', 'connection', 'delete', ssid], capture_output=True)
 
-            # 2. 创建持久化的无线热点
-            subprocess.run([
-                'nmcli', 'device', 'wifi', 'hotspot',
+            # 步骤 B: 创建热点连接
+            # 提示：Mode 设置为 Hotspot，Band 通常为 bg (2.4GHz)
+            create_cmd = [
+                'sudo', 'nmcli', 'device', 'wifi', 'hotspot',
+                'con-name', ssid,
                 'ssid', ssid,
                 'password', password,
                 'ifname', iface
-            ], check=True, capture_output=True)
+            ]
+            subprocess.run(create_cmd, check=True, capture_output=True)
 
-            # 3. 配置 IPv4 静态地址段，供后续 TCP 链路使用
-            subprocess.run([
-                'nmcli', 'connection', 'modify', 'Hotspot',
+            # 步骤 C: 固定网关 IP (设置为 10.42.0.1)
+            # 提示：ipv4.method 必须为 shared 才能启用 DHCP 分配 IP 给其他设备
+            modify_cmd = [
+                'sudo', 'nmcli', 'connection', 'modify', ssid,
                 'ipv4.method', 'shared',
                 'ipv4.addresses', ip_addr
-            ], check=True, capture_output=True)
+            ]
+            subprocess.run(modify_cmd, check=True, capture_output=True)
 
-            # 4. 激活网络连接
-            subprocess.run(['nmcli', 'connection', 'up', 'Hotspot'], check=True, capture_output=True)
+            # 步骤 D: 激活连接
+            subprocess.run(['sudo', 'nmcli', 'connection', 'up', ssid], check=True, capture_output=True)
             
-            self.get_logger().info('Hotspot setup completed successfully.')
+            self.get_logger().info(f'成功！热点 "{ssid}" 已在后台运行，网关: {ip_addr.split("/")[0]}')
+            return True
             
         except subprocess.CalledProcessError as e:
-            error_output = e.stderr.decode() if e.stderr else str(e)
-            self.get_logger().error(f'Failed to configure Hotspot: {error_output}')
+            error_info = e.stderr.decode() if e.stderr else str(e)
+            self.get_logger().error(f'配置失败: {error_info}')
+            return False
 
 def main(args=None):
     rclpy.init(args=args)
+    node = HotspotSetupNode()
     
-    # 实例化节点
-    node = HotspotNode()
+    # 执行开启逻辑
+    success = node.activate_hotspot()
     
-    # 执行完逻辑后直接销毁，不驻留内存
-    node.get_logger().info('HotspotNode task finished. Shutting down.')
+    # 任务完成后立即关闭节点，释放内存
+    node.get_logger().info('任务完成，正在退出 ROS 2 节点...')
     node.destroy_node()
     rclpy.shutdown()
+    
+    # 根据结果退出进程
+    sys.exit(0 if success else 1)
 
 if __name__ == '__main__':
     main()
