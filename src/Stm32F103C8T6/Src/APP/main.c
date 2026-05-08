@@ -46,7 +46,7 @@ int main(void)
     OLED_ShowString(3, 4, SERVER_IP);
 
     // 测试：透传通道建立后，主动向电脑的网络助手发一句话
-    ESP8266_SEND_DATA((uint8_t *)"ID:mid\n", 7);
+    ESP8266_SEND_DATA((uint8_t *)"Hello Server! I am STM32.\r\n", 27);
   }
   else
   {

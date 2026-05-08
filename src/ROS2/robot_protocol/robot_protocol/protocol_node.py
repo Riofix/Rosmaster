@@ -97,7 +97,7 @@ class ProtocolNode(Node):
         except Exception as e:
             self.get_logger().error(f"Internal CMD parse error: {e}")
 
-    # ======================== 以下函数为句柄函数 ========================
+    # ======================== 以下函数保持你的原样 ========================
     def parse_handle_mpu(self, name, data):
         r, p, y = struct.unpack('<fff', data[:12])
         self.handle_states[name]["mpu"] = {"r": r, "p": p, "y": y}
@@ -109,17 +109,6 @@ class ProtocolNode(Node):
     def parse_handle_ack(self, name, data):
         pass
 
-    def parse_handle_bldc(self, name, data):
-        # 简单占位逻辑
-        duty = data[0] if len(data) > 0 else 0
-        self.handle_states[name]["bldc_duty"] = duty
-
-    def parse_handle_color(self, name, data):
-        # 简单占位逻辑
-        cid = data[0] if len(data) > 0 else 0
-        self.handle_states[name]["color_id"] = cid
-
-    # ======================== 底盘控制句柄 ========================
     def parse_chassis_status(self, data):
         vx, vy, vz, volt = struct.unpack('<hhhB', data[:7])
         self.chassis_state["speed"] = {"vx": vx, "vy": vy, "vz": vz}
@@ -170,7 +159,7 @@ class ProtocolNode(Node):
             if buf[0] != 0xFF or buf[1] != 0xFB:
                 buf.pop(0); continue
             length = buf[2]
-            total_len = length + 2
+            total_len = length + 3
             if len(buf) < total_len: break
             packet = buf[:total_len]
             if sum(packet[2:-1]) % 256 == packet[-1]:

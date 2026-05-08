@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'protocol_node = robot_protocol.protocol_node:main',
-            'protocol_pack_node = robot_protocol.protocol_pack_node:main',
+            'protocol_node = robot_protocol.protocol_node:main'
         ],
     },
 )

@@ -29,12 +29,6 @@ void App_Init(void)
     Cmd_Handle_Init();
 
     g_app_context.system_ready = 1;
-
-    // 3. 自动上传默认开启
-    g_app_context.mpu_stream = 1;
-    g_app_context.stepmotor_stream = 1;
-    g_app_context.rgb_serson_stream = 1;
-    g_app_context.pwm_state_stream = 1;
 }
 
 /**

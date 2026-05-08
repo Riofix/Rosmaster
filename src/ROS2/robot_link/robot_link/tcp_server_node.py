@@ -9,26 +9,34 @@ class TcpServerNode(Node):
         super().__init__('TcpServerNode')
         
         # 1. 声明参数
-        self.declare_parameter('port', 3456)
+        self.declare_parameter('port', 8080)
+        self.declare_parameter('ip_left', '192.168.1.101')
+        self.declare_parameter('ip_mid', '192.168.1.102')
+        self.declare_parameter('ip_right', '192.168.1.103')
+
         self.port = self.get_parameter('port').value
+        self.ip_map = {
+            self.get_parameter('ip_left').value: 'handle_left',
+            self.get_parameter('ip_mid').value: 'handle_mid',
+            self.get_parameter('ip_right').value: 'handle_right'
+        }
 
-        # 存储已验证身份的客户端 { 'left': socket_obj, 'mid': socket_obj, ... }
+        # 存储已连接的客户端 { 'handle_left': socket_obj }
         self.clients = {}
-        # 映射表，用于给 ROS 2 消息打标：0:left, 1:mid, 2:right
-        self.device_id_map = {'left': 0, 'mid': 1, 'right': 2}
 
-        # 2. 发布者：发送给 ROS 2 其他节点
+        # 2. 发布者：发布接收到的原始字节，增加一个来源标识字段（通过自定义消息或在数据前加前缀，
+        # 这里为了简单，我们发布包含设备信息的 UInt8MultiArray）
         self.rx_pub = self.create_publisher(UInt8MultiArray, '/tcp_rx_raw', 10)
 
-        # 3. 订阅者：接收要发给 STM32 的数据
-        # 格式：[device_id, data1, data2...]
-        self.tx_sub = self.create_subscription(UInt8MultiArray, '/tcp_tx_raw', self.tx_callback, 10)
+        # 3. 订阅者：接收要发送给 TCP 客户端的原始字节
+        # 格式约定：数据包的第一个字节作为目标标识（0:left, 1:mid, 2:right），后续为实际负载
+        self.create_subscription(UInt8MultiArray, '/tcp_tx_raw', self.tx_callback, 10)
 
         # 4. 启动服务器线程
         self.server_thread = threading.Thread(target=self.run_server, daemon=True)
         self.server_thread.start()
         
-        self.get_logger().info(f'TCP 服务器已启动，监听端口: {self.port}')
+        self.get_logger().info(f'TCP Server Node started on port {self.port}')
 
     def run_server(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,78 +48,63 @@ class TcpServerNode(Node):
             
             while rclpy.ok():
                 client_sock, addr = server_socket.accept()
-                # 开启新线程去处理身份验证，不阻塞主循环
-                threading.Thread(target=self.auth_and_receive, args=(client_sock, addr), daemon=True).start()
+                client_ip = addr[0]
+                device_name = self.ip_map.get(client_ip)
+                
+                if device_name:
+                    self.get_logger().info(f'{device_name} connected from {client_ip}')
+                    self.clients[device_name] = client_sock
+                    threading.Thread(target=self.receive_loop, args=(client_sock, device_name), daemon=True).start()
+                else:
+                    self.get_logger().warn(f'Unknown IP {client_ip} rejected.')
+                    client_sock.close()
         except Exception as e:
-            self.get_logger().error(f'服务器异常: {e}')
+            self.get_logger().error(f'Server error: {e}')
         finally:
             server_socket.close()
 
-    def auth_and_receive(self, client_sock, addr):
-        """身份验证与数据接收"""
-        device_name = None
-        try:
-            # --- 第一阶段：身份验证 ---
-            # 设置 10 秒超时，如果 10 秒内 STM32 没发 ID 包，就断开连接
-            client_sock.settimeout(10.0)
-            data = client_sock.recv(1024).decode('utf-8').strip()
-            
-            if data.startswith("ID:"):
-                device_name = data.split(":")[1]
-                if device_name in self.device_id_map:
-                    self.get_logger().info(f'设备身份确认: {device_name} (来自 {addr[0]})')
-                    self.clients[device_name] = client_sock
-                else:
-                    self.get_logger().error(f'未知设备 ID: {device_name}，断开连接。')
-                    client_sock.close()
-                    return
-            else:
-                self.get_logger().warn(f'非法握手数据: {data}，断开连接。')
-                client_sock.close()
-                return
-
-            # --- 第二阶段：正常接收数据 ---
-            # 验证通过后，移除超时限制，进入正常接收循环
-            client_sock.settimeout(None)
-            device_id = self.device_id_map[device_name]
-            
-            while rclpy.ok():
-                raw_data = client_sock.recv(2048)
-                if not raw_data:
+    def receive_loop(self, client_sock, device_name):
+        """接收数据并发布到 /tcp_rx_raw"""
+        # 定义标识：left=0, mid=1, right=2
+        device_id = list(self.ip_map.values()).index(device_name)
+        
+        while rclpy.ok():
+            try:
+                data = client_sock.recv(1024)
+                if not data:
                     break
                 
-                # 发布到 ROS 2 话题
                 msg = UInt8MultiArray()
-                msg.data = [device_id] + list(raw_data)
+                # 协议解耦：在原始数据前插入一个字节的设备 ID，方便解析节点区分来源
+                msg.data = [device_id] + list(data)
                 self.rx_pub.publish(msg)
-                
-        except (socket.timeout, Exception) as e:
-            self.get_logger().warn(f'连接处理异常 ({addr[0]}): {e}')
-        finally:
-            if device_name and device_name in self.clients:
-                del self.clients[device_name]
-            client_sock.close()
-            self.get_logger().info(f'设备 {device_name if device_name else addr[0]} 已断开')
+            except:
+                break
+        
+        self.get_logger().warn(f'{device_name} disconnected.')
+        if device_name in self.clients:
+            del self.clients[device_name]
+        client_sock.close()
 
     def tx_callback(self, msg):
         """
-        处理外发数据
-        msg.data 格式: [device_id, byte1, byte2...]
+        从 /tcp_tx_raw 接收数据并分发给对应的 TCP 客户端
+        msg.data 格式: [device_id, raw_byte1, raw_byte2, ...]
         """
-        if len(msg.data) < 2: return
-        
-        target_id = msg.data[0]
+        if len(msg.data) < 2:
+            return
+            
+        device_id = msg.data[0]
         payload = bytes(msg.data[1:])
         
-        # 查找 ID 对应的名称
-        for name, d_id in self.device_id_map.items():
-            if d_id == target_id:
-                if name in self.clients:
-                    try:
-                        self.clients[name].send(payload)
-                    except Exception as e:
-                        self.get_logger().error(f'向 {name} 发送数据失败: {e}')
-                break
+        device_names = list(self.ip_map.values())
+        if device_id < len(device_names):
+            target_name = device_names[device_id]
+            if target_name in self.clients:
+                try:
+                    self.clients[target_name].send(payload)
+                except Exception as e:
+                    self.get_logger().error(f'TCP send error to {target_name}: {e}')
 
 def main(args=None):
     rclpy.init(args=args)
