@@ -2,7 +2,7 @@
 .\objects\oled.o: Src\BSP\OLED_Font.h
 .\objects\oled.o: .\CMSIS\stm32f10x.h
 .\objects\oled.o: .\CMSIS\core_cm3.h
-.\objects\oled.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\oled.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\oled.o: .\CMSIS\system_stm32f10x.h
 .\objects\oled.o: .\Src\APP\stm32f10x_conf.h
 .\objects\oled.o: .\FWlib\inc\stm32f10x_adc.h

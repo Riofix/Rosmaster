@@ -41,6 +41,7 @@
 ".\objects\oled.o"
 ".\objects\bsp_pwm.o"
 ".\objects\bsp_mpu6050.o"
+".\objects\bsp_tcs3472.o"
 ".\objects\msg_queue.o"
 ".\objects\protocol.o"
 ".\objects\protocol_emm.o"

@@ -23,7 +23,7 @@
 		// STA 模式参数
     #define WIFI_SSID       "Redmi K70"
     #define WIFI_PWD        "44704470"
-    #define SERVER_IP       "10.19.50.175" 
+    #define SERVER_IP       "10.19.50.101" 
     #define SERVER_PORT     "3456"
 #else
     // AP 模式参数

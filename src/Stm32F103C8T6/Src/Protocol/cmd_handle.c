@@ -424,12 +424,12 @@ static void Handle_Query_MpuRaw(uint8_t *data, uint8_t len)
  */
 static void Handle_Query_ColorRaw(uint8_t *data, uint8_t len)
 {
-  ColorRawData_t rgb;
-  App_Rgb_GetRaw(&rgb);
-  uint8_t tx_buf[1 + sizeof(ColorRawData_t)];
-  tx_buf[0] = CMD_RX_QUERY_COLOR_RAW;
-  memcpy(&tx_buf[1], &rgb, sizeof(ColorRawData_t));
-  Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
+  // ColorRawData_t rgb;
+  // App_Rgb_GetRaw(&rgb);
+  // uint8_t tx_buf[1 + sizeof(ColorRawData_t)];
+  // tx_buf[0] = CMD_RX_QUERY_COLOR_RAW;
+  // memcpy(&tx_buf[1], &rgb, sizeof(ColorRawData_t));
+  // Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
 }
 
 /**
@@ -439,12 +439,12 @@ static void Handle_Query_ColorRaw(uint8_t *data, uint8_t len)
  */
 static void Handle_Query_ColorRes(uint8_t *data, uint8_t len)
 {
-  ColorResult_t res;
-  App_Rgb_GetResult(&res);
-  uint8_t tx_buf[1 + sizeof(ColorResult_t)];
-  tx_buf[0] = CMD_RX_QUERY_COLOR_RES;
-  memcpy(&tx_buf[1], &res, sizeof(ColorResult_t));
-  Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
+  // ColorResult_t res;
+  // App_Rgb_GetResult(&res);
+  // uint8_t tx_buf[1 + sizeof(ColorResult_t)];
+  // tx_buf[0] = CMD_RX_QUERY_COLOR_RES;
+  // memcpy(&tx_buf[1], &res, sizeof(ColorResult_t));
+  // Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
 }
 
 /**

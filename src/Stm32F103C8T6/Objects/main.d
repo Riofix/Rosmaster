@@ -2,7 +2,7 @@
 .\objects\main.o: .\Src\BSP\OLED.h
 .\objects\main.o: .\CMSIS\stm32f10x.h
 .\objects\main.o: .\CMSIS\core_cm3.h
-.\objects\main.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\main.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\main.o: .\CMSIS\system_stm32f10x.h
 .\objects\main.o: .\Src\APP\stm32f10x_conf.h
 .\objects\main.o: .\FWlib\inc\stm32f10x_adc.h
@@ -32,7 +32,7 @@
 .\objects\main.o: Src\APP\app.h
 .\objects\main.o: .\Src\Protocol\cmd_handle.h
 .\objects\main.o: .\Src\Protocol\protocol.h
-.\objects\main.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\main.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\objects\main.o: .\Src\BSP\bsp_esp8266.h
 .\objects\main.o: .\Src\BSP\bsp_usart.h
 .\objects\main.o: .\Src\BSP\bsp_systick.h
@@ -40,4 +40,4 @@
 .\objects\main.o: .\Src\BSP\bsp_pwm.h
 .\objects\main.o: .\Src\BSP\bsp_mpu6050.h
 .\objects\main.o: .\Src\Protocol\protocol_emm.h
-.\objects\main.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\main.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h

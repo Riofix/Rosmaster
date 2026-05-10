@@ -2,7 +2,7 @@
 .\objects\bsp_iic.o: Src\BSP\bsp_iic.h
 .\objects\bsp_iic.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_iic.o: .\CMSIS\core_cm3.h
-.\objects\bsp_iic.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_iic.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_iic.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_iic.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_iic.o: .\FWlib\inc\stm32f10x_adc.h
@@ -30,4 +30,4 @@
 .\objects\bsp_iic.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\bsp_iic.o: .\FWlib\inc\misc.h
 .\objects\bsp_iic.o: Src\BSP\bsp_systick.h
-.\objects\bsp_iic.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\bsp_iic.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
