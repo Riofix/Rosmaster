@@ -13,13 +13,13 @@ class ProtocolNode(Node):
         # 1. Handle (TCP) 的专属状态结构
         self.handle_states = {
             name: {
-                "motor_odom": [0, 0],
                 "mpu": {"r": 0.0, "p": 0.0, "y": 0.0},
+                "stepmotor": {},
                 "bldc_duty": 0,
-                "servo_angle": 0,
+                "servo_angle": [0, 0],
                 "color_id": 0,
                 "track_arrived": False, # 指示：抓手在水平横梁轨道上到位
-                "action_done": False,   # 指示：抓手垂直升降/抓取流程完成 (注意这里补了逗号)
+                "action_done": False,   # 指示：抓手垂直升降/抓取流程完成 
                 "task_id": 0            # 预留，由 Control 层通过特定方式触发更新
             } for name in ["handle_left", "handle_mid", "handle_right"]
         }
@@ -41,11 +41,10 @@ class ProtocolNode(Node):
 
         # ======================== 解析表驱动隔离 ========================
         self.handle_cmd_table = {
-            0x64: self.parse_handle_mpu,
-            0x65: self.parse_handle_odom,
-            0x60: self.parse_handle_ack,
-            0x62: self.parse_handle_bldc,
-            0x66: self.parse_handle_color,
+            0x5A: self.parse_handle_mpu,
+            0x5B: self.parse_handle_odom,
+            0x5C: self.parse_handle_pwm,
+            0x5D: self.parse_handle_color,
         }
 
         self.chassis_cmd_table = {
@@ -97,18 +96,49 @@ class ProtocolNode(Node):
         except Exception as e:
             self.get_logger().error(f"Internal CMD parse error: {e}")
 
-    # ======================== 以下函数保持你的原样 ========================
+    # ======================== 抓手句柄 ========================
     def parse_handle_mpu(self, name, data):
-        r, p, y = struct.unpack('<fff', data[:12])
+        r, p, y = struct.unpack('<hhh', data[:6])
         self.handle_states[name]["mpu"] = {"r": r, "p": p, "y": y}
 
     def parse_handle_odom(self, name, data):
-        m1, m2 = struct.unpack('<ii', data[:8])
-        self.handle_states[name]["motor_odom"] = [m1, m2]
+        fmt = '<B H h H i h i i B B'
+        
+        if len(data) >= 23:
+            (
+                addr, voltage_mv, phase_current, encoder_val,
+                target_pos, velocity, current_pos, pos_error,
+                org, flag
+            ) = struct.unpack(fmt, data[:23])
+            
+            # 存入步进电机状态（以 addr 为 key）
+            self.handle_states[name]["stepmotor"][addr] = {
+                "voltage_mv": voltage_mv,
+                "phase_current": phase_current,
+                "encoder_val": encoder_val,
+                "target_pos": target_pos,
+                "velocity": velocity,
+                "current_pos": current_pos,
+                "pos_error": pos_error,
+                "org": org,
+                "flag": flag
+            }
 
-    def parse_handle_ack(self, name, data):
-        pass
+    def parse_handle_pwm(self, name, data):
+        """
+        解析 PWM 数据
+        数据格式: servo1_angle(1B) servo2_angle(1B) bldc_duty(1B)
+        """
+        servo1_angle, servo2_angle, bldc_duty = data[0], data[1], data[2]
+        
+        self.handle_states[name]["servo_angle"] = [servo1_angle, servo2_angle]
+        self.handle_states[name]["bldc_duty"] = bldc_duty
+    
+    def parse_handle_color(self, name, data):
+        color_id = struct.unpack('<B', data[:1])[0]
+        self.handle_states[name]["color_id"] = color_id
 
+    # ======================== 底盘句柄 ========================
     def parse_chassis_status(self, data):
         vx, vy, vz, volt = struct.unpack('<hhhB', data[:7])
         self.chassis_state["speed"] = {"vx": vx, "vy": vy, "vz": vz}
@@ -128,6 +158,7 @@ class ProtocolNode(Node):
         e1, e2, e3, e4 = struct.unpack('<iiii', data[:16])
         self.chassis_state["motor_encoder"] = [e1, e2, e3, e4]
 
+    # ======================== 核心分发逻辑 ========================
     def dispatch(self, sid, cmd, data):
         device_name = self.names[sid]
         if sid < 3:

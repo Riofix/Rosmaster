@@ -148,7 +148,7 @@ class ControlNode(Node):
                 vx_cmd = self.chassis_pid.compute(avg_pos)
                 
                 # 3. 终点防抖与到位判定
-                # 判定标准：误差 < 50 且 速度指令趋于 0 (停稳)
+                # 判定标准：误差 < 50 且 速度指令趋于 0 (停稳)（PID死区）
                 if abs(self.chassis_pid.error) < 50 and abs(vx_cmd) < 10:
                     self.stop_chassis()
                     self.notify_protocol_arrival("chassis", self.current_chassis_task_id)
