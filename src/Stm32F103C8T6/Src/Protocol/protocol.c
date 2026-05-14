@@ -8,7 +8,7 @@
 typedef enum
 {
   STATE_WAIT_HEADER1, // 等待第一帧头 0xFF
-  STATE_WAIT_HEADER2, // 等待第二帧头 0xFB
+  STATE_WAIT_HEADER2, // 等待第二帧头 0xFC
   STATE_GET_LEN,      // 接收长度字节
   STATE_GET_DATA,     // 接收有效数据
   STATE_GET_CHECKSUM  // 接收校验位

@@ -30,8 +30,7 @@ void App_Init(void)
     Cmd_Handle_Init();
 
     g_app_context.system_ready = 1;
-
-    g_app_context.oled_mode = 9;
+    
 }
 
 /**

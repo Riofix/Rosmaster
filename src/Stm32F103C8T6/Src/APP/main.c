@@ -27,38 +27,36 @@ int main(void)
   OLED_ShowString(1, 1, "ESP8266 Boot...");
   OLED_ShowString(2, 1, "Connecting WiFi");
   OLED_ShowString(3, 1, "Please Wait... ");
-  Delay_ms(1000);
-  OLED_Clear();
   
   /* 3. 执行 ESP8266 智能配网与透传配置核心 */
-  // // if (ESP8266_Init() == 1)
-  // {
-  //   // ================= 配置成功 =================
-  //   OLED_Clear();
-  //   OLED_ShowString(1, 1, "WiFi Connected!");
-  //   OLED_ShowString(2, 1, "TCP Server OK");
-  //   OLED_ShowString(3, 1, "Pass-Thru Ready");
-  //   OLED_ShowString(4, 1, "Waiting Data...");
+  if (ESP8266_Init() == 1)
+  {
+    // ================= 配置成功 =================
+    OLED_Clear();
+    OLED_ShowString(1, 1, "WiFi Connected!");
+    OLED_ShowString(2, 1, "TCP Server OK");
+    OLED_ShowString(3, 1, "Pass-Thru Ready");
+    OLED_ShowString(4, 1, "Waiting Data...");
 
-  //   Delay_ms(1000);
-  //   OLED_Clear();
-  //   OLED_ShowString(1, 1, "WIFI");
-  //   OLED_ShowString(2, 1, WIFI_SSID);
-  //   OLED_ShowString(3, 1, "IP:");
-  //   OLED_ShowString(3, 4, SERVER_IP);
+    Delay_ms(1000);
+    OLED_Clear();
+    OLED_ShowString(1, 1, "WIFI");
+    OLED_ShowString(2, 1, WIFI_SSID);
+    OLED_ShowString(3, 1, "IP:");
+    OLED_ShowString(3, 4, SERVER_IP);
 
-  //   // 测试：透传通道建立后，主动向电脑的网络助手发一句话
-  //   ESP8266_SEND_DATA((uint8_t *)"Hello Server! I am STM32.\r\n", 27);
-  // }
-  // else
-  // {
-  //   // ================= 配置失败 =================
-  //   OLED_Clear();
-  //   OLED_ShowString(1, 1, "ESP Config FAIL");
-  //   OLED_ShowString(2, 1, "1.Check AT+CWJAP");
-  //   OLED_ShowString(3, 1, "2.Check TCP IP");
-  //   OLED_ShowString(4, 1, "3.Reset Board");
-  // }
+    // 测试：透传通道建立后，主动向电脑的网络助手发一句话
+    ESP8266_SEND_DATA((uint8_t *)"Hello Server! I am STM32.\r\n", 27);
+  }
+  else
+  {
+    // ================= 配置失败 =================
+    OLED_Clear();
+    OLED_ShowString(1, 1, "ESP Config FAIL");
+    OLED_ShowString(2, 1, "1.Check AT+CWJAP");
+    OLED_ShowString(3, 1, "2.Check TCP IP");
+    OLED_ShowString(4, 1, "3.Reset Board");
+  }
 
   /* 4. 底层协议与应用层初始化 */
   App_Init();

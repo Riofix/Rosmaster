@@ -118,26 +118,31 @@ void TCS3472_Init(void) {
 }
 
 /**
- * @brief 读取一次 RGBC 数据（阻塞，等待转换完成）
+ * @brief 读取一次 RGBC 数据（非阻塞版本）
  * @param data 数据指针
- * @return
+ * @return 无（若数据未就绪，则不会更新 data 指向的内容）
  */
 void TCS3472_ReadRGBC(TCS3472_RGBC_Data *data) {
     uint8_t status;
     uint8_t buf[8];
 
-    // 等待数据有效（AVALID位置1）
-    do {
-        if (!TCS3472_ReadReg(TCS3472_STATUS, &status))
-        Delay_ms(1);
+    // 1. 读取状态寄存器
+    if (!TCS3472_ReadReg(TCS3472_STATUS, &status)) {
+        return; // I2C 读取失败直接返回
+    }
 
-    } while (!(status & TCS3472_STATUS_AVALID));
+    // 2. 核心改动：去掉 do-while，改用 if 判断
+    // 如果 AVALID 位为 0，说明传感器还没完成本轮转换
+    if (!(status & TCS3472_STATUS_AVALID)) {
+        return; // 数据没准备好，直接“撤退”，不让 CPU 在这儿等
+    }
 
+    // 3. 只有数据有效时，才执行后续的连续读取
     if (!TCS3472_ReadRegs(TCS3472_CDATAL, buf, 8)) {
         return;  // 读取失败
     }
 
-    // 组装16位数据（小端格式：低字节在前）
+    // 4. 组装数据（逻辑与原代码一致）
     data->clear = buf[0] | (buf[1] << 8);
     data->red   = buf[2] | (buf[3] << 8);
     data->green = buf[4] | (buf[5] << 8);
