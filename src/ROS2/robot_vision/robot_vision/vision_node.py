@@ -81,7 +81,7 @@ class VisionNode(Node):
 
         # ---------- 模板 ----------
         self.tpl_lib = self.load_dataset()
-        self.tpl_lib['R'] = self.tpl_lib['L']  # 防右眼问题
+        # ❗注意：这里不再强制左右共用模板
 
         # ---------- 摄像头 ----------
         l = cfg['left_camera']
@@ -94,7 +94,7 @@ class VisionNode(Node):
         self.pub = self.create_publisher(String, '/vision_detections', 10)
         self.create_timer(0.03, self.vision_engine)
 
-        self.get_logger().info("🔥 最终稳定版视觉节点启动")
+        self.get_logger().info("🔥 最终稳定版视觉节点启动（含旋转+Debug）")
 
     # ================= 数据集 =================
     def load_dataset(self):
@@ -127,6 +127,9 @@ class VisionNode(Node):
         if img_l is None or img_r is None:
             return
 
+        # ✅ 必须保留（你的核心要求）
+        img_r = cv2.rotate(img_r, cv2.ROTATE_180)
+
         dst = np.array([[0,0],[0,self.th],[self.tw,self.th],[self.tw,0]], np.float32)
 
         w_l = [cv2.warpPerspective(img_l, cv2.getPerspectiveTransform(np.array(p,np.float32), dst),(self.tw,self.th)) for p in self.rois_l]
@@ -144,16 +147,20 @@ class VisionNode(Node):
         res_l = [self.get_digit(bin_l[i*self.th:(i+1)*self.th, 0:self.tw], self.params_l["Center_Dist"], self.tpl_lib['L']) for i in range(4)]
         res_r = [self.get_digit(bin_r[i*self.th:(i+1)*self.th, 0:self.tw], self.params_r["Center_Dist"], self.tpl_lib['R']) for i in range(4)]
 
+        # ---------- 补全 ----------
         full_r = res_r + [self.infer_missing_digit(res_r)]
         full_l = [self.infer_missing_digit(res_l)] + res_l
 
+        # ---------- 融合 ----------
         seq = []
         for i in range(5):
             c = [x for x in [full_l[i], full_r[i]] if x != "N/A"]
             seq.append(Counter(c).most_common(1)[0][0] if c else "N/A")
 
+        # ✅ 强制唯一
         seq = self.enforce_unique(seq)
 
+        # ---------- 合法才入池 ----------
         if len(set(seq)) == 5 and "N/A" not in seq:
             self.global_sequence_history.append(tuple(seq))
 
@@ -164,15 +171,17 @@ class VisionNode(Node):
 
         print(f"\r识别结果: {best}", end="")
 
+        # ---------- Debug ----------
         self.show_debug_image(bin_l, bin_r, res_l, res_r, best, elapsed)
 
+        # ---------- 超时 ----------
         if elapsed >= self.timeout_limit:
             if self.global_sequence_history:
                 self.publish_result(best, "success")
             else:
                 self.retry()
 
-    # ================= Debug显示 =================
+    # ================= Debug =================
     def show_debug_image(self, bin_l, bin_r, res_l, res_r, seq, elapsed):
         if not self.debug_mode or self.debug_window_closed:
             return
