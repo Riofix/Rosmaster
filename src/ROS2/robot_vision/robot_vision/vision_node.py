@@ -34,6 +34,10 @@ class CameraStream:
     def get_frame(self):
         with self.lock: return self.frame.copy() if self.frame is not None else None
 
+    def stop(self):
+        self.stopped = True
+        self.cap.release()
+
 # ======================== 核心逻辑：固定ROI + 帧堆叠 + 逻辑补全 ========================
 class VisionNode(Node):
     def __init__(self):
@@ -73,6 +77,7 @@ class VisionNode(Node):
         # ========== 2. 状态变量 ==========
         self.start_time = time.time()
         self.is_published = False
+        self.debug_window_closed = False
         self.buf_l = deque(maxlen=self.stack_size)
         self.buf_r = deque(maxlen=self.stack_size)
         self.global_sequence_history = deque(maxlen=self.full_seq_vote_size)
@@ -175,6 +180,7 @@ class VisionNode(Node):
             debug_msg = (f"[DEBUG] 左眼(R0-R3): {res_l} | 右眼(L1-L4): {res_r}"
                          f" | 补全后: {current_best_seq}")
             self.get_logger().info(debug_msg)
+            self.show_debug_image(bin_l, bin_r, res_l, res_r, current_best_seq, elapsed)
 
             # 超时后才发布最终结果到话题
             if elapsed >= self.timeout_limit:
@@ -196,6 +202,27 @@ class VisionNode(Node):
                 self.publish_result(final_seq, "Early_Historical_Fusion")
 
     # ------------------ 帧堆叠预处理 ------------------
+
+    # ------------------ Debug display ------------------
+
+    def show_debug_image(self, bin_l, bin_r, res_l, res_r, current_best_seq, elapsed):
+        if self.debug_window_closed:
+            return
+
+        monitor = cv2.hconcat([bin_r, bin_l])
+        monitor = cv2.cvtColor(monitor, cv2.COLOR_GRAY2BGR)
+        monitor = cv2.copyMakeBorder(monitor, 70, 0, 0, 0, cv2.BORDER_CONSTANT, value=(30, 30, 30))
+
+        cv2.putText(monitor, f"Right: {res_r}  Left: {res_l}", (10, 24),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(monitor, f"Best: {current_best_seq}  Time: {elapsed:.2f}s  Press q to close",
+                    (10, 54), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.line(monitor, (self.tw, 70), (self.tw, monitor.shape[0]), (0, 255, 255), 1)
+
+        cv2.imshow("Vision_Debug_Binary", monitor)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.debug_window_closed = True
+            cv2.destroyWindow("Vision_Debug_Binary")
 
     def preprocess(self, buf, params):
         """
@@ -268,11 +295,23 @@ class VisionNode(Node):
         self.is_published = True
         self.get_logger().info(f"任务完成! [{mode}] 结果: {seq}")
 
+    def cleanup(self):
+        if hasattr(self, 'cam_l'):
+            self.cam_l.stop()
+        if hasattr(self, 'cam_r'):
+            self.cam_r.stop()
+        cv2.destroyAllWindows()
+
 
 def main(args=None):
     rclpy.init(args=args)
-    rclpy.spin(VisionNode())
-    rclpy.shutdown()
+    node = VisionNode()
+    try:
+        rclpy.spin(node)
+    finally:
+        node.cleanup()
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
