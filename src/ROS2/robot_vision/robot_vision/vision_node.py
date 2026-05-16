@@ -9,6 +9,7 @@ import threading
 import time
 from collections import deque, Counter
 import yaml
+from ament_index_python.packages import get_package_share_directory
 
 # ======================== 物理层：多线程高效采集 ========================
 class CameraStream:
@@ -44,7 +45,7 @@ class VisionNode(Node):
         super().__init__('vision_node')
 
         # ========== 1. 从 YAML 加载所有参数 (唯一配置来源) ==========
-        config_dir = os.path.join(os.path.dirname(__file__), '..', 'config')
+        config_dir = os.path.join(get_package_share_directory('robot_vision'), 'config')
         yaml_path = os.path.join(config_dir, 'visison_params.yaml')
         with open(yaml_path, 'r') as f:
             cfg = yaml.safe_load(f)
@@ -100,9 +101,10 @@ class VisionNode(Node):
     def load_dataset(self):
         """从 dataset_left/ 和 dataset_right/ 加载模板，按数字标签分组"""
         tpls = {'L': {}, 'R': {}}
+        pkg_dir = get_package_share_directory('robot_vision')
         paths = {
-            'L': os.path.join(os.getcwd(), 'dataset_left'),
-            'R': os.path.join(os.getcwd(), 'dataset_right')
+            'L': os.path.join(pkg_dir, 'dataset_left'),
+            'R': os.path.join(pkg_dir, 'dataset_right')
         }
         for side, path in paths.items():
             if os.path.exists(path):

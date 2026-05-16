@@ -11,6 +11,9 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'dataset_left'), glob('dataset_left/*.png')),
+        (os.path.join('share', package_name, 'dataset_right'), glob('dataset_right/*.png')),
+        (os.path.join('share', package_name, 'config'), glob('config/*')),
     ],
     install_requires=['setuptools', 'opencv-python', 'pyyaml'],
     zip_safe=True,
