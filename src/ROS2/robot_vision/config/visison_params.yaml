@@ -39,7 +39,7 @@ timeout_limit: 5.0
 
 # ==================== 左相机配置 ====================
 left_camera:
-  device_id: 0                      # 设备索引
+  device_id: 2                      # 设备索引
   resolution: [1280, 720]           # 分辨率 [宽, 高]
   fourcc: "MJPG"                    # 编码格式
   # 4 个 ROI 区域顶点坐标 (每个ROI 4个点, 每个点 [x, y])
@@ -58,7 +58,7 @@ left_camera:
 
 # ==================== 右相机配置 ====================
 right_camera:
-  device_id: 1                      # 设备索引
+  device_id: 0                      # 设备索引
   resolution: [1280, 720]           # 分辨率 [宽, 高]
   fourcc: "MJPG"                    # 编码格式
   # 4 个 ROI 区域顶点坐标 (每个ROI 4个点, 每个点 [x, y])

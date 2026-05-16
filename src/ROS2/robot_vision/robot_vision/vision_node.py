@@ -131,6 +131,7 @@ class VisionNode(Node):
 
         img_l, img_r = self.cam_l.get_frame(), self.cam_r.get_frame()
         if img_l is None or img_r is None: return
+        img_r = cv2.rotate(img_r, cv2.ROTATE_180)  # 右眼图像旋转180度 
 
         # 1. 固定ROI透视变换 — 将每个 ROI 矫正为 tw×th 的矩形
         dst_pts = np.array([[0, 0], [0, self.th], [self.tw, self.th], [self.tw, 0]], dtype=np.float32)
