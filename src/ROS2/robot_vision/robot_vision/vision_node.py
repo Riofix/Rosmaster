@@ -12,14 +12,14 @@ import yaml
 from ament_index_python.packages import get_package_share_directory
 
 
-# ======================== 摄像头线程 ========================
+# ================= 摄像头线程 =================
 class CameraStream:
     def __init__(self, dev_id, width, height, fourcc):
         self.cap = cv2.VideoCapture(dev_id)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*fourcc))
-        self.ret, self.frame = self.cap.read()
+        self.frame = None
         self.lock = threading.Lock()
         self.stopped = False
 
@@ -43,7 +43,7 @@ class CameraStream:
         self.cap.release()
 
 
-# ======================== 主节点 ========================
+# ================= 主节点 =================
 class VisionNode(Node):
     def __init__(self):
         super().__init__('vision_node')
@@ -76,11 +76,12 @@ class VisionNode(Node):
         self.max_retry = 3
         self.is_published = False
 
+        self.debug_mode = True
+        self.debug_window_closed = False
+
         # ---------- 模板 ----------
         self.tpl_lib = self.load_dataset()
-
-        # 👉 强制左右模板一致（避免右眼问题）
-        self.tpl_lib['R'] = self.tpl_lib['L']
+        self.tpl_lib['R'] = self.tpl_lib['L']  # 防右眼问题
 
         # ---------- 摄像头 ----------
         l = cfg['left_camera']
@@ -93,9 +94,9 @@ class VisionNode(Node):
         self.pub = self.create_publisher(String, '/vision_detections', 10)
         self.create_timer(0.03, self.vision_engine)
 
-        self.get_logger().info("🔥 视觉系统最终稳定版已启动")
+        self.get_logger().info("🔥 最终稳定版视觉节点启动")
 
-    # ======================== 数据集 ========================
+    # ================= 数据集 =================
     def load_dataset(self):
         tpls = {'L': {}, 'R': {}}
         pkg_dir = get_package_share_directory('robot_vision')
@@ -114,7 +115,7 @@ class VisionNode(Node):
                         tpls[side].setdefault(label, []).append(img)
         return tpls
 
-    # ======================== 主逻辑 ========================
+    # ================= 主循环 =================
     def vision_engine(self):
         if self.is_published:
             return
@@ -126,7 +127,6 @@ class VisionNode(Node):
         if img_l is None or img_r is None:
             return
 
-        # ---------- ROI ----------
         dst = np.array([[0,0],[0,self.th],[self.tw,self.th],[self.tw,0]], np.float32)
 
         w_l = [cv2.warpPerspective(img_l, cv2.getPerspectiveTransform(np.array(p,np.float32), dst),(self.tw,self.th)) for p in self.rois_l]
@@ -144,24 +144,19 @@ class VisionNode(Node):
         res_l = [self.get_digit(bin_l[i*self.th:(i+1)*self.th, 0:self.tw], self.params_l["Center_Dist"], self.tpl_lib['L']) for i in range(4)]
         res_r = [self.get_digit(bin_r[i*self.th:(i+1)*self.th, 0:self.tw], self.params_r["Center_Dist"], self.tpl_lib['R']) for i in range(4)]
 
-        # ---------- 补全 ----------
         full_r = res_r + [self.infer_missing_digit(res_r)]
         full_l = [self.infer_missing_digit(res_l)] + res_l
 
-        # ---------- 融合 ----------
         seq = []
         for i in range(5):
             c = [x for x in [full_l[i], full_r[i]] if x != "N/A"]
             seq.append(Counter(c).most_common(1)[0][0] if c else "N/A")
 
-        # 🔥 强制唯一
         seq = self.enforce_unique(seq)
 
-        # ---------- 合法才记录 ----------
         if len(set(seq)) == 5 and "N/A" not in seq:
             self.global_sequence_history.append(tuple(seq))
 
-        # ---------- 输出 ----------
         if self.global_sequence_history:
             best = list(Counter(self.global_sequence_history).most_common(1)[0][0])
         else:
@@ -169,14 +164,43 @@ class VisionNode(Node):
 
         print(f"\r识别结果: {best}", end="")
 
-        # ---------- 超时 ----------
+        self.show_debug_image(bin_l, bin_r, res_l, res_r, best, elapsed)
+
         if elapsed >= self.timeout_limit:
             if self.global_sequence_history:
                 self.publish_result(best, "success")
             else:
                 self.retry()
 
-    # ======================== 工具函数 ========================
+    # ================= Debug显示 =================
+    def show_debug_image(self, bin_l, bin_r, res_l, res_r, seq, elapsed):
+        if not self.debug_mode or self.debug_window_closed:
+            return
+
+        monitor = cv2.hconcat([bin_r, bin_l])
+        monitor = cv2.cvtColor(monitor, cv2.COLOR_GRAY2BGR)
+
+        monitor = cv2.copyMakeBorder(monitor, 80, 0, 0, 0,
+                                    cv2.BORDER_CONSTANT, value=(30,30,30))
+
+        cv2.putText(monitor, f"Right: {res_r} | Left: {res_l}",
+                    (10,25), cv2.FONT_HERSHEY_SIMPLEX, 0.6,(0,255,255),2)
+
+        cv2.putText(monitor, f"Fusion: {seq}",
+                    (10,50), cv2.FONT_HERSHEY_SIMPLEX, 0.6,(0,255,0),2)
+
+        cv2.putText(monitor, f"Time: {elapsed:.2f}s Retry:{self.retry_count}",
+                    (10,75), cv2.FONT_HERSHEY_SIMPLEX, 0.6,(255,255,255),2)
+
+        cv2.line(monitor, (self.tw,80),(self.tw, monitor.shape[0]),(0,255,255),1)
+
+        cv2.imshow("Vision_Debug", monitor)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.debug_window_closed = True
+            cv2.destroyWindow("Vision_Debug")
+
+    # ================= 工具 =================
     def retry(self):
         self.retry_count += 1
         if self.retry_count >= self.max_retry:
