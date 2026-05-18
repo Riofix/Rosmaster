@@ -1,6 +1,6 @@
 .\objects\protocol.o: Src\Protocol\protocol.c
 .\objects\protocol.o: Src\Protocol\protocol.h
-.\objects\protocol.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\protocol.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\protocol.o: .\Src\BSP\bsp_usart.h
 .\objects\protocol.o: .\CMSIS\stm32f10x.h
 .\objects\protocol.o: .\CMSIS\core_cm3.h
@@ -30,4 +30,4 @@
 .\objects\protocol.o: .\FWlib\inc\stm32f10x_usart.h
 .\objects\protocol.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\protocol.o: .\FWlib\inc\misc.h
-.\objects\protocol.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\protocol.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

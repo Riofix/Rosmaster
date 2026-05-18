@@ -2,7 +2,7 @@
 .\objects\bsp_mpu6050.o: Src\BSP\bsp_mpu6050.h
 .\objects\bsp_mpu6050.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_mpu6050.o: .\CMSIS\core_cm3.h
-.\objects\bsp_mpu6050.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_mpu6050.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_mpu6050.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_mpu6050.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_mpu6050.o: .\FWlib\inc\stm32f10x_adc.h
@@ -31,4 +31,4 @@
 .\objects\bsp_mpu6050.o: .\FWlib\inc\misc.h
 .\objects\bsp_mpu6050.o: Src\BSP\bsp_iic.h
 .\objects\bsp_mpu6050.o: Src\BSP\bsp_systick.h
-.\objects\bsp_mpu6050.o: D:\Keil5\ARM\ARMCC\Bin\..\include\math.h
+.\objects\bsp_mpu6050.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

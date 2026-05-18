@@ -1,6 +1,6 @@
 .\objects\app.o: Src\APP\app.c
 .\objects\app.o: Src\APP\app.h
-.\objects\app.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\app.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\app.o: Src\APP\app_imu.h
 .\objects\app.o: .\CMSIS\stm32f10x.h
 .\objects\app.o: .\CMSIS\core_cm3.h
@@ -31,12 +31,12 @@
 .\objects\app.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\app.o: .\FWlib\inc\misc.h
 .\objects\app.o: .\Src\BSP\bsp_mpu6050.h
-.\objects\app.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\app.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\app.o: Src\APP\app_rgb.h
 .\objects\app.o: .\Src\BSP\bsp_tcs3472.h
 .\objects\app.o: Src\APP\app_bldc.h
 .\objects\app.o: Src\APP\app_servo.h
-.\objects\app.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\app.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\objects\app.o: Src\APP\app_motor.h
 .\objects\app.o: .\Src\Protocol\protocol_emm.h
 .\objects\app.o: .\Src\Protocol\cmd_handle.h
@@ -44,4 +44,4 @@
 .\objects\app.o: .\Src\BSP\Emm_V5.h
 .\objects\app.o: .\Src\BSP\bsp_usart.h
 .\objects\app.o: .\Src\BSP\oled.h
-.\objects\app.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\app.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

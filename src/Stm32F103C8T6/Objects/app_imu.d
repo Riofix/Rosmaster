@@ -2,7 +2,7 @@
 .\objects\app_imu.o: Src\APP\app_imu.h
 .\objects\app_imu.o: .\CMSIS\stm32f10x.h
 .\objects\app_imu.o: .\CMSIS\core_cm3.h
-.\objects\app_imu.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\app_imu.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\app_imu.o: .\CMSIS\system_stm32f10x.h
 .\objects\app_imu.o: .\Src\APP\stm32f10x_conf.h
 .\objects\app_imu.o: .\FWlib\inc\stm32f10x_adc.h
@@ -30,4 +30,4 @@
 .\objects\app_imu.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\app_imu.o: .\FWlib\inc\misc.h
 .\objects\app_imu.o: .\Src\BSP\bsp_mpu6050.h
-.\objects\app_imu.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\app_imu.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

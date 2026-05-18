@@ -1,8 +1,8 @@
 .\objects\cmd_handle.o: Src\Protocol\cmd_handle.c
 .\objects\cmd_handle.o: Src\Protocol\cmd_handle.h
 .\objects\cmd_handle.o: Src\Protocol\protocol.h
-.\objects\cmd_handle.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\cmd_handle.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\cmd_handle.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\cmd_handle.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\objects\cmd_handle.o: .\Src\APP\app.h
 .\objects\cmd_handle.o: .\Src\APP\app_motor.h
 .\objects\cmd_handle.o: .\Src\Protocol\protocol_emm.h
@@ -36,7 +36,7 @@
 .\objects\cmd_handle.o: .\FWlib\inc\misc.h
 .\objects\cmd_handle.o: .\Src\APP\app_imu.h
 .\objects\cmd_handle.o: .\Src\BSP\bsp_mpu6050.h
-.\objects\cmd_handle.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\cmd_handle.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\cmd_handle.o: .\Src\APP\app_servo.h
 .\objects\cmd_handle.o: .\Src\APP\app_bldc.h
 .\objects\cmd_handle.o: .\Src\APP\app_rgb.h
@@ -46,4 +46,4 @@
 .\objects\cmd_handle.o: .\Src\BSP\bsp_pwm.h
 .\objects\cmd_handle.o: .\Src\BSP\OLED.h
 .\objects\cmd_handle.o: Src\Protocol\msg_queue.h
-.\objects\cmd_handle.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\cmd_handle.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

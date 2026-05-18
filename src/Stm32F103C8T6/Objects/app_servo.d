@@ -1,7 +1,7 @@
 .\objects\app_servo.o: Src\APP\app_servo.c
 .\objects\app_servo.o: Src\APP\app_servo.h
-.\objects\app_servo.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\app_servo.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\app_servo.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\app_servo.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\objects\app_servo.o: .\Src\BSP\bsp_pwm.h
 .\objects\app_servo.o: .\CMSIS\stm32f10x.h
 .\objects\app_servo.o: .\CMSIS\core_cm3.h
@@ -31,4 +31,4 @@
 .\objects\app_servo.o: .\FWlib\inc\stm32f10x_usart.h
 .\objects\app_servo.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\app_servo.o: .\FWlib\inc\misc.h
-.\objects\app_servo.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\app_servo.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

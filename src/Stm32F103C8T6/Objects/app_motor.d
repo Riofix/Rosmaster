@@ -1,7 +1,7 @@
 .\objects\app_motor.o: Src\APP\app_motor.c
 .\objects\app_motor.o: Src\APP\app_motor.h
-.\objects\app_motor.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
-.\objects\app_motor.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\app_motor.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\app_motor.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\objects\app_motor.o: .\Src\Protocol\protocol_emm.h
 .\objects\app_motor.o: .\CMSIS\stm32f10x.h
 .\objects\app_motor.o: .\CMSIS\core_cm3.h
@@ -32,4 +32,4 @@
 .\objects\app_motor.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\app_motor.o: .\FWlib\inc\misc.h
 .\objects\app_motor.o: .\Src\BSP\bsp_usart.h
-.\objects\app_motor.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\app_motor.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

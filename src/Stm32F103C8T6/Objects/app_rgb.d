@@ -1,6 +1,6 @@
 .\objects\app_rgb.o: Src\APP\app_rgb.c
 .\objects\app_rgb.o: Src\APP\app_rgb.h
-.\objects\app_rgb.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\app_rgb.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\app_rgb.o: .\Src\BSP\bsp_tcs3472.h
 .\objects\app_rgb.o: .\CMSIS\stm32f10x.h
 .\objects\app_rgb.o: .\CMSIS\core_cm3.h
@@ -30,4 +30,4 @@
 .\objects\app_rgb.o: .\FWlib\inc\stm32f10x_usart.h
 .\objects\app_rgb.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\app_rgb.o: .\FWlib\inc\misc.h
-.\objects\app_rgb.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\app_rgb.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
