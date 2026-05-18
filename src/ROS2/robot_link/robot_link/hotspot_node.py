@@ -12,6 +12,7 @@ class HotspotNode(Node):
         self.declare_parameter('password', '12345678')
         self.declare_parameter('interface', 'wlan0')
         self.declare_parameter('ip_address', '192.168.1.1/24')
+        self.declare_parameter('connection_name', 'Digua')
 
         # 执行网络配置逻辑
         self.configure_network()
@@ -21,30 +22,32 @@ class HotspotNode(Node):
         password = self.get_parameter('password').get_parameter_value().string_value
         iface = self.get_parameter('interface').get_parameter_value().string_value
         ip_addr = self.get_parameter('ip_address').get_parameter_value().string_value
+        con_name = self.get_parameter('connection_name').get_parameter_value().string_value
 
         self.get_logger().info(f'Configuring WiFi Hotspot: {ssid}...')
 
         try:
             # 1. 删除可能存在的旧连接，确保干净的配置环境
-            subprocess.run(['nmcli', 'connection', 'delete', 'Hotspot'], capture_output=True)
+            subprocess.run(['nmcli', 'connection', 'delete', con_name], capture_output=True)
 
             # 2. 创建持久化的无线热点
             subprocess.run([
                 'nmcli', 'device', 'wifi', 'hotspot',
+                'ifname', iface,
+                'con-name', con_name,
                 'ssid', ssid,
-                'password', password,
-                'ifname', iface
+                'password', password
             ], check=True, capture_output=True)
 
             # 3. 配置 IPv4 静态地址段，供后续 TCP 链路使用
             subprocess.run([
-                'nmcli', 'connection', 'modify', 'Hotspot',
+                'nmcli', 'connection', 'modify', con_name,
                 'ipv4.method', 'shared',
                 'ipv4.addresses', ip_addr
             ], check=True, capture_output=True)
 
             # 4. 激活网络连接
-            subprocess.run(['nmcli', 'connection', 'up', 'Hotspot'], check=True, capture_output=True)
+            subprocess.run(['nmcli', 'connection', 'up', con_name], check=True, capture_output=True)
             
             self.get_logger().info('Hotspot setup completed successfully.')
             
