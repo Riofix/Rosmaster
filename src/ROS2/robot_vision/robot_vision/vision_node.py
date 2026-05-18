@@ -75,6 +75,7 @@ class VisionNode(Node):
         self.retry_count = 0
         self.max_retry = 3
         self.is_published = False
+        self.final_result_msg = None
 
         self.debug_mode = True
         self.debug_window_closed = False
@@ -93,6 +94,7 @@ class VisionNode(Node):
         # ---------- ROS ----------
         self.pub = self.create_publisher(String, '/vision_detections', 10)
         self.create_timer(0.03, self.vision_engine)
+        self.create_timer(1.0, self.broadcast_final_result)
 
         self.get_logger().info("🔥 最终稳定版视觉节点启动（含旋转+Debug）")
 
@@ -280,9 +282,14 @@ class VisionNode(Node):
     def publish_result(self, seq, mode):
         msg = String()
         msg.data = json.dumps({"sequence": seq, "mode": mode})
+        self.final_result_msg = msg
         self.pub.publish(msg)
         self.is_published = True
         self.get_logger().info(f"最终结果: {seq}")
+
+    def broadcast_final_result(self):
+        if self.final_result_msg is not None:
+            self.pub.publish(self.final_result_msg)
 
     def cleanup(self):
         self.cam_l.stop()

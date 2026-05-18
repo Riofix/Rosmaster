@@ -22,7 +22,7 @@ class TcpServerNode(Node):
         }
 
         # 存储已连接的客户端 { 'handle_left': socket_obj }
-        self.clients = {}
+        self.client_sockets = {}
 
         # 2. 发布者：发布接收到的原始字节，增加一个来源标识字段（通过自定义消息或在数据前加前缀，
         # 这里为了简单，我们发布包含设备信息的 UInt8MultiArray）
@@ -53,7 +53,7 @@ class TcpServerNode(Node):
                 
                 if device_name:
                     self.get_logger().info(f'{device_name} connected from {client_ip}')
-                    self.clients[device_name] = client_sock
+                    self.client_sockets[device_name] = client_sock
                     threading.Thread(target=self.receive_loop, args=(client_sock, device_name), daemon=True).start()
                 else:
                     self.get_logger().warn(f'Unknown IP {client_ip} rejected.')
@@ -82,8 +82,8 @@ class TcpServerNode(Node):
                 break
         
         self.get_logger().warn(f'{device_name} disconnected.')
-        if device_name in self.clients:
-            del self.clients[device_name]
+        if device_name in self.client_sockets:
+            del self.client_sockets[device_name]
         client_sock.close()
 
     def tx_callback(self, msg):
@@ -100,9 +100,9 @@ class TcpServerNode(Node):
         device_names = list(self.ip_map.values())
         if device_id < len(device_names):
             target_name = device_names[device_id]
-            if target_name in self.clients:
+            if target_name in self.client_sockets:
                 try:
-                    self.clients[target_name].send(payload)
+                    self.client_sockets[target_name].send(payload)
                 except Exception as e:
                     self.get_logger().error(f'TCP send error to {target_name}: {e}')
 

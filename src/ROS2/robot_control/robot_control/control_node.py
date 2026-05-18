@@ -69,9 +69,10 @@ class ControlNode(Node):
         self.device_tree = {
             "chassis": {"base": {"sub_id": 0x01, "type": "mecanum_base"}},
             "handle_left": {
-                "track": {"sub_id": 0x01, "type": "handle_servo"},
-                "lift":  {"sub_id": 0x02, "type": "handle_servo"},
-                "grab":  {"sub_id": 0x03, "type": "handle_bldc"}
+                "stepper_x": {"motor_addr": 0x01, "type": "handle_stepper"},
+                "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
+                "servo": {"channel": 0x00, "type": "handle_servo"},
+                "bldc": {"type": "handle_bldc"}
             }
             # 其他抓手以此类推...
         }
@@ -79,8 +80,16 @@ class ControlNode(Node):
         # 指令码定义
         self.cmd_map = {
             "mecanum_base": {"set_speed": 0x12},
-            "handle_servo": {"move_to": 0x01},
-            "handle_bldc":  {"start": 0x10}
+            "handle_stepper": {
+                "enable": 0x60,
+                "disable": 0x60,
+                "velocity": 0x61,
+                "move_relative": 0x62,
+                "move_absolute": 0x62,
+                "stop": 0x63
+            },
+            "handle_servo": {"move_to": 0x6C, "set_angle": 0x6C},
+            "handle_bldc": {"start": 0x6D, "stop": 0x6E}
         }
 
         # --- PID 实例初始化 (针对底盘) ---
@@ -112,6 +121,8 @@ class ControlNode(Node):
             action = task.get("action")
             task_id = task.get("task_id", 0)
             params = task.get("params", {})
+            if task.get("subsystem") is not None:
+                params["subsystem"] = task.get("subsystem")
 
             if device == "chassis":
                 # 1. 重置影子状态 (TaskID 握手第一步)
@@ -207,6 +218,51 @@ class ControlNode(Node):
         # 逻辑同之前的 control_node，但需记得同时通知 Protocol 更新 task_id
         self.notify_protocol_reset(device, task_id)
         # ... 包装并发送 packer_pub ...
+
+    def handle_forwarding(self, device, action, params, task_id):
+        """Forward handle commands without touching chassis control."""
+        subsystem = params.get("subsystem") or params.get("sub_system") or params.get("part")
+        handle_config = self.device_tree.get(device)
+        if handle_config is None:
+            self.get_logger().warn(f"Unknown handle device: {device}")
+            return
+
+        sub_config = handle_config.get(subsystem)
+        if sub_config is None:
+            self.get_logger().warn(f"Unknown handle subsystem: {device}.{subsystem}")
+            return
+
+        cmd_hex = self.cmd_map.get(sub_config["type"], {}).get(action)
+        if cmd_hex is None:
+            self.get_logger().warn(f"Unsupported handle action: {device}.{subsystem}.{action}")
+            return
+
+        self.notify_protocol_reset(device, task_id)
+
+        control_params = dict(params)
+        control_params.pop("subsystem", None)
+        control_params.pop("sub_system", None)
+        control_params.pop("part", None)
+
+        if sub_config["type"] == "handle_stepper":
+            control_params["motor_addr"] = sub_config["motor_addr"]
+            control_params["relative"] = action == "move_relative"
+            if action == "enable":
+                control_params["enable"] = True
+            elif action == "disable":
+                control_params["enable"] = False
+        elif sub_config["type"] == "handle_servo":
+            control_params["channel"] = control_params.get("channel", sub_config["channel"])
+
+        payload = {
+            "target": device,
+            "cmd_hex": cmd_hex,
+            "params": control_params
+        }
+        msg = String()
+        msg.data = json.dumps(payload)
+        self.packer_pub.publish(msg)
+        self.get_logger().info(f"Forwarded handle command: {device}.{subsystem}.{action}")
 
 def main(args=None):
     rclpy.init(args=args)
