@@ -103,14 +103,14 @@ class ProtocolNode(Node):
 
     def parse_handle_odom(self, name, data):
         fmt = '<B H h H i h i i B B'
-        
+
         if len(data) >= 23:
             (
                 addr, voltage_mv, phase_current, encoder_val,
                 target_pos, velocity, current_pos, pos_error,
                 org, flag
             ) = struct.unpack(fmt, data[:23])
-            
+
             # 存入步进电机状态（以 addr 为 key）
             self.handle_states[name]["stepmotor"][addr] = {
                 "voltage_mv": voltage_mv,
@@ -123,6 +123,14 @@ class ProtocolNode(Node):
                 "org": org,
                 "flag": flag
             }
+
+            # 双电机到位检测：X轴(0x01) 和 Z轴(0x02) 的 flag bit1 都为 1
+            motors = self.handle_states[name]["stepmotor"]
+            x_flag = motors.get(0x01, {}).get("flag", 0)
+            z_flag = motors.get(0x02, {}).get("flag", 0)
+            self.handle_states[name]["track_arrived"] = bool(
+                (x_flag & 0x02) and (z_flag & 0x02)
+            )
 
     def parse_handle_pwm(self, name, data):
         """

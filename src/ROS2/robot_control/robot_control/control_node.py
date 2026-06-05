@@ -73,8 +73,19 @@ class ControlNode(Node):
                 "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
                 "servo": {"channel": 0x00, "type": "handle_servo"},
                 "bldc": {"type": "handle_bldc"}
-            }
-            # 其他抓手以此类推...
+            },
+            "handle_mid": {
+                "stepper_x": {"motor_addr": 0x01, "type": "handle_stepper"},
+                "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
+                "servo": {"channel": 0x00, "type": "handle_servo"},
+                "bldc": {"type": "handle_bldc"}
+            },
+            "handle_right": {
+                "stepper_x": {"motor_addr": 0x01, "type": "handle_stepper"},
+                "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
+                "servo": {"channel": 0x00, "type": "handle_servo"},
+                "bldc": {"type": "handle_bldc"}
+            },
         }
 
         # 指令码定义
@@ -174,11 +185,15 @@ class ControlNode(Node):
 
     # ================= 工具函数 =================
     def notify_protocol_reset(self, target, task_id):
-        """通知解析层：新任务开始，清空到位标志"""
+        """通知解析层：新任务开始，清空到位标志 + 写入 task_id"""
+        if target == "chassis":
+            field = "arrival_done"
+        else:
+            field = "track_arrived"
         msg = String()
         msg.data = json.dumps({
             "target": target,
-            "update_field": "arrival_done",
+            "update_field": field,
             "value": False,
             "task_id": task_id
         })
@@ -210,14 +225,6 @@ class ControlNode(Node):
     def stop_chassis(self):
         """发送急停指令"""
         self.dispatch_chassis_speed(0.0)
-
-    def handle_forwarding(self, device, action, params, task_id):
-        """抓手类指令透传逻辑 (下位机自带闭环)"""
-        # 这里根据 device_tree 查表，将语义转换为 sub_id 和 cmd_hex
-        # 示例：handle_left -> lift -> move_to -> 0x01
-        # 逻辑同之前的 control_node，但需记得同时通知 Protocol 更新 task_id
-        self.notify_protocol_reset(device, task_id)
-        # ... 包装并发送 packer_pub ...
 
     def handle_forwarding(self, device, action, params, task_id):
         """Forward handle commands without touching chassis control."""
