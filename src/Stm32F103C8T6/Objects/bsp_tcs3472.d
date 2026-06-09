@@ -2,7 +2,7 @@
 .\objects\bsp_tcs3472.o: Src\BSP\bsp_tcs3472.h
 .\objects\bsp_tcs3472.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_tcs3472.o: .\CMSIS\core_cm3.h
-.\objects\bsp_tcs3472.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_tcs3472.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_tcs3472.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_tcs3472.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_tcs3472.o: .\FWlib\inc\stm32f10x_adc.h

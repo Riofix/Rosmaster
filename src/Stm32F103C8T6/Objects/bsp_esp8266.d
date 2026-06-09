@@ -2,7 +2,7 @@
 .\objects\bsp_esp8266.o: Src\BSP\bsp_esp8266.h
 .\objects\bsp_esp8266.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_esp8266.o: .\CMSIS\core_cm3.h
-.\objects\bsp_esp8266.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_esp8266.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_esp8266.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_esp8266.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_esp8266.o: .\FWlib\inc\stm32f10x_adc.h
@@ -32,5 +32,5 @@
 .\objects\bsp_esp8266.o: Src\BSP\bsp_usart.h
 .\objects\bsp_esp8266.o: Src\BSP\bsp_systick.h
 .\objects\bsp_esp8266.o: Src\BSP\OLED.h
-.\objects\bsp_esp8266.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\bsp_esp8266.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\bsp_esp8266.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\bsp_esp8266.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

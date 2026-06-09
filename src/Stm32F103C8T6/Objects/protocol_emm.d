@@ -2,7 +2,7 @@
 .\objects\protocol_emm.o: Src\Protocol\protocol_emm.h
 .\objects\protocol_emm.o: .\CMSIS\stm32f10x.h
 .\objects\protocol_emm.o: .\CMSIS\core_cm3.h
-.\objects\protocol_emm.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\protocol_emm.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\protocol_emm.o: .\CMSIS\system_stm32f10x.h
 .\objects\protocol_emm.o: .\Src\APP\stm32f10x_conf.h
 .\objects\protocol_emm.o: .\FWlib\inc\stm32f10x_adc.h
@@ -30,5 +30,5 @@
 .\objects\protocol_emm.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\protocol_emm.o: .\FWlib\inc\misc.h
 .\objects\protocol_emm.o: .\Src\BSP\bsp_usart.h
-.\objects\protocol_emm.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
-.\objects\protocol_emm.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\protocol_emm.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\protocol_emm.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

@@ -2,7 +2,7 @@
 .\objects\bsp_systick.o: Src\BSP\bsp_systick.h
 .\objects\bsp_systick.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_systick.o: .\CMSIS\core_cm3.h
-.\objects\bsp_systick.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_systick.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_systick.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_systick.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_systick.o: .\FWlib\inc\stm32f10x_adc.h

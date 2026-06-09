@@ -3,7 +3,7 @@
 .\objects\emm_v5.o: Src\BSP\bsp_usart.h
 .\objects\emm_v5.o: .\CMSIS\stm32f10x.h
 .\objects\emm_v5.o: .\CMSIS\core_cm3.h
-.\objects\emm_v5.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\emm_v5.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\emm_v5.o: .\CMSIS\system_stm32f10x.h
 .\objects\emm_v5.o: .\Src\APP\stm32f10x_conf.h
 .\objects\emm_v5.o: .\FWlib\inc\stm32f10x_adc.h
@@ -30,4 +30,4 @@
 .\objects\emm_v5.o: .\FWlib\inc\stm32f10x_usart.h
 .\objects\emm_v5.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\emm_v5.o: .\FWlib\inc\misc.h
-.\objects\emm_v5.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\objects\emm_v5.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

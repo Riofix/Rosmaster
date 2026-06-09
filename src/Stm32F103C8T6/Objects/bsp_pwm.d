@@ -2,7 +2,7 @@
 .\objects\bsp_pwm.o: Src\BSP\bsp_pwm.h
 .\objects\bsp_pwm.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_pwm.o: .\CMSIS\core_cm3.h
-.\objects\bsp_pwm.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_pwm.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_pwm.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_pwm.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_pwm.o: .\FWlib\inc\stm32f10x_adc.h

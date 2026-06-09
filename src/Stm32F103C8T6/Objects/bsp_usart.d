@@ -2,7 +2,7 @@
 .\objects\bsp_usart.o: Src\BSP\bsp_usart.h
 .\objects\bsp_usart.o: .\CMSIS\stm32f10x.h
 .\objects\bsp_usart.o: .\CMSIS\core_cm3.h
-.\objects\bsp_usart.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\bsp_usart.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\bsp_usart.o: .\CMSIS\system_stm32f10x.h
 .\objects\bsp_usart.o: .\Src\APP\stm32f10x_conf.h
 .\objects\bsp_usart.o: .\FWlib\inc\stm32f10x_adc.h
@@ -29,4 +29,4 @@
 .\objects\bsp_usart.o: .\FWlib\inc\stm32f10x_usart.h
 .\objects\bsp_usart.o: .\FWlib\inc\stm32f10x_wwdg.h
 .\objects\bsp_usart.o: .\FWlib\inc\misc.h
-.\objects\bsp_usart.o: D:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\bsp_usart.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
