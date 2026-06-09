@@ -89,6 +89,7 @@ for c in [cap_l, cap_r]:
 while True:
     ret_l, frame_l = cap_l.read(); ret_r, frame_r = cap_r.read()
     if not ret_l or not ret_r: break
+    frame_r = cv2.rotate(frame_r, cv2.ROTATE_180)
 
     # A. 矫正堆叠
     w_l = [cv2.warpPerspective(frame_l, cv2.getPerspectiveTransform(np.array(p, np.float32), 
