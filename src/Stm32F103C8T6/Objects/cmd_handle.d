@@ -46,4 +46,5 @@
 .\objects\cmd_handle.o: .\Src\BSP\bsp_pwm.h
 .\objects\cmd_handle.o: .\Src\BSP\OLED.h
 .\objects\cmd_handle.o: Src\Protocol\msg_queue.h
+.\objects\cmd_handle.o: ..\Common\slot_manager.h
 .\objects\cmd_handle.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

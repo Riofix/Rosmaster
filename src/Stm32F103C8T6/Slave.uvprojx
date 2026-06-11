@@ -81,9 +81,9 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
+            <RunUserProg2>1</RunUserProg2>
             <UserProg1Name></UserProg1Name>
-            <UserProg2Name></UserProg2Name>
+            <UserProg2Name>fromelf --bin -o "$L@L.bin" "#L</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8000000</StartAddress>
-                <Size>0x10000</Size>
+                <StartAddress>0x8002000</StartAddress>
+                <Size>0x7000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\CMSIS;.\FWlib\inc;.\FWlib\src;.\Src\APP;.\Src\BSP;.\Src\Protocol</IncludePath>
+              <IncludePath>.\CMSIS;.\FWlib\inc;.\FWlib\src;.\Src\APP;.\Src\BSP;.\Src\Protocol;..\Common</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -604,6 +604,11 @@
               <FileType>5</FileType>
               <FilePath>.\Src\APP\app_servo.h</FilePath>
             </File>
+            <File>
+              <FileName>slot_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bootloader\Src\APP\slot_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -760,5 +765,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>Slave</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

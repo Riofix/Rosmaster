@@ -30,6 +30,7 @@
 #define CMD_RX_PWM_STATE_STREAM 0x74  // 无刷电机占空比、舵机旋转角度自动上报开启或者关闭
 #define CMD_RX_RGB_SENSOR_STREAM 0x75 // 颜色传感器数据自动上报或者关闭（预留操作）
 #define CMD_RX_SENSOR_STREAM 0x76     // 所有数据数据自动上报或者关闭（预留操作）
+#define CMD_OTA_START       0x78     // 进入 OTA 升级模式
 
 // ======================== 查询类型指令 (0x80~0x87) ==========================
 #define CMD_RX_QUERY_MPU_ATT 0x80    // 查询MPU6050解算数据（返回俯仰角等）

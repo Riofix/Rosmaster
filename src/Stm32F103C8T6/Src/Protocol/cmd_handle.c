@@ -11,6 +11,7 @@
 #include "OLED.h"
 #include "msg_queue.h"
 #include "protocol.h"
+#include "slot_manager.h"
 #include <string.h>
 
 /**
@@ -585,6 +586,20 @@ static void Handle_Query_StepParam(uint8_t *data, uint8_t len)
   Protocol_PackAndSend(tx_buf, tx_len);
 }
 
+// ======================= OTA 升级 =======================
+/**
+ * @brief 处理 OTA 升级指令 (0x78)
+ *        写 slot_state.enter_update = 1 → 软复位 → Bootloader 接管
+ */
+static void Handle_OTA_Start(uint8_t *data, uint8_t len)
+{
+  (void)data;
+  (void)len;
+
+  slot_set_enter_update();
+  NVIC_SystemReset();
+}
+
 // ======================= 表驱动 =======================
 
 typedef void (*CmdHandler_t)(uint8_t *data, uint8_t len);
@@ -618,6 +633,7 @@ static const CmdTable_t g_cmd_table[] = {
     {CMD_RX_STEP_MOTOR_STREAM, Handle_StepMotor_Stream},
     {CMD_RX_PWM_STATE_STREAM, Handle_PWM_State_Stream},
     {CMD_RX_RGB_SENSOR_STREAM, Handle_Rgb_Stream},
+    {CMD_OTA_START, Handle_OTA_Start},
 
     // ---- 8 个查询指令 ----
     {CMD_RX_QUERY_MPU_ATT, Handle_Query_MpuAtt},

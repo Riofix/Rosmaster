@@ -14,6 +14,10 @@
 
 int main(void)
 {
+  /* 向量表重定位 — 根据编译时的 scatter 基址自动适配 Slot A/B */
+  extern uint32_t __Vectors;
+  SCB->VTOR = (uint32_t)&__Vectors;
+
   /* Hardware initialization */
   Systick_Init();
 

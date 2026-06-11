@@ -33,6 +33,7 @@
 ".\objects\app_rgb.o"
 ".\objects\app_bldc.o"
 ".\objects\app_servo.o"
+".\objects\slot_manager.o"
 ".\objects\bsp_esp8266.o"
 ".\objects\bsp_iic.o"
 ".\objects\bsp_systick.o"
