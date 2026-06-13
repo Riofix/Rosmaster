@@ -5,7 +5,7 @@ from launch.actions import LogInfo
 
 def generate_launch_description():
     return LaunchDescription([
-        LogInfo(msg="=== 启动键盘遥控控制 (四轮全同向底盘) ==="),
+        LogInfo(msg="=== 启动键盘遥控控制 ==="),
 
         # 1. 串口链路层 — USB转串口连接STM32底盘
         Node(
@@ -34,7 +34,7 @@ def generate_launch_description():
             executable='twist_to_control_bridge',
             name='twist_to_control_bridge',
             parameters=[{
-                'car_type': 7,          # 0x07 四轮全同向
+                'car_type': 4,          # 0x07 四轮全同向
                 'linear_scale': 1000,   # m/s → mm/s
                 'angular_scale': 2000,  # rad/s → chassis Vz
                 'max_vx': 1000,
