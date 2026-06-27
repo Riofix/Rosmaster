@@ -80,6 +80,7 @@ CMD_RESET_CUR_POS    = 0x6A  # 重置当前位置为0
 CMD_RESET_CLOG_PRO   = 0x6B  # 解除堵转保护
 CMD_POS_CM           = 0x78  # 位置模式(cm单位)
 CMD_ACTION_GRAB       = 0x79  # 启动抓取
+CMD_ACTION_DONE       = 0x7C  # 抓取完成通知(下位机→上位机)
 CMD_ACTION_MOVE       = 0x7A  # 电机1点位移动 [pos_id, clockwise]
 CMD_SERVO_CONTROL    = 0x6C  # 舵机角度控制
 CMD_BLDC_CONTROL     = 0x6D  # 无刷电机转速控制
@@ -1087,6 +1088,48 @@ class RosmasterGUI:
         self.step_stream_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(pw, text="步进自动上报", variable=self.step_stream_var, command=self._toggle_step_stream).pack(side=tk.LEFT, padx=10)
 
+        # ---- 状态机控制 ----
+        sm_frame = ttk.LabelFrame(parent, text="状态机控制", padding=5)
+        sm_frame.pack(fill=tk.X, padx=5, pady=(5,0))
+
+        # 模式选择
+        sm_top = ttk.Frame(sm_frame); sm_top.pack(fill=tk.X, pady=2)
+        self._sm_mode = tk.StringVar(value="manual")
+        ttk.Radiobutton(sm_top, text="手动", variable=self._sm_mode, value="manual").pack(side=tk.LEFT, padx=3)
+        ttk.Radiobutton(sm_top, text="自动", variable=self._sm_mode, value="auto").pack(side=tk.LEFT, padx=3)
+
+        self._sm_state_label = tk.StringVar(value="状态: IDLE")
+        ttk.Label(sm_top, textvariable=self._sm_state_label, foreground="#1565C0").pack(side=tk.RIGHT, padx=5)
+
+        # 三设备到位状态
+        sm_devs = ttk.Frame(sm_frame); sm_devs.pack(fill=tk.X, pady=2)
+        self._sm_dev_labels = []
+        for i, name in enumerate(["左", "中", "右"]):
+            lbl = ttk.Label(sm_devs, text=f"{name}:-", foreground="gray")
+            lbl.pack(side=tk.LEFT, padx=8)
+            self._sm_dev_labels.append(lbl)
+
+        # 按钮
+        sm_btns = ttk.Frame(sm_frame); sm_btns.pack(fill=tk.X, pady=2)
+        ttk.Button(sm_btns, text="▶ 单步", width=8, command=self._sm_step).pack(side=tk.LEFT, padx=3)
+        ttk.Button(sm_btns, text="⏸ 急停", width=8, command=self._sm_estop).pack(side=tk.LEFT, padx=3)
+        ttk.Button(sm_btns, text="▶▶ 自动运行", width=10, command=self._sm_auto).pack(side=tk.LEFT, padx=3)
+
+        # 视觉输入 + 路径显示
+        sm_vis = ttk.Frame(sm_frame); sm_vis.pack(fill=tk.X, pady=2)
+        ttk.Label(sm_vis, text="视觉序列:").pack(side=tk.LEFT)
+        self._sm_vision_var = tk.StringVar(value="")
+        ttk.Entry(sm_vis, textvariable=self._sm_vision_var, width=8).pack(side=tk.LEFT, padx=3)
+        self._sm_path_label = tk.StringVar(value="路径: -")
+        ttk.Label(sm_vis, textvariable=self._sm_path_label, foreground="#E65100").pack(side=tk.LEFT, padx=5)
+
+        # 状态机内部变量
+        self._sm_seq = 0        # 当前步序号
+        self._sm_sent = False   # 当前步指令是否已发
+        self._sm_timer = 0      # 消抖计数
+        self._sm_checks = {}    # 每步到位检测函数
+        self._sm_init()         # 初始化步骤表
+
         if HAS_MPL:
             self._build_viz_tab(parent)
 
@@ -1108,6 +1151,132 @@ class RosmasterGUI:
         for tag, color in [("tx","#4FC3F7"),("rx","#81C784"),("info","#FFB74D"),("error","#E57373"),("parsed","#CE93D8")]:
             self.monitor_text.tag_config(tag, foreground=color)
         self._tx_count = self._rx_count = self._rx_pkt_count = 0
+
+    # ========== 状态机方法 ==========
+    def _sm_init(self):
+        """步骤表: [(名称, [(设备id, cmd, data), ...], 检测方式)]"""
+        self._sm_steps = [
+            ("INIT-校准",    [(0,0x7B,[1]),(1,0x7B,[2]),(2,0x7B,[3])], "flag"),
+            ("INIT-上报",    [(0,0x72,[1]),(0,0x73,[1]),(0,0x74,[1]),
+                               (1,0x72,[1]),(1,0x73,[1]),(1,0x74,[1]),
+                               (2,0x72,[1]),(2,0x73,[1]),(2,0x74,[1])], "none"),
+            ("INIT-电机2",   [(0,0x60,[2,1,0]),(1,0x60,[2,1,0]),(2,0x60,[2,1,0]),
+                               (0,0x61,[2,0,0x01,0xF4,100,0]),(1,0x61,[2,0,0x01,0xF4,100,0]),(2,0x61,[2,0,0x01,0xF4,100,0])], "stall"),
+            ("INIT-停+零",   [(0,0x63,[2,0]),(1,0x63,[2,0]),(2,0x63,[2,0]),
+                               (0,0x6A,[2]),(1,0x6A,[2]),(2,0x6A,[2]),
+                               (0,0x6B,[2]),(1,0x6B,[2]),(2,0x6B,[2])], "none"),
+            ("INIT-舵机",    [(0,0x6C,[1,90]),(1,0x6C,[1,90]),(2,0x6C,[1,90])], "none"),
+            ("视觉输入",     [], "vision"),
+            ("WAIT_START",   [], "manual"),
+            ("MOVE_GRAB",    [(0,0x7A,[6,0]),(1,0x7A,[7,0]),(2,0x7A,[8,1])], "flag"),
+            ("GRAB",         [(0,0x79,[]),(1,0x79,[]),(2,0x79,[])], "action_done"),
+            ("AVOID1",       [(0,0x7A,[8,0]),(1,0x7A,[1,0]),(2,0x7A,[4,0])], "flag"),
+            ("AVOID2",       [(0,0x7A,[5,1]),(1,0x7A,[3,1]),(2,0x7A,[6,1])], "flag"),
+            ("DROP",         [], "manual"),
+            ("DONE",         [], "none"),
+        ]
+        self._sm_seq = 0; self._sm_sent = False; self._sm_timer = 0
+        self._sm_action_done = [False, False, False]
+        self._sm_vision_seq = ""  # 用户输入视觉序列
+        self._sm_update_ui()
+
+    def _sm_step(self):
+        """单步执行"""
+        self._sm_execute()
+        self._sm_timer = 0
+
+    def _sm_auto(self):
+        """自动运行"""
+        self._sm_mode.set("auto")
+        self._sm_execute()
+
+    def _sm_estop(self):
+        """急停"""
+        for d in range(3):
+            self._send_cmd_raw(d, 0x63, [1,0])
+            self._send_cmd_raw(d, 0x63, [2,0])
+            self._send_cmd_raw(d, 0x6E, [])
+        self._sm_init()
+        self._sm_mode.set("manual")
+
+    def _sm_execute(self):
+        """发送当前步指令"""
+        name, cmds, detect = self._sm_steps[self._sm_seq]
+        if detect == "vision":
+            seq = self._sm_vision_var.get().strip()
+            if not seq:
+                messagebox.showwarning("视觉输入", "请输入视觉序列(如31542)")
+                return
+            self._sm_vision_seq = seq
+        if detect == "manual":
+            self._sm_advance()
+            return
+        if not self._sm_sent:
+            self._sm_sent = True
+            self._sm_action_done = [False, False, False]
+            for dev, cmd, data in cmds:
+                self._send_cmd_raw(dev, cmd, data)
+            self._log("info", f"[SM] 第{self._sm_seq+1}步: {name} ({len(cmds)}条指令)")
+        self._sm_update_ui()
+
+    def _sm_check(self):
+        """检查当前步是否完成 (由定时器调用)"""
+        if self._sm_seq >= len(self._sm_steps):
+            return
+        name, cmds, detect = self._sm_steps[self._sm_seq]
+        if not self._sm_sent:
+            return
+        self._sm_timer += 1
+
+        ok = False
+        if detect == "none":
+            ok = self._sm_timer > 3  # 3 个 tick 的消抖
+        elif detect == "flag":
+            ok = True
+            for d in range(3):
+                ms = self.recorders[d].latest_m1
+                if ms and not (ms.flag & 0x02):
+                    ok = False
+        elif detect == "stall":
+            ok = True
+            for d in range(3):
+                ms = self.recorders[d].latest_m1
+                if not (ms and (ms.flag & 0x04)):
+                    ok = False
+        elif detect == "action_done":
+            ok = all(self._sm_action_done)
+        elif detect == "manual" or detect == "vision":
+            return
+
+        if ok:
+            self._sm_advance()
+
+    def _sm_advance(self):
+        """推进到下一步"""
+        self._sm_seq += 1; self._sm_sent = False; self._sm_timer = 0
+        self._sm_update_ui()
+        if self._sm_mode.get() == "auto" and self._sm_seq < len(self._sm_steps):
+            self._sm_execute()
+
+    def _sm_update_ui(self):
+        """刷新状态机 UI"""
+        if self._sm_seq < len(self._sm_steps):
+            name, _, _ = self._sm_steps[self._sm_seq]
+            self._sm_state_label.set(f"状态: {self._sm_seq+1}/{len(self._sm_steps)} {name}")
+        for i, name in enumerate(["左","中","右"]):
+            ms = self.recorders[i].latest_m1
+            if ms:
+                s = "✅到位" if (ms.flag & 0x02) else ("⚠堵转" if (ms.flag & 0x04) else "⏳...")
+            else:
+                s = "○离线"
+            self._sm_dev_labels[i].config(text=f"{name}:{s}")
+
+    def _send_cmd_raw(self, dev, cmd, data):
+        """向指定设备发原始指令 (绕过当前设备选择)"""
+        if not self.comm or not self.comm.device_connected(dev):
+            return
+        full = bytes([cmd]) + bytes(data)
+        self.comm.send_packet(full, dev)
 
     # ========== 可视化 ==========
     def _build_viz_tab(self, parent: ttk.Frame):
@@ -1363,6 +1532,9 @@ class RosmasterGUI:
                 if ms:
                     rec.add_motor(time.time(), ms)
                     if device_idx == self._current_device: self._upd_motor_disp(ms)
+        elif cmd == 0x7C:
+            self._sm_action_done[device_idx] = True
+            self._log("parsed", f"  ↳ 抓取完成 | 设备{device_idx+1}")
         else:
             self._log("parsed", f"  ↳ {cname} | {format_hex(payload)}")
 
@@ -1388,9 +1560,13 @@ class RosmasterGUI:
 
     # ========== 可视化数据刷新 ==========
     def _start_plot_refresh(self):
-        if HAS_MPL: self._refresh_plots()
+        self._refresh_plots()
     def _refresh_plots(self):
-        if not HAS_MPL: return
+        self._sm_check()
+        if HAS_MPL:
+            try: self._upd_motor_plots(); self._upd_mpu_plots(); self._upd_other()
+            except: pass
+        self._plot_job = self.root.after(200, self._refresh_plots)
         try: self._upd_motor_plots(); self._upd_mpu_plots(); self._upd_other()
         except: pass
         self._plot_job = self.root.after(200, self._refresh_plots)

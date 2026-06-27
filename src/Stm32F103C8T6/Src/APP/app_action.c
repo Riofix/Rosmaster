@@ -14,6 +14,8 @@
 #include "app_motor.h"
 #include "app_bldc.h"
 #include "Emm_V5.h"
+#include "protocol.h"
+#include "cmd_handle.h"
 
 /* ================================================================
  * 脉冲参数
@@ -57,10 +59,25 @@ static uint32_t   s_grab_timeout = 0;       /* 超时计数 */
 
 
 /* ================================================================
+ * 原点偏移量: 上电后编码器归零, 但抓手实际在某一物理位上。
+ * SetOrigin 记录 offset = 物理位脉冲 - 当前编码器值(0),
+ * 之后 MoveTo 用 (编码器 + offset) 作为真实物理位置。
+ * ================================================================ */
+static int32_t s_origin_offset = 0;
+
+void App_Action_SetOrigin(uint8_t pos_id)
+{
+    if (pos_id < 1 || pos_id > 8) return;
+    uint32_t phys_pulse = POS_PULSE(pos_id);
+    s_origin_offset = (int32_t)phys_pulse - g_motors[0].current_pos;
+}
+
+/* ================================================================
  * App_Action_MoveTo
  *
  *   环轨点位移动, 一次性函数。
  *   cmd_handle 收到 0x7A 时直接调用, 计算路径 → 发指令 → 返回。
+ *   内部使用 (编码器 + offset) 作为真实物理位置参与环形计算。
  * ================================================================ */
 void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
 {
@@ -72,9 +89,9 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
 
     target_pulse = POS_PULSE(pos_id);
 
-    /* 读取当前编码器位置, 归一化到 [0, CIRCLE_PULSE) 防止负数溢出 */
+    /* 真实物理位置 = 编码器 + 原点偏移, 归一化到 [0, CIRCLE_PULSE) */
     {
-        int32_t raw = g_motors[0].current_pos;
+        int32_t raw = g_motors[0].current_pos + s_origin_offset;
         raw = raw % (int32_t)CIRCLE_PULSE;
         if (raw < 0) raw += (int32_t)CIRCLE_PULSE;
         cur_pulse = (uint32_t)raw;
@@ -178,6 +195,8 @@ void App_Action_Grab(void)
     /* ---- 检查推进后是否到了最后一步 (GRAB_UP13 之后) ---- */
     if (s_grab_step > GRAB_UP13)
     {
+        uint8_t done = CMD_TX_ACTION_DONE;
+        Protocol_PackAndSend(&done, 1);  /* 通知上位机抓取完成 */
         s_grab_step = GRAB_IDLE;
         s_grab_flag_low = 0;
         s_grab_timeout = 0;

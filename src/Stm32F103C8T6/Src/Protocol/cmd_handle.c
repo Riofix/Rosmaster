@@ -127,6 +127,17 @@ static void Handle_Action_Move(uint8_t *data, uint8_t len)
 }
 
 /**
+ * @brief 校准原点 (0x7B)
+ * @param data [0]pos_id(1~8)
+ */
+static void Handle_SetOrigin(uint8_t *data, uint8_t len)
+{
+  if (len < 1) return;
+  App_Action_SetOrigin(data[0]);
+  Send_Ok_Ack(data[0], CMD_RX_SET_ORIGIN);
+}
+
+/**
  * @brief 处理急停指令 (0x63)
  * @param data [0]地址, [1]同步标志
  * @param len 负载长度
@@ -650,6 +661,7 @@ static const CmdTable_t g_cmd_table[] = {
     {CMD_RX_POS_CM, Handle_Pos_Control_Cm},
     {CMD_RX_ACTION_GRAB, Handle_Action_Grab},
     {CMD_RX_ACTION_MOVE, Handle_Action_Move},
+    {CMD_RX_SET_ORIGIN, Handle_SetOrigin},
     {CMD_RX_STOP_NOW, Handle_Stop_Now},
     {CMD_RX_SYNC_MOTION, Handle_Sync_Motion},
     {CMD_RX_ORIGIN_SET_O, Handle_Origin_Set_O},

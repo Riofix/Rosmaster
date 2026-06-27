@@ -45,6 +45,7 @@ class ProtocolNode(Node):
             0x5B: self.parse_handle_odom,
             0x5C: self.parse_handle_pwm,
             0x5D: self.parse_handle_color,
+            0x7C: self.parse_action_done,
         }
 
         self.chassis_cmd_table = {
@@ -145,6 +146,9 @@ class ProtocolNode(Node):
     def parse_handle_color(self, name, data):
         color_id = struct.unpack('<B', data[:1])[0]
         self.handle_states[name]["color_id"] = color_id
+
+    def parse_action_done(self, name, data):
+        self.handle_states[name]["action_done"] = True
 
     # ======================== 底盘句柄 ========================
     def parse_chassis_status(self, data):

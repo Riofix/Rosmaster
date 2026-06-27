@@ -29,6 +29,6 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise);
  *   → 逆扫18cm → 降1cm → 顺扫18cm → 关无刷 → 升13cm → 完成
  */
 void App_Action_Grab(void);       /* 内部状态机, App_Tick 末尾周期调用 */
-void App_Action_GrabStart(void);  /* 启动抓取, cmd_handle 调用 */
-
+void App_Action_GrabStart(void);           /* 启动抓取, cmd_handle 调用 */
+void App_Action_SetOrigin(uint8_t pos_id); /* 校准原点: 记录编码器0对应的物理位 */
 #endif /* __APP_ACTION_H */

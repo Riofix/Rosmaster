@@ -106,6 +106,36 @@ class ProtocolPackNode(Node):
         if cmd_hex == 0x63:
             return bytearray([cmd_hex, motor_addr, snf])
 
+        # 0x78: CM 位置控制 (dist_cm = cm × 100)
+        if cmd_hex == 0x78:
+            direction = int(params.get("dir", params.get("direction", 0)))
+            speed = int(params.get("speed", params.get("vel", 0)))
+            acc = int(params.get("acc", 0))
+            dist_cm = int(params.get("dist_cm", params.get("pos", 0)))
+            absolute_flag = 1 if params.get("absolute", True) else 0
+            return bytearray([
+                cmd_hex, motor_addr, direction,
+                (speed >> 8) & 0xFF, speed & 0xFF, acc & 0xFF,
+                (dist_cm >> 24) & 0xFF, (dist_cm >> 16) & 0xFF,
+                (dist_cm >> 8) & 0xFF, dist_cm & 0xFF,
+                absolute_flag, snf
+            ])
+
+        # 0x79: 抓取启动 (无参数)
+        if cmd_hex == 0x79:
+            return bytearray([cmd_hex])
+
+        # 0x7A: 环轨点位移动 [pos_id(1~8), clockwise(0/1)]
+        if cmd_hex == 0x7A:
+            pos_id = int(params.get("pos_id", params.get("pos", 1)))
+            clockwise = 1 if params.get("clockwise", params.get("dir", False)) else 0
+            return bytearray([cmd_hex, pos_id & 0xFF, clockwise])
+
+        # 0x7B: 校准原点 [pos_id(1~8)]
+        if cmd_hex == 0x7B:
+            pos_id = int(params.get("pos_id", params.get("pos", 1)))
+            return bytearray([cmd_hex, pos_id & 0xFF])
+
         if cmd_hex == 0x6C:
             channel = int(params.get("channel", sub_id if sub_id is not None else 0))
             angle = int(params.get("angle", params.get("pos", 0)))
