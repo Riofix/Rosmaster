@@ -1,4 +1,5 @@
 #include "app_imu.h"
+#include "bsp_timer.h"
 
 void App_IMU_Init(void)
 {
@@ -7,10 +8,18 @@ void App_IMU_Init(void)
 
 void APP_IMU_Update(void)
 {
+    static uint32_t last_us = 0;
+    uint32_t now_us = DtTimer_GetUs();
+    float dt = (float)(now_us - last_us) / 1000000.0f;
+    last_us = now_us;
+
+    /* 异常保护：首次调用或过长间隔 */
+    if (dt <= 0.0f || dt > 0.5f)
+        dt = 0.02f;
+
     if (MPU_ReadRawData(&g_mpu_raw) == 0)
     {
-        // 假设外部调用频率为 10ms = 0.01s
-        MPU_QuaternionUpdate(&g_mpu_raw, 0.01f);
+        MPU_QuaternionUpdate(&g_mpu_raw, dt);
     }
 }
 

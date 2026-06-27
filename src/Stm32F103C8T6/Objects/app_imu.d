@@ -31,3 +31,4 @@
 .\objects\app_imu.o: .\FWlib\inc\misc.h
 .\objects\app_imu.o: .\Src\BSP\bsp_mpu6050.h
 .\objects\app_imu.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\app_imu.o: .\Src\BSP\bsp_timer.h

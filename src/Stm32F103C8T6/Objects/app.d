@@ -43,5 +43,6 @@
 .\objects\app.o: .\Src\Protocol\protocol.h
 .\objects\app.o: .\Src\BSP\Emm_V5.h
 .\objects\app.o: .\Src\BSP\bsp_usart.h
+.\objects\app.o: Src\APP\app_action.h
 .\objects\app.o: .\Src\BSP\oled.h
 .\objects\app.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

@@ -5,6 +5,7 @@
 #include "app_servo.h"
 #include "app_bldc.h"
 #include "app_rgb.h"
+#include "app_action.h"
 #include "Emm_V5.h"
 #include "bsp_pwm.h"
 #include "bsp_mpu6050.h"
@@ -76,6 +77,53 @@ static void Handle_Pos_Control(uint8_t *data, uint8_t len)
   uint8_t snF = (data[10] != 0);
   Emm_V5_Pos_Control(addr, dir, vel, acc, clk, raF, snF);
   Send_Ok_Ack(data[0], CMD_RX_POS_CONTROL);
+}
+
+/**
+ * @brief 处理位置模式(cm单位)指令 (0x78)
+ * @param data [0]地址, [1]方向, [2-3]速度, [4]加速度,
+ *             [5-8]距离(cm×100, 大端), [9]绝对/相对, [10]同步
+ * @param len 负载长度
+ */
+static void Handle_Pos_Control_Cm(uint8_t *data, uint8_t len)
+{
+  if (len < 10) return;
+  uint8_t addr = data[0];
+  uint8_t dir = (data[1] != 0);
+  uint16_t vel = (uint16_t)(data[3] | (data[2] << 8));
+  uint8_t acc = data[4];
+  uint32_t dist = (uint32_t)(data[8] | data[7] << 8 | (data[6] << 16) | (data[5] << 24));
+  uint8_t raF = (data[9] != 0);
+  uint8_t snF = (data[10] != 0);
+
+  /* 脉冲换算: 电机1=359.55/cm, 电机2=16000/cm */
+  float pulse_per_cm = (addr == 1) ? 359.55f : 16000.0f;
+  float cm = (float)dist / 100.0f;
+  uint32_t pulse = (uint32_t)(cm * pulse_per_cm + 0.5f);
+
+  Emm_V5_Pos_Control(addr, dir, vel, acc, pulse, raF, snF);
+  Send_Ok_Ack(data[0], CMD_RX_POS_CM);
+}
+
+/**
+ * @brief 启动抓取动作 (0x79)
+ */
+static void Handle_Action_Grab(uint8_t *data, uint8_t len)
+{
+  (void)data; (void)len;
+  App_Action_GrabStart();
+  Send_Ok_Ack(0, CMD_RX_ACTION_GRAB);
+}
+
+/**
+ * @brief 电机1点位移动 (0x7A)
+ * @param data [0]pos_id(1~8), [1]clockwise(1顺/0逆)
+ */
+static void Handle_Action_Move(uint8_t *data, uint8_t len)
+{
+  if (len < 2) return;
+  App_Action_MoveTo(data[0], data[1]);
+  Send_Ok_Ack(data[0], CMD_RX_ACTION_MOVE);
 }
 
 /**
@@ -599,6 +647,9 @@ static const CmdTable_t g_cmd_table[] = {
     {CMD_RX_EN_CONTROL, Handle_En_Control},
     {CMD_RX_VEL_CONTROL, Handle_Vel_Control},
     {CMD_RX_POS_CONTROL, Handle_Pos_Control},
+    {CMD_RX_POS_CM, Handle_Pos_Control_Cm},
+    {CMD_RX_ACTION_GRAB, Handle_Action_Grab},
+    {CMD_RX_ACTION_MOVE, Handle_Action_Move},
     {CMD_RX_STOP_NOW, Handle_Stop_Now},
     {CMD_RX_SYNC_MOTION, Handle_Sync_Motion},
     {CMD_RX_ORIGIN_SET_O, Handle_Origin_Set_O},

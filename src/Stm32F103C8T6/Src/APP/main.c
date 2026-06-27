@@ -7,6 +7,7 @@
 #include "bsp_systick.h"
 #include "bsp_usart.h"
 #include "bsp_mpu6050.h"
+#include "bsp_timer.h"
 #include "protocol_emm.h"
 #include "protocol.h"
 #include "stm32f10x.h"
@@ -16,6 +17,7 @@ int main(void)
 {
   /* Hardware initialization */
   Systick_Init();
+  DtTimer_Init();
 
   USART_All_Init(115200, 115200);
 

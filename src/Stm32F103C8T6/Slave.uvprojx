@@ -10,6 +10,7 @@
       <TargetName>Target_1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
@@ -604,6 +605,16 @@
               <FileType>5</FileType>
               <FilePath>.\Src\APP\app_servo.h</FilePath>
             </File>
+            <File>
+              <FileName>app_action.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\APP\app_action.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_action.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\APP\app_action.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -704,6 +715,16 @@
               <FileType>5</FileType>
               <FilePath>.\Src\BSP\bsp_tcs3472.h</FilePath>
             </File>
+            <File>
+              <FileName>bsp_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\BSP\bsp_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\BSP\bsp_timer.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -760,5 +781,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>Slave</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

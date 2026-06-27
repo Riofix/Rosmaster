@@ -7,6 +7,7 @@
 #include "cmd_handle.h"
 #include "bsp_mpu6050.h"
 #include "Emm_V5.h"
+#include "app_action.h"
 #include "oled.h"
 #include <stdio.h>
 #include <string.h>
@@ -30,7 +31,7 @@ void App_Init(void)
     Cmd_Handle_Init();
 
     g_app_context.system_ready = 1;
-    
+
 }
 
 /**
@@ -262,4 +263,7 @@ void App_Tick(void)
         // OLED_Clear();
         break;
     }
+
+    // 抓取动作状态机推进 (空闲时立即返回)
+    App_Action_Grab();
 }

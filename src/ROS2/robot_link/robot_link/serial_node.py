@@ -22,6 +22,7 @@ class SerialNode(Node):
         self.create_subscription(UInt8MultiArray, '/serial_tx_raw', self.tx_callback, 10)
 
         # 4. 初始化串口 (严格匹配：8位数据位，无校验位，1位停止位)
+        self.ser = None
         try:
             self.ser = serial.Serial(
                 port=self.port_name,
@@ -32,13 +33,12 @@ class SerialNode(Node):
                 timeout=0.1
             )
             self.get_logger().info(f'Serial port {self.port_name} opened (115200, 8N1).')
+            # 5. 开启读取线程
+            self.read_thread = threading.Thread(target=self.read_loop, daemon=True)
+            self.read_thread.start()
         except Exception as e:
             self.get_logger().error(f'Failed to open {self.port_name}: {e}')
-            return
-
-        # 5. 开启读取线程
-        self.read_thread = threading.Thread(target=self.read_loop, daemon=True)
-        self.read_thread.start()
+            self.get_logger().error(f'Serial node running without serial port. Check port name.')
 
     def read_loop(self):
         """持续循环读取"""

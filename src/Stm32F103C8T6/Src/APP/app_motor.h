@@ -8,7 +8,7 @@
 /**
  * @brief 电机全量状态模型 (根据0x43返回值精简与结构化)
  */
-typedef struct
+typedef __packed struct
 {
     uint8_t addr; // 电机地址
     /* ------ 物理遥测数据 ------ */
