@@ -126,7 +126,7 @@ CMD_NAMES = {
     0x86: "查询步进状态", 0x87: "查询步进参数",
     0x90: "✅ ACK成功",
     0x5A: "📡 MPU上报", 0x5B: "📡 步进电机上报",
-    0x5C: "📡 PWM状态上报", 0x5D: "📡 颜色上报",
+    0x5C: "📡 PWM状态上报", 0x5D: "📡 颜色上报", 0x7C: "✅ 抓取完成",
 }
 
 
@@ -853,9 +853,13 @@ class RosmasterGUI:
         monitor_frame = ttk.Frame(notebook)
         notebook.add(monitor_frame, text="  通信监视器  ")
 
+        sm_frame = ttk.Frame(notebook)
+        notebook.add(sm_frame, text="  状态机  ")
+
         self._build_motor_tab(motor_frame)
         self._build_sensor_tab(sensor_frame)
         self._build_monitor_tab(monitor_frame)
+        self._build_sm_tab(sm_frame)
 
         bottom_bar = ttk.Frame(self.root, padding=5)
         bottom_bar.pack(fill=tk.X, side=tk.BOTTOM)
@@ -1088,48 +1092,6 @@ class RosmasterGUI:
         self.step_stream_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(pw, text="步进自动上报", variable=self.step_stream_var, command=self._toggle_step_stream).pack(side=tk.LEFT, padx=10)
 
-        # ---- 状态机控制 ----
-        sm_frame = ttk.LabelFrame(parent, text="状态机控制", padding=5)
-        sm_frame.pack(fill=tk.X, padx=5, pady=(5,0))
-
-        # 模式选择
-        sm_top = ttk.Frame(sm_frame); sm_top.pack(fill=tk.X, pady=2)
-        self._sm_mode = tk.StringVar(value="manual")
-        ttk.Radiobutton(sm_top, text="手动", variable=self._sm_mode, value="manual").pack(side=tk.LEFT, padx=3)
-        ttk.Radiobutton(sm_top, text="自动", variable=self._sm_mode, value="auto").pack(side=tk.LEFT, padx=3)
-
-        self._sm_state_label = tk.StringVar(value="状态: IDLE")
-        ttk.Label(sm_top, textvariable=self._sm_state_label, foreground="#1565C0").pack(side=tk.RIGHT, padx=5)
-
-        # 三设备到位状态
-        sm_devs = ttk.Frame(sm_frame); sm_devs.pack(fill=tk.X, pady=2)
-        self._sm_dev_labels = []
-        for i, name in enumerate(["左", "中", "右"]):
-            lbl = ttk.Label(sm_devs, text=f"{name}:-", foreground="gray")
-            lbl.pack(side=tk.LEFT, padx=8)
-            self._sm_dev_labels.append(lbl)
-
-        # 按钮
-        sm_btns = ttk.Frame(sm_frame); sm_btns.pack(fill=tk.X, pady=2)
-        ttk.Button(sm_btns, text="▶ 单步", width=8, command=self._sm_step).pack(side=tk.LEFT, padx=3)
-        ttk.Button(sm_btns, text="⏸ 急停", width=8, command=self._sm_estop).pack(side=tk.LEFT, padx=3)
-        ttk.Button(sm_btns, text="▶▶ 自动运行", width=10, command=self._sm_auto).pack(side=tk.LEFT, padx=3)
-
-        # 视觉输入 + 路径显示
-        sm_vis = ttk.Frame(sm_frame); sm_vis.pack(fill=tk.X, pady=2)
-        ttk.Label(sm_vis, text="视觉序列:").pack(side=tk.LEFT)
-        self._sm_vision_var = tk.StringVar(value="")
-        ttk.Entry(sm_vis, textvariable=self._sm_vision_var, width=8).pack(side=tk.LEFT, padx=3)
-        self._sm_path_label = tk.StringVar(value="路径: -")
-        ttk.Label(sm_vis, textvariable=self._sm_path_label, foreground="#E65100").pack(side=tk.LEFT, padx=5)
-
-        # 状态机内部变量
-        self._sm_seq = 0        # 当前步序号
-        self._sm_sent = False   # 当前步指令是否已发
-        self._sm_timer = 0      # 消抖计数
-        self._sm_checks = {}    # 每步到位检测函数
-        self._sm_init()         # 初始化步骤表
-
         if HAS_MPL:
             self._build_viz_tab(parent)
 
@@ -1151,6 +1113,50 @@ class RosmasterGUI:
         for tag, color in [("tx","#4FC3F7"),("rx","#81C784"),("info","#FFB74D"),("error","#E57373"),("parsed","#CE93D8")]:
             self.monitor_text.tag_config(tag, foreground=color)
         self._tx_count = self._rx_count = self._rx_pkt_count = 0
+
+    # ========== 状态机页 ==========
+    def _build_sm_tab(self, parent: ttk.Frame):
+        # 模式
+        top = ttk.Frame(parent, padding=5); top.pack(fill=tk.X)
+        self._sm_mode = tk.StringVar(value="manual")
+        ttk.Label(top, text="模式:").pack(side=tk.LEFT)
+        ttk.Radiobutton(top, text="手动", variable=self._sm_mode, value="manual").pack(side=tk.LEFT, padx=3)
+        ttk.Radiobutton(top, text="自动", variable=self._sm_mode, value="auto").pack(side=tk.LEFT, padx=3)
+        self._sm_state_label = tk.StringVar(value="状态: IDLE")
+        ttk.Label(top, textvariable=self._sm_state_label, foreground="#1565C0", font=("",11,"bold")).pack(side=tk.RIGHT)
+
+        # 设备状态
+        devf = ttk.LabelFrame(parent, text="设备状态", padding=5)
+        devf.pack(fill=tk.X, padx=5, pady=5)
+        self._sm_dev_labels = []
+        for i, name in enumerate(["左抓手", "中抓手", "右抓手"]):
+            lbl = ttk.Label(devf, text=f"{name}:- ", font=("",10))
+            lbl.pack(side=tk.LEFT, padx=8)
+            self._sm_dev_labels.append(lbl)
+
+        # 步骤列表
+        sf = ttk.LabelFrame(parent, text="步骤序列", padding=5)
+        sf.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self._sm_step_list = tk.Text(sf, height=12, width=50, state=tk.DISABLED,
+                                     font=("Consolas",10), bg="#FAFAFA")
+        self._sm_step_list.pack(fill=tk.BOTH, expand=True)
+
+        # 视觉输入
+        visf = ttk.LabelFrame(parent, text="视觉 & 路径规划", padding=5)
+        visf.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Label(visf, text="视觉序列:").pack(side=tk.LEFT)
+        self._sm_vision_var = tk.StringVar(value="")
+        ttk.Entry(visf, textvariable=self._sm_vision_var, width=8).pack(side=tk.LEFT, padx=3)
+        self._sm_path_label = tk.StringVar(value="路径: -")
+        ttk.Label(visf, textvariable=self._sm_path_label, foreground="#E65100").pack(side=tk.LEFT, padx=10)
+
+        # 按钮
+        bf = ttk.Frame(parent, padding=5); bf.pack(fill=tk.X)
+        ttk.Button(bf, text="▶ 单步", width=8, command=self._sm_step).pack(side=tk.LEFT, padx=3)
+        ttk.Button(bf, text="⏸ 急停", width=8, command=self._sm_estop).pack(side=tk.LEFT, padx=3)
+        ttk.Button(bf, text="▶▶ 自动", width=8, command=self._sm_auto).pack(side=tk.LEFT, padx=3)
+
+        self._sm_init()
 
     # ========== 状态机方法 ==========
     def _sm_init(self):
@@ -1221,6 +1227,8 @@ class RosmasterGUI:
 
     def _sm_check(self):
         """检查当前步是否完成 (由定时器调用)"""
+        if not hasattr(self, '_sm_seq'):
+            return
         if self._sm_seq >= len(self._sm_steps):
             return
         name, cmds, detect = self._sm_steps[self._sm_seq]
@@ -1560,13 +1568,17 @@ class RosmasterGUI:
 
     # ========== 可视化数据刷新 ==========
     def _start_plot_refresh(self):
-        self._refresh_plots()
-    def _refresh_plots(self):
+        # SM check 轻量定时器 (每200ms)
         self._sm_check()
+        self._plot_job = self.root.after(200, self._start_plot_refresh)
+        # 绘图仅在 HAS_MPL 时刷新
         if HAS_MPL:
-            try: self._upd_motor_plots(); self._upd_mpu_plots(); self._upd_other()
-            except: pass
-        self._plot_job = self.root.after(200, self._refresh_plots)
+            self._refresh_plots()
+
+    def _refresh_plots(self):
+        if not HAS_MPL: return
+        try: self._upd_motor_plots(); self._upd_mpu_plots(); self._upd_other()
+        except: pass
         try: self._upd_motor_plots(); self._upd_mpu_plots(); self._upd_other()
         except: pass
         self._plot_job = self.root.after(200, self._refresh_plots)

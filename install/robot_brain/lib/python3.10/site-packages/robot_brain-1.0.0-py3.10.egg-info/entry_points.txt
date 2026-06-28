@@ -1,2 +1,0 @@
-[console_scripts]
-brain_node = robot_brain.brain_node:main

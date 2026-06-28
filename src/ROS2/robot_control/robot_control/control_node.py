@@ -203,7 +203,7 @@ class ControlNode(Node):
                 encoders = state.get("motor_encoder", [0, 0, 0, 0])
                 
                 # 1. 计算平均位置 ( demo 逻辑)
-                avg_pos = sum(encoders) / 4.0
+                avg_pos = (encoders[0] + encoders[2]) / 2.0  # 电机1和3
                 
                 # 2. 运行 PID 计算速度
                 vx_cmd = self.chassis_pid.compute(avg_pos)

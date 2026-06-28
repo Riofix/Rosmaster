@@ -1,2 +1,0 @@
-[console_scripts]
-vision_node = robot_vision.vision_node:main

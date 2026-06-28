@@ -23,6 +23,7 @@ setup(
         'console_scripts': [
             'control_node = robot_control.control_node:main',
             'twist_to_control_bridge = robot_control.twist_to_control_bridge:main',
+            'keyboard_teleop = robot_control.keyboard_teleop:main',
         ],
     },
 )
