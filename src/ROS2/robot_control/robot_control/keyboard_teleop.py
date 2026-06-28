@@ -50,12 +50,11 @@ class KeyboardTeleop(Node):
         if self.has_record:
             d1 = self.enc1 - self.recorded1
             d3 = self.enc3 - self.recorded3
-            return (f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx:+d} | "
-                    f"Δ  E1:{d1:+d} E3:{d3:+d} ΔAvg:{(d1+d3)//2:+d}")
-        return f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx:+d} | 按R记录"
+            return (f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx} | "
+                    f"Δ  E1:{d1} E3:{d3} ΔAvg:{(d1+d3)//2}")
+        return f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx} | 按R记录"
 
     def key_loop(self):
-        # 在 launch 环境下 stdin 不是 TTY, 用 /dev/tty
         tty_path = "/dev/tty"
         if not os.path.exists(tty_path):
             tty_path = "/dev/stdin"
