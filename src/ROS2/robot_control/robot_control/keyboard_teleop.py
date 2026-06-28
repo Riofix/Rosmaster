@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """
 键盘遥控底盘 + 编码器测距
-
-  W/S : 前进/后退 (Vx)
-  空格: 急停
-  R   : 记录编码器位置, 显示增量
-  Q   : 退出
+  W/S : 前进/后退  |  空格: 急停  |  R: 记录  |  Q: 退出
 """
 
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 import json
+import os
 import sys
 import termios
 import tty
@@ -25,18 +22,13 @@ class KeyboardTeleop(Node):
         self.cmd_pub = self.create_publisher(String, '/control_cmd', 10)
         self.create_subscription(String, '/robot_shadow_states', self.shadow_cb, 10)
 
-        self.enc1 = 0
-        self.enc3 = 0
-        self.last_enc1 = 0
-        self.last_enc3 = 0
-        self.recorded1 = 0
-        self.recorded3 = 0
+        self.enc1 = self.enc3 = 0
+        self.recorded1 = self.recorded3 = 0
         self.has_record = False
         self.running = True
         self.vx = 0
 
-        self.get_logger().info("键盘遥控启动: W/S=前后 空格=停 R=记录 Q=退出")
-        self._print_status()
+        self.get_logger().info("W/S=前后 空格=停 R=记录 Q=退出")
 
     def shadow_cb(self, msg):
         try:
@@ -53,47 +45,47 @@ class KeyboardTeleop(Node):
                "params": {"vx": vx, "vy": 0, "vz": 0}}
         self.cmd_pub.publish(String(data=json.dumps(cmd)))
 
-    def _print_status(self):
+    def _status_str(self):
         avg = (self.enc1 + self.enc3) // 2
         if self.has_record:
             d1 = self.enc1 - self.recorded1
             d3 = self.enc3 - self.recorded3
-            davg = (d1 + d3) // 2
-            self.get_logger().info(
-                f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx} | "
-                f"Δ(R记录起): E1:{d1:+} E3:{d3:+} ΔAvg:{davg:+}"
-            )
-        else:
-            self.get_logger().info(
-                f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx} | 按R记录起点"
-            )
+            return (f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx:+d} | "
+                    f"Δ  E1:{d1:+d} E3:{d3:+d} ΔAvg:{(d1+d3)//2:+d}")
+        return f"E1:{self.enc1} E3:{self.enc3} Avg:{avg} Vx:{self.vx:+d} | 按R记录"
 
     def key_loop(self):
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
+        # 在 launch 环境下 stdin 不是 TTY, 用 /dev/tty
+        tty_path = "/dev/tty"
+        if not os.path.exists(tty_path):
+            tty_path = "/dev/stdin"
+        try:
+            fd = os.open(tty_path, os.O_RDONLY | os.O_NONBLOCK)
+        except OSError:
+            self.get_logger().error(f"无法打开 {tty_path}, 键盘不可用")
+            return
+
+        old = termios.tcgetattr(fd)
         tty.setcbreak(fd)
 
         while self.running and rclpy.ok():
-            if select.select([sys.stdin], [], [], 0.1)[0]:
-                key = sys.stdin.read(1).lower()
-                if key == 'w':
-                    self.send_speed(200)
-                elif key == 's':
-                    self.send_speed(-200)
-                elif key == ' ':
-                    self.send_speed(0)
+            r, _, _ = select.select([fd], [], [], 0.2)
+            if r:
+                key = os.read(fd, 1).decode('utf-8', errors='ignore').lower()
+                if key == 'w':      self.send_speed(200)
+                elif key == 's':    self.send_speed(-200)
+                elif key == ' ':    self.send_speed(0)
                 elif key == 'r':
-                    self.recorded1 = self.enc1
-                    self.recorded3 = self.enc3
+                    self.recorded1 = self.enc1; self.recorded3 = self.enc3
                     self.has_record = True
                     self.get_logger().info(f"◎ 记录起点: E1={self.enc1} E3={self.enc3}")
                 elif key == 'q':
-                    self.send_speed(0)
-                    self.running = False
+                    self.send_speed(0); self.running = False
                     self.get_logger().info("退出")
-            self._print_status()
+            self.get_logger().info(self._status_str())
 
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        os.close(fd)
 
 
 def main(args=None):
