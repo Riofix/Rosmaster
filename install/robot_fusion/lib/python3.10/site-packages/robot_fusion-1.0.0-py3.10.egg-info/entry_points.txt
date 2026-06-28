@@ -1,0 +1,2 @@
+[console_scripts]
+fusion_node = robot_fusion.fusion_node:main

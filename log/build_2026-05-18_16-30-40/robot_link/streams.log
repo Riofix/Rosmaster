@@ -1,0 +1,74 @@
+[13.265s] Invoking command in '/home/sunrise/Rosmaster/src/ROS2/robot_link': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_link/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_link build --build-base /home/sunrise/Rosmaster/build/robot_link/build install --record /home/sunrise/Rosmaster/build/robot_link/install.log --install-scripts $base/lib/robot_link --single-version-externally-managed install_data
+[14.569s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[14.570s] !!
+[14.571s] 
+[14.571s]         ********************************************************************************
+[14.572s]         Usage of dash-separated 'script-dir' will not be supported in future
+[14.573s]         versions. Please use the underscore name 'script_dir' instead.
+[14.573s] 
+[14.574s]         This deprecation is overdue, please update your project and remove deprecated
+[14.575s]         calls to avoid build errors in the future.
+[14.575s] 
+[14.576s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[14.576s]         ********************************************************************************
+[14.577s] 
+[14.578s] !!
+[14.578s]   opt = self._enforce_underscore(opt, section)
+[14.716s] /usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+[14.717s]   warnings.warn(msg)
+[14.987s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[14.992s] !!
+[14.993s] 
+[14.993s]         ********************************************************************************
+[14.994s]         Usage of dash-separated 'script-dir' will not be supported in future
+[14.995s]         versions. Please use the underscore name 'script_dir' instead.
+[14.995s]         (Affected: robot_link).
+[14.996s] 
+[14.996s]         This deprecation is overdue, please update your project and remove deprecated
+[14.997s]         calls to avoid build errors in the future.
+[14.997s] 
+[14.998s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[14.999s]         ********************************************************************************
+[14.999s] 
+[15.000s] !!
+[15.000s]   opt = self._enforce_underscore(opt, section)
+[15.453s] running egg_info
+[15.559s] creating ../../../build/robot_link/robot_link.egg-info
+[15.561s] writing ../../../build/robot_link/robot_link.egg-info/PKG-INFO
+[15.562s] writing dependency_links to ../../../build/robot_link/robot_link.egg-info/dependency_links.txt
+[15.563s] writing entry points to ../../../build/robot_link/robot_link.egg-info/entry_points.txt
+[15.565s] writing requirements to ../../../build/robot_link/robot_link.egg-info/requires.txt
+[15.581s] writing top-level names to ../../../build/robot_link/robot_link.egg-info/top_level.txt
+[15.582s] writing manifest file '../../../build/robot_link/robot_link.egg-info/SOURCES.txt'
+[15.851s] reading manifest file '../../../build/robot_link/robot_link.egg-info/SOURCES.txt'
+[15.861s] writing manifest file '../../../build/robot_link/robot_link.egg-info/SOURCES.txt'
+[15.862s] running build
+[15.863s] running build_py
+[15.864s] creating /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link
+[15.866s] copying robot_link/serial_node.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link
+[15.867s] copying robot_link/tcp_server_node.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link
+[15.868s] copying robot_link/hotspot_node.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link
+[15.870s] copying robot_link/__init__.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link
+[15.873s] running install
+[15.923s] running install_lib
+[16.039s] creating /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link
+[16.041s] copying /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link/serial_node.py -> /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link
+[16.044s] copying /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link/tcp_server_node.py -> /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link
+[16.047s] copying /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link/hotspot_node.py -> /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link
+[16.047s] copying /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link/__init__.py -> /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link
+[16.052s] byte-compiling /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link/serial_node.py to serial_node.cpython-310.pyc
+[16.060s] byte-compiling /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link/tcp_server_node.py to tcp_server_node.cpython-310.pyc
+[16.065s] byte-compiling /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link/hotspot_node.py to hotspot_node.cpython-310.pyc
+[16.070s] byte-compiling /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link/__init__.py to __init__.cpython-310.pyc
+[16.073s] running install_data
+[16.076s] creating /home/sunrise/Rosmaster/install/robot_link/share/ament_index/resource_index/packages
+[16.079s] copying resource/robot_link -> /home/sunrise/Rosmaster/install/robot_link/share/ament_index/resource_index/packages
+[16.083s] copying package.xml -> /home/sunrise/Rosmaster/install/robot_link/share/robot_link
+[16.085s] running install_egg_info
+[16.230s] Copying ../../../build/robot_link/robot_link.egg-info to /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link-1.0.0-py3.10.egg-info
+[16.243s] running install_scripts
+[16.593s] Installing hotspot_node script to /home/sunrise/Rosmaster/install/robot_link/lib/robot_link
+[16.594s] Installing serial_node script to /home/sunrise/Rosmaster/install/robot_link/lib/robot_link
+[16.603s] Installing tcp_server_node script to /home/sunrise/Rosmaster/install/robot_link/lib/robot_link
+[16.604s] writing list of installed files to '/home/sunrise/Rosmaster/build/robot_link/install.log'
+[16.938s] Invoked command in '/home/sunrise/Rosmaster/src/ROS2/robot_link' returned '0': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_link/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_link build --build-base /home/sunrise/Rosmaster/build/robot_link/build install --record /home/sunrise/Rosmaster/build/robot_link/install.log --install-scripts $base/lib/robot_link --single-version-externally-managed install_data

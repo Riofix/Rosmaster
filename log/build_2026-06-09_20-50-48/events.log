@@ -1,0 +1,751 @@
+[0.000000] (-) TimerEvent: {}
+[0.001485] (robot_brain) JobQueued: {'identifier': 'robot_brain', 'dependencies': OrderedDict()}
+[0.003180] (robot_control) JobQueued: {'identifier': 'robot_control', 'dependencies': OrderedDict()}
+[0.004022] (robot_fusion) JobQueued: {'identifier': 'robot_fusion', 'dependencies': OrderedDict()}
+[0.004994] (robot_link) JobQueued: {'identifier': 'robot_link', 'dependencies': OrderedDict()}
+[0.005253] (robot_protocol) JobQueued: {'identifier': 'robot_protocol', 'dependencies': OrderedDict()}
+[0.005480] (robot_vision) JobQueued: {'identifier': 'robot_vision', 'dependencies': OrderedDict()}
+[0.005694] (robot_bringup) JobQueued: {'identifier': 'robot_bringup', 'dependencies': OrderedDict([('robot_control', '/home/sunrise/Rosmaster/install/robot_control'), ('robot_link', '/home/sunrise/Rosmaster/install/robot_link'), ('robot_protocol', '/home/sunrise/Rosmaster/install/robot_protocol')])}
+[0.005926] (robot_control) JobStarted: {'identifier': 'robot_control'}
+[0.055106] (robot_link) JobStarted: {'identifier': 'robot_link'}
+[0.091846] (robot_protocol) JobStarted: {'identifier': 'robot_protocol'}
+[0.098657] (-) TimerEvent: {}
+[0.135917] (robot_brain) JobStarted: {'identifier': 'robot_brain'}
+[0.169489] (robot_fusion) JobStarted: {'identifier': 'robot_fusion'}
+[0.198856] (-) TimerEvent: {}
+[0.208030] (robot_vision) JobStarted: {'identifier': 'robot_vision'}
+[0.299082] (-) TimerEvent: {}
+[0.400146] (-) TimerEvent: {}
+[0.501343] (-) TimerEvent: {}
+[0.602505] (-) TimerEvent: {}
+[0.703595] (-) TimerEvent: {}
+[0.804681] (-) TimerEvent: {}
+[0.905790] (-) TimerEvent: {}
+[1.006923] (-) TimerEvent: {}
+[1.108055] (-) TimerEvent: {}
+[1.209270] (-) TimerEvent: {}
+[1.310364] (-) TimerEvent: {}
+[1.411563] (-) TimerEvent: {}
+[1.512648] (-) TimerEvent: {}
+[1.613751] (-) TimerEvent: {}
+[1.714950] (-) TimerEvent: {}
+[1.816271] (-) TimerEvent: {}
+[1.917518] (-) TimerEvent: {}
+[2.018669] (-) TimerEvent: {}
+[2.119823] (-) TimerEvent: {}
+[2.221210] (-) TimerEvent: {}
+[2.322454] (-) TimerEvent: {}
+[2.423655] (-) TimerEvent: {}
+[2.524716] (-) TimerEvent: {}
+[2.625933] (-) TimerEvent: {}
+[2.727128] (-) TimerEvent: {}
+[2.828225] (-) TimerEvent: {}
+[2.929240] (-) TimerEvent: {}
+[3.030258] (-) TimerEvent: {}
+[3.131393] (-) TimerEvent: {}
+[3.232577] (-) TimerEvent: {}
+[3.333856] (-) TimerEvent: {}
+[3.435040] (-) TimerEvent: {}
+[3.536266] (-) TimerEvent: {}
+[3.637612] (-) TimerEvent: {}
+[3.738712] (-) TimerEvent: {}
+[3.839818] (-) TimerEvent: {}
+[3.940958] (-) TimerEvent: {}
+[4.042147] (-) TimerEvent: {}
+[4.143156] (-) TimerEvent: {}
+[4.244217] (-) TimerEvent: {}
+[4.345267] (-) TimerEvent: {}
+[4.446327] (-) TimerEvent: {}
+[4.547344] (-) TimerEvent: {}
+[4.648409] (-) TimerEvent: {}
+[4.749522] (-) TimerEvent: {}
+[4.850705] (-) TimerEvent: {}
+[4.952017] (-) TimerEvent: {}
+[5.053136] (-) TimerEvent: {}
+[5.154235] (-) TimerEvent: {}
+[5.255265] (-) TimerEvent: {}
+[5.356321] (-) TimerEvent: {}
+[5.457318] (-) TimerEvent: {}
+[5.558365] (-) TimerEvent: {}
+[5.659477] (-) TimerEvent: {}
+[5.760564] (-) TimerEvent: {}
+[5.861701] (-) TimerEvent: {}
+[5.962835] (-) TimerEvent: {}
+[6.063912] (-) TimerEvent: {}
+[6.165047] (-) TimerEvent: {}
+[6.266165] (-) TimerEvent: {}
+[6.367372] (-) TimerEvent: {}
+[6.468655] (-) TimerEvent: {}
+[6.569800] (-) TimerEvent: {}
+[6.671102] (-) TimerEvent: {}
+[6.772153] (-) TimerEvent: {}
+[6.873264] (-) TimerEvent: {}
+[6.974419] (-) TimerEvent: {}
+[7.075490] (-) TimerEvent: {}
+[7.176528] (-) TimerEvent: {}
+[7.277542] (-) TimerEvent: {}
+[7.378563] (-) TimerEvent: {}
+[7.479589] (-) TimerEvent: {}
+[7.580657] (-) TimerEvent: {}
+[7.681847] (-) TimerEvent: {}
+[7.782885] (-) TimerEvent: {}
+[7.883946] (-) TimerEvent: {}
+[7.985048] (-) TimerEvent: {}
+[8.086266] (-) TimerEvent: {}
+[8.187398] (-) TimerEvent: {}
+[8.288499] (-) TimerEvent: {}
+[8.389732] (-) TimerEvent: {}
+[8.490913] (-) TimerEvent: {}
+[8.591974] (-) TimerEvent: {}
+[8.692999] (-) TimerEvent: {}
+[8.794024] (-) TimerEvent: {}
+[8.895060] (-) TimerEvent: {}
+[8.996056] (-) TimerEvent: {}
+[9.097077] (-) TimerEvent: {}
+[9.198091] (-) TimerEvent: {}
+[9.299190] (-) TimerEvent: {}
+[9.400315] (-) TimerEvent: {}
+[9.501562] (-) TimerEvent: {}
+[9.602910] (-) TimerEvent: {}
+[9.704074] (-) TimerEvent: {}
+[9.805430] (-) TimerEvent: {}
+[9.909504] (-) TimerEvent: {}
+[10.012544] (-) TimerEvent: {}
+[10.115303] (-) TimerEvent: {}
+[10.218006] (-) TimerEvent: {}
+[10.320968] (-) TimerEvent: {}
+[10.426468] (-) TimerEvent: {}
+[10.527738] (-) TimerEvent: {}
+[10.628928] (-) TimerEvent: {}
+[10.730265] (-) TimerEvent: {}
+[10.831531] (-) TimerEvent: {}
+[10.932752] (-) TimerEvent: {}
+[11.033983] (-) TimerEvent: {}
+[11.135511] (-) TimerEvent: {}
+[11.241309] (-) TimerEvent: {}
+[11.346096] (-) TimerEvent: {}
+[11.450781] (-) TimerEvent: {}
+[11.552101] (-) TimerEvent: {}
+[11.655338] (-) TimerEvent: {}
+[11.758667] (-) TimerEvent: {}
+[11.861942] (-) TimerEvent: {}
+[11.963486] (-) TimerEvent: {}
+[12.064607] (-) TimerEvent: {}
+[12.165795] (-) TimerEvent: {}
+[12.267283] (-) TimerEvent: {}
+[12.368906] (-) TimerEvent: {}
+[12.473213] (-) TimerEvent: {}
+[12.576498] (-) TimerEvent: {}
+[12.679791] (-) TimerEvent: {}
+[12.783517] (-) TimerEvent: {}
+[12.889298] (-) TimerEvent: {}
+[12.990658] (-) TimerEvent: {}
+[13.092301] (-) TimerEvent: {}
+[13.194594] (-) TimerEvent: {}
+[13.296270] (-) TimerEvent: {}
+[13.397888] (-) TimerEvent: {}
+[13.499229] (-) TimerEvent: {}
+[13.600682] (-) TimerEvent: {}
+[13.686949] (robot_control) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_control', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_control/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_control/install.log', '--install-scripts', '$base/lib/robot_control', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_control', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_control', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[13.701115] (-) TimerEvent: {}
+[13.764709] (robot_vision) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_vision', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_vision/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_vision/install.log', '--install-scripts', '$base/lib/robot_vision', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_vision', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_vision', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_vision/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[13.801553] (-) TimerEvent: {}
+[13.902938] (-) TimerEvent: {}
+[13.916599] (robot_link) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_link', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_link/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_link/install.log', '--install-scripts', '$base/lib/robot_link', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_link', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_link', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_link/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[13.968707] (robot_brain) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_brain', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_brain/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_brain/install.log', '--install-scripts', '$base/lib/robot_brain', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_brain', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_brain', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_brain/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[14.003170] (-) TimerEvent: {}
+[14.057367] (robot_fusion) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_fusion', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_fusion/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_fusion/install.log', '--install-scripts', '$base/lib/robot_fusion', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_fusion', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_fusion', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[14.103425] (-) TimerEvent: {}
+[14.141985] (robot_protocol) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_protocol', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_protocol/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_protocol/install.log', '--install-scripts', '$base/lib/robot_protocol', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_protocol', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_protocol', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_protocol/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[14.203663] (-) TimerEvent: {}
+[14.304860] (-) TimerEvent: {}
+[14.406052] (-) TimerEvent: {}
+[14.508982] (-) TimerEvent: {}
+[14.633591] (-) TimerEvent: {}
+[14.734732] (-) TimerEvent: {}
+[14.835938] (-) TimerEvent: {}
+[14.886360] (robot_control) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[14.887773] (robot_control) StderrLine: {'line': b'!!\n'}
+[14.888506] (robot_control) StderrLine: {'line': b'\n'}
+[14.889198] (robot_control) StderrLine: {'line': b'        ********************************************************************************\n'}
+[14.889925] (robot_control) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[14.890606] (robot_control) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[14.892647] (robot_control) StderrLine: {'line': b'\n'}
+[14.893427] (robot_control) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[14.894145] (robot_control) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[14.894796] (robot_control) StderrLine: {'line': b'\n'}
+[14.895453] (robot_control) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[14.896156] (robot_control) StderrLine: {'line': b'        ********************************************************************************\n'}
+[14.896868] (robot_control) StderrLine: {'line': b'\n'}
+[14.897589] (robot_control) StderrLine: {'line': b'!!\n'}
+[14.898265] (robot_control) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[14.918320] (robot_vision) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[14.920165] (robot_vision) StderrLine: {'line': b'!!\n'}
+[14.941198] (robot_vision) StderrLine: {'line': b'\n'}
+[14.942152] (-) TimerEvent: {}
+[14.945185] (robot_vision) StderrLine: {'line': b'        ********************************************************************************\n'}
+[14.946135] (robot_vision) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[14.946843] (robot_vision) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[14.947507] (robot_vision) StderrLine: {'line': b'\n'}
+[14.948174] (robot_vision) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[14.948825] (robot_vision) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[14.953302] (robot_vision) StderrLine: {'line': b'\n'}
+[14.954039] (robot_vision) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[14.954710] (robot_vision) StderrLine: {'line': b'        ********************************************************************************\n'}
+[14.955355] (robot_vision) StderrLine: {'line': b'\n'}
+[14.956041] (robot_vision) StderrLine: {'line': b'!!\n'}
+[14.956746] (robot_vision) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.042413] (-) TimerEvent: {}
+[15.052559] (robot_control) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[15.053466] (robot_control) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[15.065100] (robot_vision) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[15.066138] (robot_vision) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[15.087450] (robot_link) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.088927] (robot_link) StderrLine: {'line': b'!!\n'}
+[15.089677] (robot_link) StderrLine: {'line': b'\n'}
+[15.090291] (robot_link) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.090880] (robot_link) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.092765] (robot_link) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.093484] (robot_link) StderrLine: {'line': b'\n'}
+[15.094131] (robot_link) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.094759] (robot_link) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.095370] (robot_link) StderrLine: {'line': b'\n'}
+[15.096576] (robot_link) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.097494] (robot_link) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.098381] (robot_link) StderrLine: {'line': b'\n'}
+[15.099362] (robot_link) StderrLine: {'line': b'!!\n'}
+[15.100272] (robot_link) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.143861] (-) TimerEvent: {}
+[15.169911] (robot_brain) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.170998] (robot_brain) StderrLine: {'line': b'!!\n'}
+[15.171969] (robot_brain) StderrLine: {'line': b'\n'}
+[15.172647] (robot_brain) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.173344] (robot_brain) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.174071] (robot_brain) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.174781] (robot_brain) StderrLine: {'line': b'\n'}
+[15.175463] (robot_brain) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.176149] (robot_brain) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.176963] (robot_brain) StderrLine: {'line': b'\n'}
+[15.177687] (robot_brain) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.178333] (robot_brain) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.178975] (robot_brain) StderrLine: {'line': b'\n'}
+[15.179713] (robot_brain) StderrLine: {'line': b'!!\n'}
+[15.180377] (robot_brain) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.221363] (robot_fusion) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.222582] (robot_fusion) StderrLine: {'line': b'!!\n'}
+[15.223302] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.223932] (robot_fusion) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.224620] (robot_fusion) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.225288] (robot_fusion) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.225951] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.226627] (robot_fusion) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.227302] (robot_fusion) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.227928] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.228567] (robot_fusion) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.229248] (robot_fusion) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.229908] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.230580] (robot_fusion) StderrLine: {'line': b'!!\n'}
+[15.233884] (robot_fusion) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.238880] (robot_link) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[15.261331] (robot_link) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[15.262287] (-) TimerEvent: {}
+[15.269468] (robot_protocol) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.270874] (robot_protocol) StderrLine: {'line': b'!!\n'}
+[15.271823] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.272522] (robot_protocol) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.273192] (robot_protocol) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.273869] (robot_protocol) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.274521] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.275133] (robot_protocol) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.275793] (robot_protocol) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.276413] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.277080] (robot_protocol) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.277756] (robot_protocol) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.278382] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.279011] (robot_protocol) StderrLine: {'line': b'!!\n'}
+[15.279663] (robot_protocol) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.333835] (robot_brain) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[15.334917] (robot_brain) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[15.362528] (-) TimerEvent: {}
+[15.365285] (robot_fusion) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[15.366234] (robot_fusion) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[15.373210] (robot_control) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.374146] (robot_control) StderrLine: {'line': b'!!\n'}
+[15.374817] (robot_control) StderrLine: {'line': b'\n'}
+[15.375483] (robot_control) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.376181] (robot_control) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.376833] (robot_control) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.377478] (robot_control) StderrLine: {'line': b'        (Affected: robot_control).\n'}
+[15.378092] (robot_control) StderrLine: {'line': b'\n'}
+[15.378763] (robot_control) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.379386] (robot_control) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.379992] (robot_control) StderrLine: {'line': b'\n'}
+[15.380594] (robot_control) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.383487] (robot_control) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.384324] (robot_control) StderrLine: {'line': b'\n'}
+[15.385019] (robot_control) StderrLine: {'line': b'!!\n'}
+[15.385641] (robot_control) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.386303] (robot_vision) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.386968] (robot_vision) StderrLine: {'line': b'!!\n'}
+[15.387600] (robot_vision) StderrLine: {'line': b'\n'}
+[15.388216] (robot_vision) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.388886] (robot_vision) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.389572] (robot_vision) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.390229] (robot_vision) StderrLine: {'line': b'        (Affected: robot_vision).\n'}
+[15.390838] (robot_vision) StderrLine: {'line': b'\n'}
+[15.402518] (robot_vision) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.403274] (robot_vision) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.403958] (robot_vision) StderrLine: {'line': b'\n'}
+[15.404633] (robot_vision) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.405307] (robot_vision) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.406045] (robot_vision) StderrLine: {'line': b'\n'}
+[15.406814] (robot_vision) StderrLine: {'line': b'!!\n'}
+[15.407492] (robot_vision) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.462789] (-) TimerEvent: {}
+[15.467037] (robot_protocol) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[15.468816] (robot_protocol) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[15.560634] (robot_link) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.561638] (robot_link) StderrLine: {'line': b'!!\n'}
+[15.562331] (robot_link) StderrLine: {'line': b'\n'}
+[15.562971] (-) TimerEvent: {}
+[15.564585] (robot_link) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.565461] (robot_link) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.566165] (robot_link) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.566952] (robot_link) StderrLine: {'line': b'        (Affected: robot_link).\n'}
+[15.567685] (robot_link) StderrLine: {'line': b'\n'}
+[15.568425] (robot_link) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.569141] (robot_link) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.569851] (robot_link) StderrLine: {'line': b'\n'}
+[15.570652] (robot_link) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.573417] (robot_link) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.574194] (robot_link) StderrLine: {'line': b'\n'}
+[15.574835] (robot_link) StderrLine: {'line': b'!!\n'}
+[15.575426] (robot_link) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.629192] (robot_fusion) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.630231] (robot_fusion) StderrLine: {'line': b'!!\n'}
+[15.631731] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.632787] (robot_fusion) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.633676] (robot_fusion) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.634421] (robot_fusion) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.635143] (robot_fusion) StderrLine: {'line': b'        (Affected: robot_fusion).\n'}
+[15.635876] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.636567] (robot_fusion) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.637280] (robot_fusion) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.638080] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.638758] (robot_fusion) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.639415] (robot_fusion) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.640112] (robot_fusion) StderrLine: {'line': b'\n'}
+[15.640768] (robot_fusion) StderrLine: {'line': b'!!\n'}
+[15.643925] (robot_fusion) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.657347] (robot_brain) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.658239] (robot_brain) StderrLine: {'line': b'!!\n'}
+[15.658930] (robot_brain) StderrLine: {'line': b'\n'}
+[15.659649] (robot_brain) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.660377] (robot_brain) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.662254] (robot_brain) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.663176] (-) TimerEvent: {}
+[15.664015] (robot_brain) StderrLine: {'line': b'        (Affected: robot_brain).\n'}
+[15.664906] (robot_brain) StderrLine: {'line': b'\n'}
+[15.665666] (robot_brain) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.666383] (robot_brain) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.667072] (robot_brain) StderrLine: {'line': b'\n'}
+[15.667774] (robot_brain) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.668456] (robot_brain) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.669226] (robot_brain) StderrLine: {'line': b'\n'}
+[15.669918] (robot_brain) StderrLine: {'line': b'!!\n'}
+[15.670617] (robot_brain) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.763424] (-) TimerEvent: {}
+[15.783240] (robot_protocol) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[15.784181] (robot_protocol) StderrLine: {'line': b'!!\n'}
+[15.784943] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.785637] (robot_protocol) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.786327] (robot_protocol) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[15.787051] (robot_protocol) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[15.787764] (robot_protocol) StderrLine: {'line': b'        (Affected: robot_protocol).\n'}
+[15.788429] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.789099] (robot_protocol) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[15.789762] (robot_protocol) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[15.790436] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.793165] (robot_protocol) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[15.794119] (robot_protocol) StderrLine: {'line': b'        ********************************************************************************\n'}
+[15.794866] (robot_protocol) StderrLine: {'line': b'\n'}
+[15.795593] (robot_protocol) StderrLine: {'line': b'!!\n'}
+[15.796309] (robot_protocol) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[15.863641] (-) TimerEvent: {}
+[15.964762] (-) TimerEvent: {}
+[15.976116] (robot_vision) StdoutLine: {'line': b'running egg_info\n'}
+[16.041180] (robot_control) StdoutLine: {'line': b'running egg_info\n'}
+[16.064995] (-) TimerEvent: {}
+[16.095444] (robot_link) StdoutLine: {'line': b'running egg_info\n'}
+[16.116496] (robot_vision) StdoutLine: {'line': b'writing ../../../build/robot_vision/robot_vision.egg-info/PKG-INFO\n'}
+[16.122638] (robot_vision) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_vision/robot_vision.egg-info/dependency_links.txt\n'}
+[16.125658] (robot_vision) StdoutLine: {'line': b'writing entry points to ../../../build/robot_vision/robot_vision.egg-info/entry_points.txt\n'}
+[16.127782] (robot_vision) StdoutLine: {'line': b'writing requirements to ../../../build/robot_vision/robot_vision.egg-info/requires.txt\n'}
+[16.129685] (robot_vision) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_vision/robot_vision.egg-info/top_level.txt\n'}
+[16.164858] (robot_fusion) StdoutLine: {'line': b'running egg_info\n'}
+[16.165916] (-) TimerEvent: {}
+[16.204350] (robot_brain) StdoutLine: {'line': b'running egg_info\n'}
+[16.215396] (robot_control) StdoutLine: {'line': b'writing ../../../build/robot_control/robot_control.egg-info/PKG-INFO\n'}
+[16.219507] (robot_control) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_control/robot_control.egg-info/dependency_links.txt\n'}
+[16.222200] (robot_control) StdoutLine: {'line': b'writing entry points to ../../../build/robot_control/robot_control.egg-info/entry_points.txt\n'}
+[16.224116] (robot_control) StdoutLine: {'line': b'writing requirements to ../../../build/robot_control/robot_control.egg-info/requires.txt\n'}
+[16.225721] (robot_control) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_control/robot_control.egg-info/top_level.txt\n'}
+[16.266156] (-) TimerEvent: {}
+[16.288897] (robot_link) StdoutLine: {'line': b'writing ../../../build/robot_link/robot_link.egg-info/PKG-INFO\n'}
+[16.294238] (robot_link) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_link/robot_link.egg-info/dependency_links.txt\n'}
+[16.295464] (robot_link) StdoutLine: {'line': b'writing entry points to ../../../build/robot_link/robot_link.egg-info/entry_points.txt\n'}
+[16.297612] (robot_link) StdoutLine: {'line': b'writing requirements to ../../../build/robot_link/robot_link.egg-info/requires.txt\n'}
+[16.299957] (robot_link) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_link/robot_link.egg-info/top_level.txt\n'}
+[16.316893] (robot_fusion) StdoutLine: {'line': b'writing ../../../build/robot_fusion/robot_fusion.egg-info/PKG-INFO\n'}
+[16.324817] (robot_fusion) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_fusion/robot_fusion.egg-info/dependency_links.txt\n'}
+[16.326583] (robot_fusion) StdoutLine: {'line': b'writing entry points to ../../../build/robot_fusion/robot_fusion.egg-info/entry_points.txt\n'}
+[16.329644] (robot_fusion) StdoutLine: {'line': b'writing requirements to ../../../build/robot_fusion/robot_fusion.egg-info/requires.txt\n'}
+[16.331663] (robot_fusion) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_fusion/robot_fusion.egg-info/top_level.txt\n'}
+[16.339107] (robot_brain) StdoutLine: {'line': b'writing ../../../build/robot_brain/robot_brain.egg-info/PKG-INFO\n'}
+[16.345070] (robot_brain) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_brain/robot_brain.egg-info/dependency_links.txt\n'}
+[16.348999] (robot_brain) StdoutLine: {'line': b'writing entry points to ../../../build/robot_brain/robot_brain.egg-info/entry_points.txt\n'}
+[16.353725] (robot_brain) StdoutLine: {'line': b'writing requirements to ../../../build/robot_brain/robot_brain.egg-info/requires.txt\n'}
+[16.357146] (robot_brain) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_brain/robot_brain.egg-info/top_level.txt\n'}
+[16.366408] (-) TimerEvent: {}
+[16.386321] (robot_protocol) StdoutLine: {'line': b'running egg_info\n'}
+[16.405437] (robot_vision) StdoutLine: {'line': b"reading manifest file '../../../build/robot_vision/robot_vision.egg-info/SOURCES.txt'\n"}
+[16.425368] (robot_vision) StdoutLine: {'line': b"writing manifest file '../../../build/robot_vision/robot_vision.egg-info/SOURCES.txt'\n"}
+[16.427777] (robot_vision) StdoutLine: {'line': b'running build\n'}
+[16.428881] (robot_vision) StdoutLine: {'line': b'running build_py\n'}
+[16.430735] (robot_vision) StdoutLine: {'line': b'copying robot_vision/vision_node.py -> /home/sunrise/Rosmaster/build/robot_vision/build/lib/robot_vision\n'}
+[16.433933] (robot_vision) StdoutLine: {'line': b'copying robot_vision/__init__.py -> /home/sunrise/Rosmaster/build/robot_vision/build/lib/robot_vision\n'}
+[16.435894] (robot_vision) StdoutLine: {'line': b'copying robot_vision/finalest-inference.py -> /home/sunrise/Rosmaster/build/robot_vision/build/lib/robot_vision\n'}
+[16.439070] (robot_vision) StdoutLine: {'line': b'running install\n'}
+[16.468277] (-) TimerEvent: {}
+[16.476593] (robot_vision) StdoutLine: {'line': b'running install_lib\n'}
+[16.528678] (robot_control) StdoutLine: {'line': b"reading manifest file '../../../build/robot_control/robot_control.egg-info/SOURCES.txt'\n"}
+[16.538935] (robot_control) StdoutLine: {'line': b"writing manifest file '../../../build/robot_control/robot_control.egg-info/SOURCES.txt'\n"}
+[16.539949] (robot_protocol) StdoutLine: {'line': b'writing ../../../build/robot_protocol/robot_protocol.egg-info/PKG-INFO\n'}
+[16.542124] (robot_control) StdoutLine: {'line': b'running build\n'}
+[16.543000] (robot_control) StdoutLine: {'line': b'running build_py\n'}
+[16.544097] (robot_protocol) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_protocol/robot_protocol.egg-info/dependency_links.txt\n'}
+[16.544958] (robot_control) StdoutLine: {'line': b'copying robot_control/control_node.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control\n'}
+[16.545804] (robot_control) StdoutLine: {'line': b'copying robot_control/twist_to_control_bridge.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control\n'}
+[16.546800] (robot_protocol) StdoutLine: {'line': b'writing entry points to ../../../build/robot_protocol/robot_protocol.egg-info/entry_points.txt\n'}
+[16.547903] (robot_control) StdoutLine: {'line': b'copying robot_control/demo_rosmaster.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control\n'}
+[16.550885] (robot_protocol) StdoutLine: {'line': b'writing requirements to ../../../build/robot_protocol/robot_protocol.egg-info/requires.txt\n'}
+[16.551953] (robot_control) StdoutLine: {'line': b'copying robot_control/__init__.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control\n'}
+[16.552789] (robot_protocol) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_protocol/robot_protocol.egg-info/top_level.txt\n'}
+[16.553495] (robot_control) StdoutLine: {'line': b'running install\n'}
+[16.568520] (-) TimerEvent: {}
+[16.586508] (robot_link) StdoutLine: {'line': b"reading manifest file '../../../build/robot_link/robot_link.egg-info/SOURCES.txt'\n"}
+[16.588679] (robot_control) StdoutLine: {'line': b'running install_lib\n'}
+[16.594273] (robot_link) StdoutLine: {'line': b"writing manifest file '../../../build/robot_link/robot_link.egg-info/SOURCES.txt'\n"}
+[16.596028] (robot_link) StdoutLine: {'line': b'running build\n'}
+[16.597052] (robot_link) StdoutLine: {'line': b'running build_py\n'}
+[16.598172] (robot_link) StdoutLine: {'line': b'copying robot_link/serial_node.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link\n'}
+[16.599908] (robot_link) StdoutLine: {'line': b'copying robot_link/tcp_server_node.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link\n'}
+[16.601559] (robot_link) StdoutLine: {'line': b'copying robot_link/hotspot_node.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link\n'}
+[16.604515] (robot_link) StdoutLine: {'line': b'copying robot_link/__init__.py -> /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link\n'}
+[16.605922] (robot_link) StdoutLine: {'line': b'running install\n'}
+[16.642774] (robot_link) StdoutLine: {'line': b'running install_lib\n'}
+[16.650170] (robot_fusion) StdoutLine: {'line': b"reading manifest file '../../../build/robot_fusion/robot_fusion.egg-info/SOURCES.txt'\n"}
+[16.654283] (robot_vision) StdoutLine: {'line': b'running install_data\n'}
+[16.658028] (robot_vision) StdoutLine: {'line': b'copying resource/robot_vision -> /home/sunrise/Rosmaster/install/robot_vision/share/ament_index/resource_index/packages\n'}
+[16.660164] (robot_brain) StdoutLine: {'line': b"reading manifest file '../../../build/robot_brain/robot_brain.egg-info/SOURCES.txt'\n"}
+[16.662212] (robot_fusion) StdoutLine: {'line': b"writing manifest file '../../../build/robot_fusion/robot_fusion.egg-info/SOURCES.txt'\n"}
+[16.663293] (robot_fusion) StdoutLine: {'line': b'running build\n'}
+[16.664251] (robot_fusion) StdoutLine: {'line': b'running build_py\n'}
+[16.665294] (robot_fusion) StdoutLine: {'line': b'copying robot_fusion/fusion_node.py -> /home/sunrise/Rosmaster/build/robot_fusion/build/lib/robot_fusion\n'}
+[16.666919] (robot_fusion) StdoutLine: {'line': b'copying robot_fusion/__init__.py -> /home/sunrise/Rosmaster/build/robot_fusion/build/lib/robot_fusion\n'}
+[16.668612] (robot_vision) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision\n'}
+[16.671426] (-) TimerEvent: {}
+[16.672286] (robot_fusion) StdoutLine: {'line': b'running install\n'}
+[16.675599] (robot_vision) StdoutLine: {'line': b'copying dataset_left/2-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.677393] (robot_brain) StdoutLine: {'line': b"writing manifest file '../../../build/robot_brain/robot_brain.egg-info/SOURCES.txt'\n"}
+[16.679674] (robot_brain) StdoutLine: {'line': b'running build\n'}
+[16.680818] (robot_brain) StdoutLine: {'line': b'running build_py\n'}
+[16.681696] (robot_brain) StdoutLine: {'line': b'copying robot_brain/brain_node.py -> /home/sunrise/Rosmaster/build/robot_brain/build/lib/robot_brain\n'}
+[16.693878] (robot_brain) StdoutLine: {'line': b'copying robot_brain/__init__.py -> /home/sunrise/Rosmaster/build/robot_brain/build/lib/robot_brain\n'}
+[16.694730] (robot_vision) StdoutLine: {'line': b'copying dataset_left/3-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.695449] (robot_vision) StdoutLine: {'line': b'copying dataset_left/1-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.696120] (robot_brain) StdoutLine: {'line': b'running install\n'}
+[16.696796] (robot_vision) StdoutLine: {'line': b'copying dataset_left/4-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.697470] (robot_vision) StdoutLine: {'line': b'copying dataset_left/3-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.698188] (robot_vision) StdoutLine: {'line': b'copying dataset_left/4-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.698860] (robot_vision) StdoutLine: {'line': b'copying dataset_left/4-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.700527] (robot_vision) StdoutLine: {'line': b'copying dataset_left/1-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.705109] (robot_vision) StdoutLine: {'line': b'copying dataset_left/3-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.707747] (robot_vision) StdoutLine: {'line': b'copying dataset_left/2-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.710459] (robot_vision) StdoutLine: {'line': b'copying dataset_left/5-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.714315] (robot_fusion) StdoutLine: {'line': b'running install_lib\n'}
+[16.715604] (robot_vision) StdoutLine: {'line': b'copying dataset_left/2-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.718298] (robot_vision) StdoutLine: {'line': b'copying dataset_left/5-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.722338] (robot_vision) StdoutLine: {'line': b'copying dataset_left/4-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.723519] (robot_brain) StdoutLine: {'line': b'running install_lib\n'}
+[16.725992] (robot_vision) StdoutLine: {'line': b'copying dataset_left/1-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.728737] (robot_vision) StdoutLine: {'line': b'copying dataset_left/5-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.732842] (robot_vision) StdoutLine: {'line': b'copying dataset_left/4-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.735634] (robot_vision) StdoutLine: {'line': b'copying dataset_left/2-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.738586] (robot_vision) StdoutLine: {'line': b'copying dataset_left/2-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.741362] (robot_vision) StdoutLine: {'line': b'copying dataset_left/3-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.750002] (robot_vision) StdoutLine: {'line': b'copying dataset_left/1-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.750930] (robot_vision) StdoutLine: {'line': b'copying dataset_left/5-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.751787] (robot_vision) StdoutLine: {'line': b'copying dataset_left/1-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.753942] (robot_vision) StdoutLine: {'line': b'copying dataset_left/3-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left\n'}
+[16.757185] (robot_vision) StdoutLine: {'line': b'copying dataset_right/2-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.760748] (robot_control) StdoutLine: {'line': b'running install_data\n'}
+[16.767253] (robot_vision) StdoutLine: {'line': b'copying dataset_right/3-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.768259] (robot_vision) StdoutLine: {'line': b'copying dataset_right/1-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.769578] (robot_vision) StdoutLine: {'line': b'copying dataset_right/4-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.770354] (robot_vision) StdoutLine: {'line': b'copying dataset_right/5-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.771218] (robot_control) StdoutLine: {'line': b'copying resource/robot_control -> /home/sunrise/Rosmaster/install/robot_control/share/ament_index/resource_index/packages\n'}
+[16.772803] (-) TimerEvent: {}
+[16.773667] (robot_vision) StdoutLine: {'line': b'copying dataset_right/3-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.774599] (robot_control) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_control/share/robot_control\n'}
+[16.775425] (robot_control) StdoutLine: {'line': b'running install_egg_info\n'}
+[16.776484] (robot_vision) StdoutLine: {'line': b'copying dataset_right/4-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.778316] (robot_vision) StdoutLine: {'line': b'copying dataset_right/4-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.780851] (robot_vision) StdoutLine: {'line': b'copying dataset_right/1-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.783733] (robot_vision) StdoutLine: {'line': b'copying dataset_right/3-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.786264] (robot_vision) StdoutLine: {'line': b'copying dataset_right/2-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.790292] (robot_vision) StdoutLine: {'line': b'copying dataset_right/5-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.791898] (robot_vision) StdoutLine: {'line': b'copying dataset_right/2-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.794147] (robot_vision) StdoutLine: {'line': b'copying dataset_right/5-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.796650] (robot_vision) StdoutLine: {'line': b'copying dataset_right/4-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.797962] (robot_link) StdoutLine: {'line': b'copying /home/sunrise/Rosmaster/build/robot_link/build/lib/robot_link/serial_node.py -> /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link\n'}
+[16.799021] (robot_vision) StdoutLine: {'line': b'copying dataset_right/1-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.799845] (robot_link) StdoutLine: {'line': b'byte-compiling /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link/serial_node.py to serial_node.cpython-310.pyc\n'}
+[16.801000] (robot_vision) StdoutLine: {'line': b'copying dataset_right/5-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.801917] (robot_vision) StdoutLine: {'line': b'copying dataset_right/4-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.802604] (robot_vision) StdoutLine: {'line': b'copying dataset_right/2-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.805820] (robot_vision) StdoutLine: {'line': b'copying dataset_right/2-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.806682] (robot_vision) StdoutLine: {'line': b'copying dataset_right/3-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.807832] (robot_vision) StdoutLine: {'line': b'copying dataset_right/1-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.820478] (robot_link) StdoutLine: {'line': b'running install_data\n'}
+[16.821956] (robot_vision) StdoutLine: {'line': b'copying dataset_right/5-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.822825] (robot_link) StdoutLine: {'line': b'copying resource/robot_link -> /home/sunrise/Rosmaster/install/robot_link/share/ament_index/resource_index/packages\n'}
+[16.823610] (robot_link) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_link/share/robot_link\n'}
+[16.824370] (robot_link) StdoutLine: {'line': b'running install_egg_info\n'}
+[16.825116] (robot_vision) StdoutLine: {'line': b'copying dataset_right/1-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.825891] (robot_vision) StdoutLine: {'line': b'copying dataset_right/3-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right\n'}
+[16.826672] (robot_vision) StdoutLine: {'line': b'copying config/right_camera_params.json -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/config\n'}
+[16.831405] (robot_vision) StdoutLine: {'line': b'copying config/visison_params.yaml -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/config\n'}
+[16.833235] (robot_vision) StdoutLine: {'line': b'copying config/left_camera_params.json -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/config\n'}
+[16.834589] (robot_vision) StdoutLine: {'line': b'running install_egg_info\n'}
+[16.859414] (robot_protocol) StdoutLine: {'line': b"reading manifest file '../../../build/robot_protocol/robot_protocol.egg-info/SOURCES.txt'\n"}
+[16.867024] (robot_protocol) StdoutLine: {'line': b"writing manifest file '../../../build/robot_protocol/robot_protocol.egg-info/SOURCES.txt'\n"}
+[16.868228] (robot_protocol) StdoutLine: {'line': b'running build\n'}
+[16.869274] (robot_protocol) StdoutLine: {'line': b'running build_py\n'}
+[16.870288] (robot_protocol) StdoutLine: {'line': b'copying robot_protocol/protocol_pack_node.py -> /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol\n'}
+[16.871890] (robot_protocol) StdoutLine: {'line': b'copying robot_protocol/protocol_node.py -> /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol\n'}
+[16.874698] (robot_protocol) StdoutLine: {'line': b'copying robot_protocol/__init__.py -> /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol\n'}
+[16.875591] (-) TimerEvent: {}
+[16.878369] (robot_protocol) StdoutLine: {'line': b'running install\n'}
+[16.905330] (robot_brain) StdoutLine: {'line': b'running install_data\n'}
+[16.907273] (robot_fusion) StdoutLine: {'line': b'running install_data\n'}
+[16.908590] (robot_brain) StdoutLine: {'line': b'copying resource/robot_brain -> /home/sunrise/Rosmaster/install/robot_brain/share/ament_index/resource_index/packages\n'}
+[16.909955] (robot_fusion) StdoutLine: {'line': b'copying resource/robot_fusion -> /home/sunrise/Rosmaster/install/robot_fusion/share/ament_index/resource_index/packages\n'}
+[16.911154] (robot_brain) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_brain/share/robot_brain\n'}
+[16.912190] (robot_fusion) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_fusion/share/robot_fusion\n'}
+[16.913236] (robot_fusion) StdoutLine: {'line': b'running install_egg_info\n'}
+[16.913959] (robot_protocol) StdoutLine: {'line': b'running install_lib\n'}
+[16.915126] (robot_brain) StdoutLine: {'line': b'copying config/position.yaml -> /home/sunrise/Rosmaster/install/robot_brain/share/robot_brain/config\n'}
+[16.916017] (robot_brain) StdoutLine: {'line': b'running install_egg_info\n'}
+[16.958653] (robot_control) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages/robot_control-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[16.965178] (robot_link) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[16.966088] (robot_control) StdoutLine: {'line': b'Copying ../../../build/robot_control/robot_control.egg-info to /home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages/robot_control-1.0.0-py3.10.egg-info\n'}
+[16.968607] (robot_link) StdoutLine: {'line': b'Copying ../../../build/robot_link/robot_link.egg-info to /home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages/robot_link-1.0.0-py3.10.egg-info\n'}
+[16.975977] (-) TimerEvent: {}
+[16.977771] (robot_control) StdoutLine: {'line': b'running install_scripts\n'}
+[16.979392] (robot_link) StdoutLine: {'line': b'running install_scripts\n'}
+[16.998494] (robot_vision) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages/robot_vision-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[16.999448] (robot_vision) StdoutLine: {'line': b'Copying ../../../build/robot_vision/robot_vision.egg-info to /home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages/robot_vision-1.0.0-py3.10.egg-info\n'}
+[17.006147] (robot_vision) StdoutLine: {'line': b'running install_scripts\n'}
+[17.039711] (robot_protocol) StdoutLine: {'line': b'running install_data\n'}
+[17.042445] (robot_protocol) StdoutLine: {'line': b'copying resource/robot_protocol -> /home/sunrise/Rosmaster/install/robot_protocol/share/ament_index/resource_index/packages\n'}
+[17.044751] (robot_protocol) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_protocol/share/robot_protocol\n'}
+[17.046424] (robot_protocol) StdoutLine: {'line': b'running install_egg_info\n'}
+[17.068422] (robot_fusion) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages/robot_fusion-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[17.069608] (robot_fusion) StdoutLine: {'line': b'Copying ../../../build/robot_fusion/robot_fusion.egg-info to /home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages/robot_fusion-1.0.0-py3.10.egg-info\n'}
+[17.081259] (robot_fusion) StdoutLine: {'line': b'running install_scripts\n'}
+[17.082212] (-) TimerEvent: {}
+[17.094793] (robot_brain) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages/robot_brain-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[17.098130] (robot_brain) StdoutLine: {'line': b'Copying ../../../build/robot_brain/robot_brain.egg-info to /home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages/robot_brain-1.0.0-py3.10.egg-info\n'}
+[17.111279] (robot_brain) StdoutLine: {'line': b'running install_scripts\n'}
+[17.182460] (-) TimerEvent: {}
+[17.220695] (robot_protocol) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[17.229960] (robot_protocol) StdoutLine: {'line': b'Copying ../../../build/robot_protocol/robot_protocol.egg-info to /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol-1.0.0-py3.10.egg-info\n'}
+[17.235717] (robot_protocol) StdoutLine: {'line': b'running install_scripts\n'}
+[17.282703] (-) TimerEvent: {}
+[17.295724] (robot_link) StdoutLine: {'line': b'Installing hotspot_node script to /home/sunrise/Rosmaster/install/robot_link/lib/robot_link\n'}
+[17.297631] (robot_link) StdoutLine: {'line': b'Installing serial_node script to /home/sunrise/Rosmaster/install/robot_link/lib/robot_link\n'}
+[17.299687] (robot_link) StdoutLine: {'line': b'Installing tcp_server_node script to /home/sunrise/Rosmaster/install/robot_link/lib/robot_link\n'}
+[17.303586] (robot_link) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_link/install.log'\n"}
+[17.305047] (robot_control) StdoutLine: {'line': b'Installing control_node script to /home/sunrise/Rosmaster/install/robot_control/lib/robot_control\n'}
+[17.307043] (robot_control) StdoutLine: {'line': b'Installing twist_to_control_bridge script to /home/sunrise/Rosmaster/install/robot_control/lib/robot_control\n'}
+[17.312204] (robot_control) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_control/install.log'\n"}
+[17.362830] (robot_vision) StdoutLine: {'line': b'Installing vision_node script to /home/sunrise/Rosmaster/install/robot_vision/lib/robot_vision\n'}
+[17.369086] (robot_vision) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_vision/install.log'\n"}
+[17.382949] (-) TimerEvent: {}
+[17.399941] (robot_fusion) StdoutLine: {'line': b'Installing fusion_node script to /home/sunrise/Rosmaster/install/robot_fusion/lib/robot_fusion\n'}
+[17.408412] (robot_fusion) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_fusion/install.log'\n"}
+[17.483228] (-) TimerEvent: {}
+[17.579532] (robot_brain) StdoutLine: {'line': b'Installing brain_node script to /home/sunrise/Rosmaster/install/robot_brain/lib/robot_brain\n'}
+[17.582342] (robot_brain) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_brain/install.log'\n"}
+[17.583298] (-) TimerEvent: {}
+[17.604912] (robot_link) CommandEnded: {'returncode': 0}
+[17.607895] (robot_protocol) StdoutLine: {'line': b'Installing protocol_node script to /home/sunrise/Rosmaster/install/robot_protocol/lib/robot_protocol\n'}
+[17.611578] (robot_protocol) StdoutLine: {'line': b'Installing protocol_pack_node script to /home/sunrise/Rosmaster/install/robot_protocol/lib/robot_protocol\n'}
+[17.612761] (robot_protocol) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_protocol/install.log'\n"}
+[17.684890] (-) TimerEvent: {}
+[17.716800] (robot_link) JobEnded: {'identifier': 'robot_link', 'rc': 0}
+[17.742486] (robot_control) CommandEnded: {'returncode': 0}
+[17.786608] (-) TimerEvent: {}
+[17.798798] (robot_control) JobEnded: {'identifier': 'robot_control', 'rc': 0}
+[17.808768] (robot_vision) CommandEnded: {'returncode': 0}
+[17.860705] (robot_vision) JobEnded: {'identifier': 'robot_vision', 'rc': 0}
+[17.869598] (robot_fusion) CommandEnded: {'returncode': 0}
+[17.887061] (-) TimerEvent: {}
+[17.917450] (robot_fusion) JobEnded: {'identifier': 'robot_fusion', 'rc': 0}
+[17.926463] (robot_brain) CommandEnded: {'returncode': 0}
+[17.975081] (robot_brain) JobEnded: {'identifier': 'robot_brain', 'rc': 0}
+[17.982246] (robot_protocol) CommandEnded: {'returncode': 0}
+[17.987739] (-) TimerEvent: {}
+[18.030368] (robot_protocol) JobEnded: {'identifier': 'robot_protocol', 'rc': 0}
+[18.040468] (robot_bringup) JobStarted: {'identifier': 'robot_bringup'}
+[18.089138] (-) TimerEvent: {}
+[18.190531] (-) TimerEvent: {}
+[18.291654] (-) TimerEvent: {}
+[18.392613] (-) TimerEvent: {}
+[18.493678] (-) TimerEvent: {}
+[18.597186] (-) TimerEvent: {}
+[18.698274] (-) TimerEvent: {}
+[18.799309] (-) TimerEvent: {}
+[18.900276] (-) TimerEvent: {}
+[19.001392] (-) TimerEvent: {}
+[19.102610] (-) TimerEvent: {}
+[19.203484] (-) TimerEvent: {}
+[19.304448] (-) TimerEvent: {}
+[19.405566] (-) TimerEvent: {}
+[19.506744] (-) TimerEvent: {}
+[19.607825] (-) TimerEvent: {}
+[19.708889] (-) TimerEvent: {}
+[19.809951] (-) TimerEvent: {}
+[19.910824] (-) TimerEvent: {}
+[20.011734] (-) TimerEvent: {}
+[20.112606] (-) TimerEvent: {}
+[20.213474] (-) TimerEvent: {}
+[20.314431] (-) TimerEvent: {}
+[20.415311] (-) TimerEvent: {}
+[20.516201] (-) TimerEvent: {}
+[20.617086] (-) TimerEvent: {}
+[20.717956] (-) TimerEvent: {}
+[20.818835] (-) TimerEvent: {}
+[20.919748] (-) TimerEvent: {}
+[21.020723] (-) TimerEvent: {}
+[21.121757] (-) TimerEvent: {}
+[21.222696] (-) TimerEvent: {}
+[21.323735] (-) TimerEvent: {}
+[21.424761] (-) TimerEvent: {}
+[21.525670] (-) TimerEvent: {}
+[21.626599] (-) TimerEvent: {}
+[21.727612] (-) TimerEvent: {}
+[21.828721] (-) TimerEvent: {}
+[21.929730] (-) TimerEvent: {}
+[22.030598] (-) TimerEvent: {}
+[22.131485] (-) TimerEvent: {}
+[22.232670] (-) TimerEvent: {}
+[22.333622] (-) TimerEvent: {}
+[22.434493] (-) TimerEvent: {}
+[22.535365] (-) TimerEvent: {}
+[22.636232] (-) TimerEvent: {}
+[22.737161] (-) TimerEvent: {}
+[22.838348] (-) TimerEvent: {}
+[22.939458] (-) TimerEvent: {}
+[23.034763] (robot_bringup) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/robot_bringup', 'build', '--build-base', '/home/sunrise/Rosmaster/build/robot_bringup/build', 'install', '--record', '/home/sunrise/Rosmaster/build/robot_bringup/install.log', '--install-scripts', '$base/lib/robot_bringup', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/sunrise/Rosmaster/src/ROS2/robot_bringup', 'env': {'PYTHON_BASIC_REPL': '1', 'LANGUAGE': 'zh_CN', 'USER': 'sunrise', 'XDG_SEAT': 'seat0', 'SSH_AGENT_PID': '1370', 'XDG_SESSION_TYPE': 'x11', 'GIT_ASKPASS': '/usr/share/code/resources/app/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:/usr/hobot/lib:/app/lib:/app/pub/lib:/middleware/lib:/middleware/pub/lib:/usr/hobot/lib/sensor:/system/lib:/system/usr/lib:/lib:', 'HOME': '/home/sunrise', 'CHROME_DESKTOP': 'code.desktop', 'TERM_PROGRAM_VERSION': '1.119.0', 'DESKTOP_SESSION': 'xfce', 'ROS_PYTHON_VERSION': '3', 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0', 'VSCODE_GIT_ASKPASS_MAIN': '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/usr/share/code/code', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/sunrise/Rosmaster/install', 'ROS_DISTRO': 'humble', 'GTK_IM_MODULE': 'ibus', 'LOGNAME': 'sunrise', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': 'c1', 'FC_FONTATIONS': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sunrise/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sunrise/.local/bin:/opt/ros/humble/bin:/usr/hobot/bin/:/home/sunrise/.local/bin:/usr/hobot/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/bundled/scripts/noConfigScripts', 'SESSION_MANAGER': 'local/ubuntu:@/tmp/.ICE-unix/1195,unix/ubuntu:/tmp/.ICE-unix/1195', 'GDM_LANG': 'zh_CN', 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0', 'XDG_MENU_PREFIX': 'xfce-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'GDK_BACKEND': 'x11', 'DISPLAY': ':0.0', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/sunrise/.vscode/extensions/ms-python.debugpy-2026.6.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-63477253394e6e1e.txt', 'LANG': 'zh_CN.UTF-8', 'XDG_CURRENT_DESKTOP': 'XFCE', 'PYTHONSTARTUP': '/home/sunrise/.config/Code/User/workspaceStorage/ca6577712ad7f272d5d00a106d971f34/ms-python.python/pythonrc.py', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'xfce', 'XAUTHORITY': '/home/sunrise/.Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-0d485fbaaa.sock', 'TERM_PROGRAM': 'vscode', 'SSH_AUTH_SOCK': '/tmp/ssh-XXXXXXa4DMIg/agent.1366', 'XDG_GREETER_DATA_DIR': '/var/lib/lightdm-data/sunrise', 'AMENT_PREFIX_PATH': '/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble', 'SHELL': '/bin/bash', 'NO_AT_BRIDGE': '1', 'GDMSESSION': 'xfce', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'QT_IM_MODULE': 'ibus', 'XDG_VTNR': '7', 'PWD': '/home/sunrise/Rosmaster/build/robot_bringup', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-xfce:/etc/xdg:/etc/xdg', 'CLUTTER_IM_MODULE': 'ibus', 'XDG_DATA_DIRS': '/usr/share/xfce4:/usr/local/share/:/usr/share/:/usr/share', 'PYTHONPATH': '/home/sunrise/Rosmaster/build/robot_bringup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[23.043796] (-) TimerEvent: {}
+[23.144713] (-) TimerEvent: {}
+[23.245602] (-) TimerEvent: {}
+[23.346531] (-) TimerEvent: {}
+[23.447414] (-) TimerEvent: {}
+[23.548362] (-) TimerEvent: {}
+[23.649297] (-) TimerEvent: {}
+[23.750443] (-) TimerEvent: {}
+[23.851431] (-) TimerEvent: {}
+[23.952341] (-) TimerEvent: {}
+[24.053268] (-) TimerEvent: {}
+[24.065645] (robot_bringup) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[24.066570] (robot_bringup) StderrLine: {'line': b'!!\n'}
+[24.067151] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.067677] (robot_bringup) StderrLine: {'line': b'        ********************************************************************************\n'}
+[24.068175] (robot_bringup) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[24.068721] (robot_bringup) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[24.069243] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.069815] (robot_bringup) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[24.070347] (robot_bringup) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[24.070820] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.071343] (robot_bringup) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[24.071835] (robot_bringup) StderrLine: {'line': b'        ********************************************************************************\n'}
+[24.072297] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.072751] (robot_bringup) StderrLine: {'line': b'!!\n'}
+[24.073224] (robot_bringup) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[24.153491] (-) TimerEvent: {}
+[24.191746] (robot_bringup) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'\n"}
+[24.192727] (robot_bringup) StderrLine: {'line': b'  warnings.warn(msg)\n'}
+[24.253671] (-) TimerEvent: {}
+[24.354677] (-) TimerEvent: {}
+[24.430576] (robot_bringup) StderrLine: {'line': b"/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.\n"}
+[24.431674] (robot_bringup) StderrLine: {'line': b'!!\n'}
+[24.432662] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.433490] (robot_bringup) StderrLine: {'line': b'        ********************************************************************************\n'}
+[24.434212] (robot_bringup) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[24.435271] (robot_bringup) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[24.436013] (robot_bringup) StderrLine: {'line': b'        (Affected: robot_bringup).\n'}
+[24.436970] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.437789] (robot_bringup) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[24.438521] (robot_bringup) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[24.439225] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.439865] (robot_bringup) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[24.440468] (robot_bringup) StderrLine: {'line': b'        ********************************************************************************\n'}
+[24.441223] (robot_bringup) StderrLine: {'line': b'\n'}
+[24.441814] (robot_bringup) StderrLine: {'line': b'!!\n'}
+[24.442283] (robot_bringup) StderrLine: {'line': b'  opt = self._enforce_underscore(opt, section)\n'}
+[24.454869] (-) TimerEvent: {}
+[24.555781] (-) TimerEvent: {}
+[24.656748] (-) TimerEvent: {}
+[24.757653] (-) TimerEvent: {}
+[24.858567] (-) TimerEvent: {}
+[24.912507] (robot_bringup) StdoutLine: {'line': b'running egg_info\n'}
+[24.958764] (-) TimerEvent: {}
+[25.033382] (robot_bringup) StdoutLine: {'line': b'writing ../../../build/robot_bringup/robot_bringup.egg-info/PKG-INFO\n'}
+[25.036298] (robot_bringup) StdoutLine: {'line': b'writing dependency_links to ../../../build/robot_bringup/robot_bringup.egg-info/dependency_links.txt\n'}
+[25.039099] (robot_bringup) StdoutLine: {'line': b'writing requirements to ../../../build/robot_bringup/robot_bringup.egg-info/requires.txt\n'}
+[25.040651] (robot_bringup) StdoutLine: {'line': b'writing top-level names to ../../../build/robot_bringup/robot_bringup.egg-info/top_level.txt\n'}
+[25.058951] (-) TimerEvent: {}
+[25.159856] (-) TimerEvent: {}
+[25.260843] (-) TimerEvent: {}
+[25.286868] (robot_bringup) StdoutLine: {'line': b"reading manifest file '../../../build/robot_bringup/robot_bringup.egg-info/SOURCES.txt'\n"}
+[25.296052] (robot_bringup) StdoutLine: {'line': b"writing manifest file '../../../build/robot_bringup/robot_bringup.egg-info/SOURCES.txt'\n"}
+[25.297084] (robot_bringup) StdoutLine: {'line': b'running build\n'}
+[25.297947] (robot_bringup) StdoutLine: {'line': b'running build_py\n'}
+[25.298862] (robot_bringup) StdoutLine: {'line': b'copying robot_bringup/__init__.py -> /home/sunrise/Rosmaster/build/robot_bringup/build/lib/robot_bringup\n'}
+[25.301877] (robot_bringup) StdoutLine: {'line': b'running install\n'}
+[25.338000] (robot_bringup) StdoutLine: {'line': b'running install_lib\n'}
+[25.361070] (-) TimerEvent: {}
+[25.461787] (robot_bringup) StdoutLine: {'line': b'running install_data\n'}
+[25.462629] (-) TimerEvent: {}
+[25.463310] (robot_bringup) StdoutLine: {'line': b'copying resource/robot_bringup -> /home/sunrise/Rosmaster/install/robot_bringup/share/ament_index/resource_index/packages\n'}
+[25.464818] (robot_bringup) StdoutLine: {'line': b'copying package.xml -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup\n'}
+[25.466473] (robot_bringup) StdoutLine: {'line': b'copying launch/hardware_launch.py -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup/launch\n'}
+[25.467595] (robot_bringup) StdoutLine: {'line': b'copying launch/teleop_launch.py -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup/launch\n'}
+[25.468533] (robot_bringup) StdoutLine: {'line': b'running install_egg_info\n'}
+[25.562842] (-) TimerEvent: {}
+[25.609827] (robot_bringup) StdoutLine: {'line': b"removing '/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages/robot_bringup-1.0.0-py3.10.egg-info' (and everything under it)\n"}
+[25.612275] (robot_bringup) StdoutLine: {'line': b'Copying ../../../build/robot_bringup/robot_bringup.egg-info to /home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages/robot_bringup-1.0.0-py3.10.egg-info\n'}
+[25.619187] (robot_bringup) StdoutLine: {'line': b'running install_scripts\n'}
+[25.663043] (-) TimerEvent: {}
+[25.764015] (-) TimerEvent: {}
+[25.864989] (-) TimerEvent: {}
+[25.875369] (robot_bringup) StdoutLine: {'line': b"writing list of installed files to '/home/sunrise/Rosmaster/build/robot_bringup/install.log'\n"}
+[25.965257] (-) TimerEvent: {}
+[26.066344] (-) TimerEvent: {}
+[26.132413] (robot_bringup) CommandEnded: {'returncode': 0}
+[26.167867] (-) TimerEvent: {}
+[26.189027] (robot_bringup) JobEnded: {'identifier': 'robot_bringup', 'rc': 0}
+[26.195404] (-) EventReactorShutdown: {}

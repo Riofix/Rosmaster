@@ -1,0 +1,54 @@
+/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self._enforce_underscore(opt, section)
+/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+        (Affected: robot_bringup).
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self._enforce_underscore(opt, section)
+running egg_info
+writing ../../../build/robot_bringup/robot_bringup.egg-info/PKG-INFO
+writing dependency_links to ../../../build/robot_bringup/robot_bringup.egg-info/dependency_links.txt
+writing requirements to ../../../build/robot_bringup/robot_bringup.egg-info/requires.txt
+writing top-level names to ../../../build/robot_bringup/robot_bringup.egg-info/top_level.txt
+reading manifest file '../../../build/robot_bringup/robot_bringup.egg-info/SOURCES.txt'
+writing manifest file '../../../build/robot_bringup/robot_bringup.egg-info/SOURCES.txt'
+running build
+running build_py
+copying robot_bringup/__init__.py -> /home/sunrise/Rosmaster/build/robot_bringup/build/lib/robot_bringup
+running install
+running install_lib
+running install_data
+copying resource/robot_bringup -> /home/sunrise/Rosmaster/install/robot_bringup/share/ament_index/resource_index/packages
+copying package.xml -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup
+copying launch/hardware_launch.py -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup/launch
+running install_egg_info
+removing '/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages/robot_bringup-1.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../../build/robot_bringup/robot_bringup.egg-info to /home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages/robot_bringup-1.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/sunrise/Rosmaster/build/robot_bringup/install.log'

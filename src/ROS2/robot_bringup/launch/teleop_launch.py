@@ -13,7 +13,7 @@ def generate_launch_description():
             executable='serial_node',
             name='serial_node',
             parameters=[{
-                'port': '/dev/rosmaster',
+                'port': '/dev/Rosmaster',
                 'baudrate': 115200
             }],
             output='screen'
@@ -34,7 +34,7 @@ def generate_launch_description():
             executable='twist_to_control_bridge',
             name='twist_to_control_bridge',
             parameters=[{
-                'car_type': 7,          # 0x07 四轮全同向
+                'car_type':4 ,          # 0x07 四轮全同向
                 'linear_scale': 1000,   # m/s → mm/s
                 'angular_scale': 2000,  # rad/s → chassis Vz
                 'max_vx': 1000,

@@ -1,0 +1,111 @@
+[12.689s] Invoking command in '/home/sunrise/Rosmaster/src/ROS2/robot_vision': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_vision/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_vision build --build-base /home/sunrise/Rosmaster/build/robot_vision/build install --record /home/sunrise/Rosmaster/build/robot_vision/install.log --install-scripts $base/lib/robot_vision --single-version-externally-managed install_data
+[13.925s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[13.926s] !!
+[13.927s] 
+[13.927s]         ********************************************************************************
+[13.928s]         Usage of dash-separated 'script-dir' will not be supported in future
+[13.929s]         versions. Please use the underscore name 'script_dir' instead.
+[13.929s] 
+[13.930s]         This deprecation is overdue, please update your project and remove deprecated
+[13.931s]         calls to avoid build errors in the future.
+[13.931s] 
+[13.932s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[13.932s]         ********************************************************************************
+[13.933s] 
+[13.934s] !!
+[13.934s]   opt = self._enforce_underscore(opt, section)
+[14.133s] /usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+[14.133s]   warnings.warn(msg)
+[14.391s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[14.391s] !!
+[14.392s] 
+[14.393s]         ********************************************************************************
+[14.393s]         Usage of dash-separated 'script-dir' will not be supported in future
+[14.394s]         versions. Please use the underscore name 'script_dir' instead.
+[14.395s]         (Affected: robot_vision).
+[14.395s] 
+[14.396s]         This deprecation is overdue, please update your project and remove deprecated
+[14.396s]         calls to avoid build errors in the future.
+[14.397s] 
+[14.398s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[14.401s]         ********************************************************************************
+[14.402s] 
+[14.402s] !!
+[14.404s]   opt = self._enforce_underscore(opt, section)
+[14.858s] running egg_info
+[14.972s] writing ../../../build/robot_vision/robot_vision.egg-info/PKG-INFO
+[14.977s] writing dependency_links to ../../../build/robot_vision/robot_vision.egg-info/dependency_links.txt
+[14.979s] writing entry points to ../../../build/robot_vision/robot_vision.egg-info/entry_points.txt
+[14.979s] writing requirements to ../../../build/robot_vision/robot_vision.egg-info/requires.txt
+[14.980s] writing top-level names to ../../../build/robot_vision/robot_vision.egg-info/top_level.txt
+[15.212s] reading manifest file '../../../build/robot_vision/robot_vision.egg-info/SOURCES.txt'
+[15.229s] writing manifest file '../../../build/robot_vision/robot_vision.egg-info/SOURCES.txt'
+[15.231s] running build
+[15.232s] running build_py
+[15.233s] copying robot_vision/vision_node.py -> /home/sunrise/Rosmaster/build/robot_vision/build/lib/robot_vision
+[15.238s] copying robot_vision/__init__.py -> /home/sunrise/Rosmaster/build/robot_vision/build/lib/robot_vision
+[15.239s] copying robot_vision/finalest-inference.py -> /home/sunrise/Rosmaster/build/robot_vision/build/lib/robot_vision
+[15.240s] running install
+[15.279s] running install_lib
+[15.388s] running install_data
+[15.390s] copying resource/robot_vision -> /home/sunrise/Rosmaster/install/robot_vision/share/ament_index/resource_index/packages
+[15.391s] copying package.xml -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision
+[15.393s] copying dataset_left/2-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.394s] copying dataset_left/3-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.398s] copying dataset_left/1-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.400s] copying dataset_left/4-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.402s] copying dataset_left/3-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.405s] copying dataset_left/4-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.406s] copying dataset_left/4-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.432s] copying dataset_left/1-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.433s] copying dataset_left/3-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.434s] copying dataset_left/2-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.438s] copying dataset_left/5-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.439s] copying dataset_left/2-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.439s] copying dataset_left/5-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.440s] copying dataset_left/4-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.441s] copying dataset_left/1-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.459s] copying dataset_left/5-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.460s] copying dataset_left/4-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.461s] copying dataset_left/2-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.462s] copying dataset_left/2-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.465s] copying dataset_left/3-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.466s] copying dataset_left/1-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.467s] copying dataset_left/5-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.476s] copying dataset_left/1-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.479s] copying dataset_left/3-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_left
+[15.483s] copying dataset_right/2-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.483s] copying dataset_right/3-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.484s] copying dataset_right/1-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.485s] copying dataset_right/4-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.486s] copying dataset_right/5-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.486s] copying dataset_right/3-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.488s] copying dataset_right/4-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.490s] copying dataset_right/4-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.491s] copying dataset_right/1-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.498s] copying dataset_right/3-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.499s] copying dataset_right/2-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.519s] copying dataset_right/5-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.519s] copying dataset_right/2-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.521s] copying dataset_right/5-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.522s] copying dataset_right/4-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.524s] copying dataset_right/1-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.525s] copying dataset_right/5-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.527s] copying dataset_right/4-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.528s] copying dataset_right/2-5.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.530s] copying dataset_right/2-2.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.531s] copying dataset_right/3-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.532s] copying dataset_right/1-3.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.532s] copying dataset_right/5-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.533s] copying dataset_right/1-1.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.534s] copying dataset_right/3-4.png -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/dataset_right
+[15.534s] copying config/right_camera_params.json -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/config
+[15.536s] copying config/visison_params.yaml -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/config
+[15.537s] copying config/left_camera_params.json -> /home/sunrise/Rosmaster/install/robot_vision/share/robot_vision/config
+[15.537s] running install_egg_info
+[15.597s] removing '/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages/robot_vision-1.0.0-py3.10.egg-info' (and everything under it)
+[15.598s] Copying ../../../build/robot_vision/robot_vision.egg-info to /home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages/robot_vision-1.0.0-py3.10.egg-info
+[15.611s] running install_scripts
+[15.858s] Installing vision_node script to /home/sunrise/Rosmaster/install/robot_vision/lib/robot_vision
+[15.859s] writing list of installed files to '/home/sunrise/Rosmaster/build/robot_vision/install.log'
+[16.161s] Invoked command in '/home/sunrise/Rosmaster/src/ROS2/robot_vision' returned '0': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_vision/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_vision build --build-base /home/sunrise/Rosmaster/build/robot_vision/build install --record /home/sunrise/Rosmaster/build/robot_vision/install.log --install-scripts $base/lib/robot_vision --single-version-externally-managed install_data

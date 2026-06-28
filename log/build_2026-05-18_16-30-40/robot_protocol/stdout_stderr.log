@@ -1,0 +1,67 @@
+/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self._enforce_underscore(opt, section)
+/usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+        (Affected: robot_protocol).
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self._enforce_underscore(opt, section)
+running egg_info
+creating ../../../build/robot_protocol/robot_protocol.egg-info
+writing ../../../build/robot_protocol/robot_protocol.egg-info/PKG-INFO
+writing dependency_links to ../../../build/robot_protocol/robot_protocol.egg-info/dependency_links.txt
+writing entry points to ../../../build/robot_protocol/robot_protocol.egg-info/entry_points.txt
+writing requirements to ../../../build/robot_protocol/robot_protocol.egg-info/requires.txt
+writing top-level names to ../../../build/robot_protocol/robot_protocol.egg-info/top_level.txt
+writing manifest file '../../../build/robot_protocol/robot_protocol.egg-info/SOURCES.txt'
+reading manifest file '../../../build/robot_protocol/robot_protocol.egg-info/SOURCES.txt'
+writing manifest file '../../../build/robot_protocol/robot_protocol.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol
+copying robot_protocol/protocol_pack_node.py -> /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol
+copying robot_protocol/protocol_node.py -> /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol
+copying robot_protocol/__init__.py -> /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol
+running install
+running install_lib
+creating /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol
+copying /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol/protocol_pack_node.py -> /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol
+copying /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol/protocol_node.py -> /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol
+copying /home/sunrise/Rosmaster/build/robot_protocol/build/lib/robot_protocol/__init__.py -> /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol
+byte-compiling /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol/protocol_pack_node.py to protocol_pack_node.cpython-310.pyc
+byte-compiling /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol/protocol_node.py to protocol_node.cpython-310.pyc
+byte-compiling /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/sunrise/Rosmaster/install/robot_protocol/share/ament_index/resource_index/packages
+copying resource/robot_protocol -> /home/sunrise/Rosmaster/install/robot_protocol/share/ament_index/resource_index/packages
+copying package.xml -> /home/sunrise/Rosmaster/install/robot_protocol/share/robot_protocol
+running install_egg_info
+Copying ../../../build/robot_protocol/robot_protocol.egg-info to /home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages/robot_protocol-1.0.0-py3.10.egg-info
+running install_scripts
+Installing protocol_node script to /home/sunrise/Rosmaster/install/robot_protocol/lib/robot_protocol
+writing list of installed files to '/home/sunrise/Rosmaster/build/robot_protocol/install.log'

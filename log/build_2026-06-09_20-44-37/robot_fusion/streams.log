@@ -1,0 +1,58 @@
+[14.509s] Invoking command in '/home/sunrise/Rosmaster/src/ROS2/robot_fusion': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_fusion build --build-base /home/sunrise/Rosmaster/build/robot_fusion/build install --record /home/sunrise/Rosmaster/build/robot_fusion/install.log --install-scripts $base/lib/robot_fusion --single-version-externally-managed install_data
+[15.682s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[15.683s] !!
+[15.683s] 
+[15.684s]         ********************************************************************************
+[15.684s]         Usage of dash-separated 'script-dir' will not be supported in future
+[15.685s]         versions. Please use the underscore name 'script_dir' instead.
+[15.686s] 
+[15.686s]         This deprecation is overdue, please update your project and remove deprecated
+[15.687s]         calls to avoid build errors in the future.
+[15.690s] 
+[15.691s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[15.692s]         ********************************************************************************
+[15.692s] 
+[15.693s] !!
+[15.693s]   opt = self._enforce_underscore(opt, section)
+[15.806s] /usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+[15.807s]   warnings.warn(msg)
+[16.072s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[16.073s] !!
+[16.074s] 
+[16.074s]         ********************************************************************************
+[16.075s]         Usage of dash-separated 'script-dir' will not be supported in future
+[16.076s]         versions. Please use the underscore name 'script_dir' instead.
+[16.076s]         (Affected: robot_fusion).
+[16.077s] 
+[16.080s]         This deprecation is overdue, please update your project and remove deprecated
+[16.080s]         calls to avoid build errors in the future.
+[16.081s] 
+[16.082s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[16.082s]         ********************************************************************************
+[16.083s] 
+[16.083s] !!
+[16.084s]   opt = self._enforce_underscore(opt, section)
+[16.691s] running egg_info
+[16.836s] writing ../../../build/robot_fusion/robot_fusion.egg-info/PKG-INFO
+[16.845s] writing dependency_links to ../../../build/robot_fusion/robot_fusion.egg-info/dependency_links.txt
+[16.851s] writing entry points to ../../../build/robot_fusion/robot_fusion.egg-info/entry_points.txt
+[16.852s] writing requirements to ../../../build/robot_fusion/robot_fusion.egg-info/requires.txt
+[16.854s] writing top-level names to ../../../build/robot_fusion/robot_fusion.egg-info/top_level.txt
+[17.115s] reading manifest file '../../../build/robot_fusion/robot_fusion.egg-info/SOURCES.txt'
+[17.124s] writing manifest file '../../../build/robot_fusion/robot_fusion.egg-info/SOURCES.txt'
+[17.126s] running build
+[17.126s] running build_py
+[17.129s] copying robot_fusion/fusion_node.py -> /home/sunrise/Rosmaster/build/robot_fusion/build/lib/robot_fusion
+[17.131s] copying robot_fusion/__init__.py -> /home/sunrise/Rosmaster/build/robot_fusion/build/lib/robot_fusion
+[17.135s] running install
+[17.171s] running install_lib
+[17.343s] running install_data
+[17.344s] copying resource/robot_fusion -> /home/sunrise/Rosmaster/install/robot_fusion/share/ament_index/resource_index/packages
+[17.345s] copying package.xml -> /home/sunrise/Rosmaster/install/robot_fusion/share/robot_fusion
+[17.348s] running install_egg_info
+[17.523s] removing '/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages/robot_fusion-1.0.0-py3.10.egg-info' (and everything under it)
+[17.524s] Copying ../../../build/robot_fusion/robot_fusion.egg-info to /home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages/robot_fusion-1.0.0-py3.10.egg-info
+[17.525s] running install_scripts
+[17.852s] Installing fusion_node script to /home/sunrise/Rosmaster/install/robot_fusion/lib/robot_fusion
+[17.853s] writing list of installed files to '/home/sunrise/Rosmaster/build/robot_fusion/install.log'
+[18.179s] Invoked command in '/home/sunrise/Rosmaster/src/ROS2/robot_fusion' returned '0': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_fusion build --build-base /home/sunrise/Rosmaster/build/robot_fusion/build install --record /home/sunrise/Rosmaster/build/robot_fusion/install.log --install-scripts $base/lib/robot_fusion --single-version-externally-managed install_data

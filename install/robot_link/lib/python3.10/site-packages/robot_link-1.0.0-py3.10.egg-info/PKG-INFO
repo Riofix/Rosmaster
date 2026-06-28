@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: robot_link
+Version: 1.0.0
+Summary: Physical IO link layer for Robot
+Maintainer: sunrise
+Maintainer-email: 1789518998@qq.com
+License: MIT
+Requires-Dist: setuptools
+Requires-Dist: pyserial
+Dynamic: license
+Dynamic: maintainer
+Dynamic: maintainer-email
+Dynamic: requires-dist
+Dynamic: summary

@@ -1,0 +1,57 @@
+[5.279s] Invoking command in '/home/sunrise/Rosmaster/src/ROS2/robot_bringup': AMENT_PREFIX_PATH=/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble PYTHONPATH=/home/sunrise/Rosmaster/build/robot_bringup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_bringup build --build-base /home/sunrise/Rosmaster/build/robot_bringup/build install --record /home/sunrise/Rosmaster/build/robot_bringup/install.log --install-scripts $base/lib/robot_bringup --single-version-externally-managed install_data
+[6.257s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[6.258s] !!
+[6.258s] 
+[6.259s]         ********************************************************************************
+[6.259s]         Usage of dash-separated 'script-dir' will not be supported in future
+[6.259s]         versions. Please use the underscore name 'script_dir' instead.
+[6.260s] 
+[6.260s]         This deprecation is overdue, please update your project and remove deprecated
+[6.261s]         calls to avoid build errors in the future.
+[6.261s] 
+[6.262s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[6.262s]         ********************************************************************************
+[6.263s] 
+[6.263s] !!
+[6.264s]   opt = self._enforce_underscore(opt, section)
+[6.387s] /usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+[6.388s]   warnings.warn(msg)
+[6.631s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[6.632s] !!
+[6.632s] 
+[6.633s]         ********************************************************************************
+[6.633s]         Usage of dash-separated 'script-dir' will not be supported in future
+[6.634s]         versions. Please use the underscore name 'script_dir' instead.
+[6.634s]         (Affected: robot_bringup).
+[6.635s] 
+[6.636s]         This deprecation is overdue, please update your project and remove deprecated
+[6.636s]         calls to avoid build errors in the future.
+[6.637s] 
+[6.637s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[6.638s]         ********************************************************************************
+[6.638s] 
+[6.638s] !!
+[6.639s]   opt = self._enforce_underscore(opt, section)
+[7.119s] running egg_info
+[7.243s] writing ../../../build/robot_bringup/robot_bringup.egg-info/PKG-INFO
+[7.246s] writing dependency_links to ../../../build/robot_bringup/robot_bringup.egg-info/dependency_links.txt
+[7.248s] writing requirements to ../../../build/robot_bringup/robot_bringup.egg-info/requires.txt
+[7.249s] writing top-level names to ../../../build/robot_bringup/robot_bringup.egg-info/top_level.txt
+[7.493s] reading manifest file '../../../build/robot_bringup/robot_bringup.egg-info/SOURCES.txt'
+[7.503s] writing manifest file '../../../build/robot_bringup/robot_bringup.egg-info/SOURCES.txt'
+[7.504s] running build
+[7.505s] running build_py
+[7.507s] copying robot_bringup/__init__.py -> /home/sunrise/Rosmaster/build/robot_bringup/build/lib/robot_bringup
+[7.509s] running install
+[7.545s] running install_lib
+[7.664s] running install_data
+[7.665s] copying resource/robot_bringup -> /home/sunrise/Rosmaster/install/robot_bringup/share/ament_index/resource_index/packages
+[7.667s] copying package.xml -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup
+[7.669s] copying launch/hardware_launch.py -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup/launch
+[7.670s] copying launch/teleop_launch.py -> /home/sunrise/Rosmaster/install/robot_bringup/share/robot_bringup/launch
+[7.671s] running install_egg_info
+[7.799s] removing '/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages/robot_bringup-1.0.0-py3.10.egg-info' (and everything under it)
+[7.802s] Copying ../../../build/robot_bringup/robot_bringup.egg-info to /home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages/robot_bringup-1.0.0-py3.10.egg-info
+[7.808s] running install_scripts
+[8.053s] writing list of installed files to '/home/sunrise/Rosmaster/build/robot_bringup/install.log'
+[8.310s] Invoked command in '/home/sunrise/Rosmaster/src/ROS2/robot_bringup' returned '0': AMENT_PREFIX_PATH=/home/sunrise/Rosmaster/install/robot_protocol:/home/sunrise/Rosmaster/install/robot_link:/home/sunrise/Rosmaster/install/robot_control:/home/sunrise/Rosmaster/install/robot_vision:/home/sunrise/Rosmaster/install/robot_bringup:/home/sunrise/Rosmaster/install/robot_fusion:/home/sunrise/Rosmaster/install/robot_brain:/opt/ros/humble PYTHONPATH=/home/sunrise/Rosmaster/build/robot_bringup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_protocol/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_link/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_vision/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_bringup/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_fusion/lib/python3.10/site-packages:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_bringup build --build-base /home/sunrise/Rosmaster/build/robot_bringup/build install --record /home/sunrise/Rosmaster/build/robot_bringup/install.log --install-scripts $base/lib/robot_bringup --single-version-externally-managed install_data

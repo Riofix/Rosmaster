@@ -1,0 +1,58 @@
+[12.926s] Invoking command in '/home/sunrise/Rosmaster/src/ROS2/robot_brain': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_brain/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_brain build --build-base /home/sunrise/Rosmaster/build/robot_brain/build install --record /home/sunrise/Rosmaster/build/robot_brain/install.log --install-scripts $base/lib/robot_brain --single-version-externally-managed install_data
+[14.196s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[14.196s] !!
+[14.197s] 
+[14.198s]         ********************************************************************************
+[14.199s]         Usage of dash-separated 'script-dir' will not be supported in future
+[14.200s]         versions. Please use the underscore name 'script_dir' instead.
+[14.200s] 
+[14.201s]         This deprecation is overdue, please update your project and remove deprecated
+[14.202s]         calls to avoid build errors in the future.
+[14.202s] 
+[14.203s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[14.204s]         ********************************************************************************
+[14.204s] 
+[14.205s] !!
+[14.206s]   opt = self._enforce_underscore(opt, section)
+[14.326s] /usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+[14.327s]   warnings.warn(msg)
+[14.561s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[14.562s] !!
+[14.563s] 
+[14.563s]         ********************************************************************************
+[14.564s]         Usage of dash-separated 'script-dir' will not be supported in future
+[14.565s]         versions. Please use the underscore name 'script_dir' instead.
+[14.565s]         (Affected: robot_brain).
+[14.566s] 
+[14.566s]         This deprecation is overdue, please update your project and remove deprecated
+[14.567s]         calls to avoid build errors in the future.
+[14.568s] 
+[14.568s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[14.571s]         ********************************************************************************
+[14.572s] 
+[14.573s] !!
+[14.574s]   opt = self._enforce_underscore(opt, section)
+[15.067s] running egg_info
+[15.181s] writing ../../../build/robot_brain/robot_brain.egg-info/PKG-INFO
+[15.187s] writing dependency_links to ../../../build/robot_brain/robot_brain.egg-info/dependency_links.txt
+[15.191s] writing entry points to ../../../build/robot_brain/robot_brain.egg-info/entry_points.txt
+[15.194s] writing requirements to ../../../build/robot_brain/robot_brain.egg-info/requires.txt
+[15.198s] writing top-level names to ../../../build/robot_brain/robot_brain.egg-info/top_level.txt
+[15.447s] reading manifest file '../../../build/robot_brain/robot_brain.egg-info/SOURCES.txt'
+[15.460s] writing manifest file '../../../build/robot_brain/robot_brain.egg-info/SOURCES.txt'
+[15.462s] running build
+[15.463s] running build_py
+[15.466s] copying robot_brain/brain_node.py -> /home/sunrise/Rosmaster/build/robot_brain/build/lib/robot_brain
+[15.467s] copying robot_brain/__init__.py -> /home/sunrise/Rosmaster/build/robot_brain/build/lib/robot_brain
+[15.494s] running install
+[15.552s] running install_lib
+[15.640s] running install_data
+[15.642s] copying resource/robot_brain -> /home/sunrise/Rosmaster/install/robot_brain/share/ament_index/resource_index/packages
+[15.647s] copying package.xml -> /home/sunrise/Rosmaster/install/robot_brain/share/robot_brain
+[15.651s] running install_egg_info
+[15.810s] removing '/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages/robot_brain-1.0.0-py3.10.egg-info' (and everything under it)
+[15.810s] Copying ../../../build/robot_brain/robot_brain.egg-info to /home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages/robot_brain-1.0.0-py3.10.egg-info
+[15.811s] running install_scripts
+[16.088s] Installing brain_node script to /home/sunrise/Rosmaster/install/robot_brain/lib/robot_brain
+[16.089s] writing list of installed files to '/home/sunrise/Rosmaster/build/robot_brain/install.log'
+[16.517s] Invoked command in '/home/sunrise/Rosmaster/src/ROS2/robot_brain' returned '0': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_brain/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_brain/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_brain build --build-base /home/sunrise/Rosmaster/build/robot_brain/build install --record /home/sunrise/Rosmaster/build/robot_brain/install.log --install-scripts $base/lib/robot_brain --single-version-externally-managed install_data

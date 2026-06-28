@@ -1,0 +1,60 @@
+[14.779s] Invoking command in '/home/sunrise/Rosmaster/src/ROS2/robot_control': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_control build --build-base /home/sunrise/Rosmaster/build/robot_control/build install --record /home/sunrise/Rosmaster/build/robot_control/install.log --install-scripts $base/lib/robot_control --single-version-externally-managed install_data
+[15.975s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[15.979s] !!
+[15.980s] 
+[15.980s]         ********************************************************************************
+[15.981s]         Usage of dash-separated 'script-dir' will not be supported in future
+[15.982s]         versions. Please use the underscore name 'script_dir' instead.
+[15.982s] 
+[15.983s]         This deprecation is overdue, please update your project and remove deprecated
+[15.983s]         calls to avoid build errors in the future.
+[15.984s] 
+[15.985s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[15.985s]         ********************************************************************************
+[15.986s] 
+[15.986s] !!
+[15.987s]   opt = self._enforce_underscore(opt, section)
+[16.148s] /usr/local/lib/python3.10/dist-packages/setuptools/_distutils/dist.py:289: UserWarning: Unknown distribution option: 'tests_require'
+[16.149s]   warnings.warn(msg)
+[16.465s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:599: SetuptoolsDeprecationWarning: Invalid dash-separated key 'script-dir' in 'develop' (setup.cfg), please use the underscore name 'script_dir' instead.
+[16.465s] !!
+[16.466s] 
+[16.467s]         ********************************************************************************
+[16.467s]         Usage of dash-separated 'script-dir' will not be supported in future
+[16.469s]         versions. Please use the underscore name 'script_dir' instead.
+[16.470s]         (Affected: robot_control).
+[16.470s] 
+[16.471s]         This deprecation is overdue, please update your project and remove deprecated
+[16.472s]         calls to avoid build errors in the future.
+[16.472s] 
+[16.473s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[16.474s]         ********************************************************************************
+[16.474s] 
+[16.475s] !!
+[16.476s]   opt = self._enforce_underscore(opt, section)
+[17.026s] running egg_info
+[17.154s] writing ../../../build/robot_control/robot_control.egg-info/PKG-INFO
+[17.159s] writing dependency_links to ../../../build/robot_control/robot_control.egg-info/dependency_links.txt
+[17.164s] writing entry points to ../../../build/robot_control/robot_control.egg-info/entry_points.txt
+[17.165s] writing requirements to ../../../build/robot_control/robot_control.egg-info/requires.txt
+[17.166s] writing top-level names to ../../../build/robot_control/robot_control.egg-info/top_level.txt
+[17.440s] reading manifest file '../../../build/robot_control/robot_control.egg-info/SOURCES.txt'
+[17.450s] writing manifest file '../../../build/robot_control/robot_control.egg-info/SOURCES.txt'
+[17.452s] running build
+[17.454s] running build_py
+[17.456s] copying robot_control/control_node.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control
+[17.458s] copying robot_control/twist_to_control_bridge.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control
+[17.460s] copying robot_control/demo_rosmaster.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control
+[17.463s] copying robot_control/__init__.py -> /home/sunrise/Rosmaster/build/robot_control/build/lib/robot_control
+[17.464s] running install
+[17.501s] running install_lib
+[17.658s] running install_data
+[17.659s] copying resource/robot_control -> /home/sunrise/Rosmaster/install/robot_control/share/ament_index/resource_index/packages
+[17.668s] copying package.xml -> /home/sunrise/Rosmaster/install/robot_control/share/robot_control
+[17.669s] running install_egg_info
+[17.835s] removing '/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages/robot_control-1.0.0-py3.10.egg-info' (and everything under it)
+[17.839s] Copying ../../../build/robot_control/robot_control.egg-info to /home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages/robot_control-1.0.0-py3.10.egg-info
+[17.843s] running install_scripts
+[18.192s] Installing control_node script to /home/sunrise/Rosmaster/install/robot_control/lib/robot_control
+[18.196s] writing list of installed files to '/home/sunrise/Rosmaster/build/robot_control/install.log'
+[18.605s] Invoked command in '/home/sunrise/Rosmaster/src/ROS2/robot_control' returned '0': PYTHONPATH=/home/sunrise/Rosmaster/build/robot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/sunrise/Rosmaster/install/robot_control/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/robot_control build --build-base /home/sunrise/Rosmaster/build/robot_control/build install --record /home/sunrise/Rosmaster/build/robot_control/install.log --install-scripts $base/lib/robot_control --single-version-externally-managed install_data

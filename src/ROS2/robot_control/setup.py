@@ -22,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'control_node = robot_control.control_node:main',
+            'twist_to_control_bridge = robot_control.twist_to_control_bridge:main',
         ],
     },
 )
