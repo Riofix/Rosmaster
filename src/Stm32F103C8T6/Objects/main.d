@@ -39,5 +39,6 @@
 .\objects\main.o: .\Src\BSP\bsp_iic.h
 .\objects\main.o: .\Src\BSP\bsp_pwm.h
 .\objects\main.o: .\Src\BSP\bsp_mpu6050.h
+.\objects\main.o: .\Src\BSP\bsp_timer.h
 .\objects\main.o: .\Src\Protocol\protocol_emm.h
 .\objects\main.o: D:\Keil_arm\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

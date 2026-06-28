@@ -30,6 +30,11 @@
 #define CMD_RX_PWM_STATE_STREAM 0x74  // 无刷电机占空比、舵机旋转角度自动上报开启或者关闭
 #define CMD_RX_RGB_SENSOR_STREAM 0x75 // 颜色传感器数据自动上报或者关闭（预留操作）
 #define CMD_RX_SENSOR_STREAM 0x76     // 所有数据数据自动上报或者关闭（预留操作）
+#define CMD_RX_POS_CM 0x78            // 位置模式(cm单位)
+#define CMD_RX_ACTION_GRAB 0x79       // 启动抓取动作
+#define CMD_RX_ACTION_MOVE 0x7A       // 电机1点位移动 [pos_id, clockwise]
+#define CMD_RX_SET_ORIGIN 0x7B        // 校准原点 [pos_id(1~8)]
+#define CMD_TX_ACTION_DONE 0x7C       // 抓取完成通知 (下位机→上位机)
 
 // ======================== 查询类型指令 (0x80~0x87) ==========================
 #define CMD_RX_QUERY_MPU_ATT 0x80    // 查询MPU6050解算数据（返回俯仰角等）

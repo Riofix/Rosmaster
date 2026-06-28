@@ -97,7 +97,11 @@ class ControlNode(Node):
                 "velocity": 0x61,
                 "move_relative": 0x62,
                 "move_absolute": 0x62,
-                "stop": 0x63
+                "stop": 0x63,
+                "move_cm": 0x78,
+                "grab_start": 0x79,
+                "track_move": 0x7A,
+                "set_origin": 0x7B
             },
             "handle_servo": {"move_to": 0x6C, "set_angle": 0x6C},
             "handle_bldc": {"start": 0x6D, "stop": 0x6E}
@@ -148,8 +152,43 @@ class ControlNode(Node):
                     self.is_chassis_moving = True
                     self.get_logger().info(f"底盘新任务: ID:{task_id} Target:{target_pos}")
 
+            elif action == "grab_start":
+                # 0x79: 抓取启动 — 无参数, 先清 action_done
+                self.notify_protocol_reset(device, task_id)
+                self._internal_update(device, "action_done", False)
+                payload = {"target": device, "cmd_hex": 0x79, "params": {}}
+                msg = String(); msg.data = json.dumps(payload)
+                self.packer_pub.publish(msg)
+                self.get_logger().info(f"抓取启动: {device}")
+
+            elif action == "set_origin":
+                # 0x7B: 校准原点 — 只传 pos_id
+                payload = {
+                    "target": device,
+                    "cmd_hex": 0x7B,
+                    "params": {"pos_id": params.get("pos_id", params.get("pos", 1))}
+                }
+                msg = String(); msg.data = json.dumps(payload)
+                self.packer_pub.publish(msg)
+                self.get_logger().info(f"校准原点: {device} → pos={payload['params']['pos_id']}")
+
+            elif action == "track_move":
+                # 0x7A: 环轨点位移动 — 只传 pos_id + clockwise
+                self.notify_protocol_reset(device, task_id)
+                payload = {
+                    "target": device,
+                    "cmd_hex": 0x7A,
+                    "params": {
+                        "pos_id": params.get("pos_id", params.get("pos", 1)),
+                        "clockwise": params.get("clockwise", params.get("dir", 0))
+                    }
+                }
+                msg = String(); msg.data = json.dumps(payload)
+                self.packer_pub.publish(msg)
+                self.get_logger().info(f"环轨点位: {device} → pos={payload['params']['pos_id']}")
+
             else:
-                # 抓手逻辑：透传给下位机，不需要上位机 PID
+                # 其他抓手逻辑：透传给下位机
                 self.handle_forwarding(device, action, params, task_id)
 
         except Exception as e:
@@ -184,6 +223,12 @@ class ControlNode(Node):
             self.get_logger().error(f"Shadow Feedback Error: {e}")
 
     # ================= 工具函数 =================
+    def _internal_update(self, target, field, value):
+        """发送内部状态更新给 ProtocolNode"""
+        msg = String()
+        msg.data = json.dumps({"target": target, "update_field": field, "value": value})
+        self.internal_state_pub.publish(msg)
+
     def notify_protocol_reset(self, target, task_id):
         """通知解析层：新任务开始，清空到位标志 + 写入 task_id"""
         if target == "chassis":

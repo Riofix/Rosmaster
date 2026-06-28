@@ -99,6 +99,10 @@ uint8_t MPU_Init(void)
     MPU_WriteReg(MPU_FIFO_EN_REG, 0x00);
     MPU_WriteReg(MPU_INT_EN_REG, 0x00);
 
+    /* 上电自动校准陀螺零偏 (约需 0.4 秒, 需保持静止) */
+    Delay_ms(50);
+    MPU_Calibrate();
+
     return 0;
 }
 

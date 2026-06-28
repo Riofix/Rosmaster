@@ -41,6 +41,7 @@
 .\objects\cmd_handle.o: .\Src\APP\app_bldc.h
 .\objects\cmd_handle.o: .\Src\APP\app_rgb.h
 .\objects\cmd_handle.o: .\Src\BSP\bsp_tcs3472.h
+.\objects\cmd_handle.o: .\Src\APP\app_action.h
 .\objects\cmd_handle.o: .\Src\BSP\Emm_V5.h
 .\objects\cmd_handle.o: .\Src\BSP\bsp_usart.h
 .\objects\cmd_handle.o: .\Src\BSP\bsp_pwm.h
