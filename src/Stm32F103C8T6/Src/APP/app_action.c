@@ -63,13 +63,15 @@ static uint32_t s_grab_timeout = 0;        /* 超时计数 */
  * SetOrigin 记录 offset = 物理位脉冲 - 当前编码器值(0),
  * 之后 MoveTo 用 (编码器 + offset) 作为真实物理位置。
  * ================================================================ */
-static uint8_t enpos_id = 0;
+static uint8_t origin_pos_id = 1;        /* 上电后默认原点在 pos1 */
+static uint32_t origin_pulse_offset = 0; /* 原点偏移量 */
 
 void App_Action_SetOrigin(uint8_t pos_id)
 {
     if (pos_id < 1 || pos_id > 8)
         return;
-    enpos_id = pos_id;
+    origin_pos_id = pos_id;
+    origin_pulse_offset = POS_PULSE(pos_id); /* 原点偏移量 */
 }
 
 /* ================================================================
@@ -82,53 +84,52 @@ void App_Action_SetOrigin(uint8_t pos_id)
 void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
 {
     uint32_t target_pulse, cur_pulse, rel_pulse;
+    uint32_t move_pulse; /* 需要移动脉冲数 */
     uint8_t dir;
 
     /* 参数保护 */
     if (pos_id < 1 || pos_id > 8)
         return;
-
     target_pulse = POS_PULSE(pos_id);
 
     /* 真实物理位置 = 编码器 + 原点偏移, 归一化到 [0, CIRCLE_PULSE) */
     {
-        uint32_t phys_pulse = POS_PULSE(enpos_id);
         /* 编码器→脉冲: 编码器65536/圈, 脉冲3200/圈 */
         int32_t cur_pulse = (int32_t)((int64_t)g_motors[0].current_pos * 3200 / 65536);
-        int32_t raw = (int32_t)phys_pulse - cur_pulse;
-        raw = raw % (int32_t)CIRCLE_PULSE;
-        if (raw < 0)
-            raw += (int32_t)CIRCLE_PULSE;
-        cur_pulse = (uint32_t)raw;
+        rel_pulse = origin_pulse_offset - cur_pulse; /* 归一化到原点 */
+        if (rel_pulse >= CIRCLE_PULSE)
+            rel_pulse = rel_pulse % CIRCLE_PULSE;
+        else if (rel_pulse < 0)
+            rel_pulse = (rel_pulse % CIRCLE_PULSE) + CIRCLE_PULSE;
     }
 
     /* 按方向计算环形路径上的相对脉冲 */
-    if (target_pulse == cur_pulse)
+    if (target_pulse == rel_pulse)
     {
-        rel_pulse = 0; /* 已在目标位, 不走 */
+        move_pulse = 0; /* 已在目标位, 不走 */
         dir = 0;
     }
     else if (clockwise)
     {
         /* 顺时针 (反转 dir=1): 脉冲递增方向 */
-        if (target_pulse > cur_pulse)
-            rel_pulse = target_pulse - cur_pulse;
+        if (target_pulse > rel_pulse)
+            move_pulse = target_pulse - rel_pulse;
         else
-            rel_pulse = (CIRCLE_PULSE - cur_pulse) + target_pulse;
+            move_pulse = (CIRCLE_PULSE - rel_pulse) + target_pulse;
         dir = 1;
     }
     else
     {
         /* 逆时针 (正转 dir=0): 脉冲递减方向 */
-        if (target_pulse < cur_pulse)
-            rel_pulse = cur_pulse - target_pulse;
+        if (target_pulse < rel_pulse)
+            move_pulse = rel_pulse - target_pulse;
         else
-            rel_pulse = cur_pulse + (CIRCLE_PULSE - target_pulse);
+            move_pulse = rel_pulse + (CIRCLE_PULSE - target_pulse);
         dir = 0;
     }
 
     /* 发相对位置指令, 不等到位, 直接返回 */
-    Emm_V5_Pos_Control(1, dir, VEL_MOVE, ACC, rel_pulse, 0, 0);
+    Emm_V5_Pos_Control(1, dir, VEL_MOVE, ACC, move_pulse, 0, 0);
 }
 
 /* ================================================================
