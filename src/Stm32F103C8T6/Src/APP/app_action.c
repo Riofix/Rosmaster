@@ -20,56 +20,56 @@
 /* ================================================================
  * 脉冲参数
  * ================================================================ */
-#define SWEEP_PULSE  6472    /* 电机1 横扫 18cm */
-#define DOWN10_PULSE 160000  /* 电机2 下降 10cm */
-#define DOWN1_PULSE  16000   /* 电机2 下降 1cm */
-#define UP13_PULSE   208000  /* 电机2 上升 13cm */
+#define SWEEP_PULSE 6472    /* 电机1 横扫 18cm */
+#define DOWN10_PULSE 160000 /* 电机2 下降 10cm */
+#define DOWN1_PULSE 16000   /* 电机2 下降 1cm */
+#define UP13_PULSE 208000   /* 电机2 上升 13cm */
 
 /* ================================================================
  * 速度参数
  * ================================================================ */
-#define VEL_HORIZ    50      /* 电机1 横扫速度 */
-#define VEL_MOVE     200     /* 电机1 点位移动速度 */
-#define VEL_VERT     500     /* 电机2 垂直速度 */
-#define ACC          100     /* 统一加速度 */
+#define VEL_HORIZ 50 /* 电机1 横扫速度 */
+#define VEL_MOVE 200 /* 电机1 点位移动速度 */
+#define VEL_VERT 500 /* 电机2 垂直速度 */
+#define ACC 100      /* 统一加速度 */
 
 /* ================================================================
  * Grab 状态机内部枚举 (不暴露给外部)
  * ================================================================ */
-typedef enum {
-    GRAB_IDLE = 0,          /* 空闲, 不在执行抓取 */
-    GRAB_DOWN10,            /* 降 10cm */
-    GRAB_BLDC_ON,           /* 开无刷 */
-    GRAB_SWEEP_CCW,         /* 逆时针横扫 */
-    GRAB_DOWN1_A,           /* 降 1cm (第1次) */
-    GRAB_SWEEP_CW,          /* 顺时针横扫 */
-    GRAB_DOWN1_B,           /* 降 1cm (第2次) */
-    GRAB_SWEEP_CCW2,        /* 逆时针横扫 (第2组) */
-    GRAB_DOWN1_C,           /* 降 1cm (第3次) */
-    GRAB_SWEEP_CW2,         /* 顺时针横扫 (第2组) */
-    GRAB_BLDC_OFF,          /* 关无刷 */
-    GRAB_UP13               /* 升 13cm 回位 */
+typedef enum
+{
+    GRAB_IDLE = 0,   /* 空闲, 不在执行抓取 */
+    GRAB_DOWN10,     /* 降 10cm */
+    GRAB_BLDC_ON,    /* 开无刷 */
+    GRAB_SWEEP_CCW,  /* 逆时针横扫 */
+    GRAB_DOWN1_A,    /* 降 1cm (第1次) */
+    GRAB_SWEEP_CW,   /* 顺时针横扫 */
+    GRAB_DOWN1_B,    /* 降 1cm (第2次) */
+    GRAB_SWEEP_CCW2, /* 逆时针横扫 (第2组) */
+    GRAB_DOWN1_C,    /* 降 1cm (第3次) */
+    GRAB_SWEEP_CW2,  /* 顺时针横扫 (第2组) */
+    GRAB_BLDC_OFF,   /* 关无刷 */
+    GRAB_UP13        /* 升 13cm 回位 */
 } GrabStep_t;
 
 /* Grab 静态状态 */
-static GrabStep_t s_grab_step = GRAB_IDLE;  /* 当前步骤 */
-static uint8_t    s_grab_flag_low = 0;      /* 到位清零检测 (bit0=电机1, bit1=电机2) */
-static uint32_t   s_grab_timeout = 0;       /* 超时计数 */
-#define GRAB_TIMEOUT 30000                  /* 30 秒超时 (tick数) */
-
+static GrabStep_t s_grab_step = GRAB_IDLE; /* 当前步骤 */
+static uint8_t s_grab_flag_low = 0;        /* 到位清零检测 (bit0=电机1, bit1=电机2) */
+static uint32_t s_grab_timeout = 0;        /* 超时计数 */
+#define GRAB_TIMEOUT 30000                 /* 30 秒超时 (tick数) */
 
 /* ================================================================
  * 原点偏移量: 上电后编码器归零, 但抓手实际在某一物理位上。
  * SetOrigin 记录 offset = 物理位脉冲 - 当前编码器值(0),
  * 之后 MoveTo 用 (编码器 + offset) 作为真实物理位置。
  * ================================================================ */
-static int32_t s_origin_offset = 0;
+static uint8_t enpos_id = 0;
 
 void App_Action_SetOrigin(uint8_t pos_id)
 {
-    if (pos_id < 1 || pos_id > 8) return;
-    uint32_t phys_pulse = POS_PULSE(pos_id);
-    s_origin_offset = (int32_t)phys_pulse - g_motors[0].current_pos;
+    if (pos_id < 1 || pos_id > 8)
+        return;
+    enpos_id = pos_id;
 }
 
 /* ================================================================
@@ -85,20 +85,30 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
     uint8_t dir;
 
     /* 参数保护 */
-    if (pos_id < 1 || pos_id > 8) return;
+    if (pos_id < 1 || pos_id > 8)
+        return;
 
     target_pulse = POS_PULSE(pos_id);
 
     /* 真实物理位置 = 编码器 + 原点偏移, 归一化到 [0, CIRCLE_PULSE) */
     {
-        int32_t raw = g_motors[0].current_pos + s_origin_offset;
+        uint32_t phys_pulse = POS_PULSE(enpos_id);
+        /* 编码器→脉冲: 编码器65536/圈, 脉冲3200/圈 */
+        int32_t cur_pulse = (int32_t)((int64_t)g_motors[0].current_pos * 3200 / 65536);
+        int32_t raw = (int32_t)phys_pulse - cur_pulse;
         raw = raw % (int32_t)CIRCLE_PULSE;
-        if (raw < 0) raw += (int32_t)CIRCLE_PULSE;
+        if (raw < 0)
+            raw += (int32_t)CIRCLE_PULSE;
         cur_pulse = (uint32_t)raw;
     }
 
     /* 按方向计算环形路径上的相对脉冲 */
-    if (clockwise)
+    if (target_pulse == cur_pulse)
+    {
+        rel_pulse = 0; /* 已在目标位, 不走 */
+        dir = 0;
+    }
+    else if (clockwise)
     {
         /* 顺时针 (反转 dir=1): 脉冲递增方向 */
         if (target_pulse > cur_pulse)
@@ -120,7 +130,6 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
     /* 发相对位置指令, 不等到位, 直接返回 */
     Emm_V5_Pos_Control(1, dir, VEL_MOVE, ACC, rel_pulse, 0, 0);
 }
-
 
 /* ================================================================
  * App_Action_Grab (内部状态机)
@@ -166,9 +175,9 @@ void App_Action_Grab(void)
     case GRAB_DOWN1_C:
     case GRAB_UP13:
         if (!(g_motors[1].flag & 0x02))
-            s_grab_flag_low |= 0x02;           /* 见识低位 → 标记"已清零" */
+            s_grab_flag_low |= 0x02; /* 见识低位 → 标记"已清零" */
         else if (s_grab_flag_low & 0x02)
-            s_grab_step++;                     /* 见识置位 + 已清零 → 到位, 推进 */
+            s_grab_step++; /* 见识置位 + 已清零 → 到位, 推进 */
         break;
 
     /* 电机1 等待: 横扫 */
@@ -177,9 +186,9 @@ void App_Action_Grab(void)
     case GRAB_SWEEP_CCW2:
     case GRAB_SWEEP_CW2:
         if (!(g_motors[0].flag & 0x02))
-            s_grab_flag_low |= 0x01;           /* 见识低位 → 标记"已清零" */
+            s_grab_flag_low |= 0x01; /* 见识低位 → 标记"已清零" */
         else if (s_grab_flag_low & 0x01)
-            s_grab_step++;                     /* 见识置位 + 已清零 → 到位, 推进 */
+            s_grab_step++; /* 见识置位 + 已清零 → 到位, 推进 */
         break;
 
     /* 无刷启停: 不用等, 下一步立即执行 */
@@ -196,7 +205,7 @@ void App_Action_Grab(void)
     if (s_grab_step > GRAB_UP13)
     {
         uint8_t done = CMD_TX_ACTION_DONE;
-        Protocol_PackAndSend(&done, 1);  /* 通知上位机抓取完成 */
+        Protocol_PackAndSend(&done, 1); /* 通知上位机抓取完成 */
         s_grab_step = GRAB_IDLE;
         s_grab_flag_low = 0;
         s_grab_timeout = 0;
@@ -211,15 +220,15 @@ void App_Action_Grab(void)
         if (s_grab_step != s_last_sent)
         {
             s_last_sent = s_grab_step;
-            s_grab_flag_low = 0;   /* 新状态重新开始到位检测 */
-            s_grab_timeout = 0;    /* 重置超时 */
+            s_grab_flag_low = 0; /* 新状态重新开始到位检测 */
+            s_grab_timeout = 0;  /* 重置超时 */
 
             switch (s_grab_step)
             {
             case GRAB_DOWN10:
                 /* 电机2 反转(下降) 10cm */
                 Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC, DOWN10_PULSE, 0, 0);
-                g_motors[1].flag &= ~0x02;  /* 清到位, 确保清零检测能触发 */
+                g_motors[1].flag &= ~0x02; /* 清到位, 确保清零检测能触发 */
                 break;
 
             case GRAB_BLDC_ON:
@@ -272,7 +281,6 @@ void App_Action_Grab(void)
         }
     }
 }
-
 
 /* ================================================================
  * 包装函数: 供 cmd_handle 调用, 启动抓取

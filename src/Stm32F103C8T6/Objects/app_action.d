@@ -35,3 +35,5 @@
 .\objects\app_action.o: Src\APP\app_bldc.h
 .\objects\app_action.o: .\Src\BSP\Emm_V5.h
 .\objects\app_action.o: .\Src\BSP\bsp_usart.h
+.\objects\app_action.o: .\Src\Protocol\protocol.h
+.\objects\app_action.o: .\Src\Protocol\cmd_handle.h

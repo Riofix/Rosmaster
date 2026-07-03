@@ -3687,7 +3687,7 @@
       </Doc>
       <Doc>
         <Name>.\Src\BSP\bsp_mpu6050.c</Name>
-        <ColumnNumber>14</ColumnNumber>
+        <ColumnNumber>13</ColumnNumber>
         <TopLine>4</TopLine>
         <CurrentLine>5</CurrentLine>
         <Folding>1</Folding>
@@ -3696,9 +3696,9 @@
       </Doc>
       <Doc>
         <Name>.\Src\APP\app_action.c</Name>
-        <ColumnNumber>19</ColumnNumber>
+        <ColumnNumber>2</ColumnNumber>
         <TopLine>105</TopLine>
-        <CurrentLine>108</CurrentLine>
+        <CurrentLine>109</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3732,7 +3732,7 @@
       </Doc>
       <Doc>
         <Name>.\Src\APP\app_servo.c</Name>
-        <ColumnNumber>18</ColumnNumber>
+        <ColumnNumber>8</ColumnNumber>
         <TopLine>1</TopLine>
         <CurrentLine>10</CurrentLine>
         <Folding>1</Folding>

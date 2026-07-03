@@ -742,6 +742,7 @@ class RosmasterGUI:
         self._cur_pos_speed = tk.IntVar(value=500)
         self._cur_pos_acc = tk.IntVar(value=100)
         self._cur_pos_dist = tk.DoubleVar(value=10.0)
+        self._cur_pos_pulse = tk.IntVar(value=1000)
         self._cur_pos_abs = tk.BooleanVar(value=True)
         self._cur_pos_sync = tk.BooleanVar(value=False)
 
@@ -966,6 +967,21 @@ class RosmasterGUI:
         ttk.Label(p4, text="距离:", width=5).pack(side=tk.LEFT)
         ttk.Entry(p4, textvariable=self._cur_pos_dist, width=8).pack(side=tk.LEFT, padx=5)
         ttk.Label(p4, text="cm").pack(side=tk.LEFT)
+        ttk.Button(p4, text="发cm", width=5,
+                   command=lambda: self._pos_cmd()).pack(side=tk.RIGHT, padx=3)
+
+        # 脉冲模式快捷行
+        pp = ttk.Frame(pf); pp.pack(fill=tk.X, pady=2)
+        self._cur_pos_pulse = tk.IntVar(value=1000)
+        ttk.Label(pp, text="脉冲:", width=5).pack(side=tk.LEFT)
+        ttk.Entry(pp, textvariable=self._cur_pos_pulse, width=10).pack(side=tk.LEFT, padx=5)
+        ttk.Button(pp, text="发脉冲", width=6,
+                   command=lambda: self._cmd_position(
+                       self._cur_motor.get(), self._cur_pos_dir.get(),
+                       self._cur_pos_speed.get(), self._cur_pos_acc.get(),
+                       self._cur_pos_pulse.get(), self._cur_pos_abs.get(),
+                       self._cur_pos_sync.get())).pack(side=tk.RIGHT, padx=3)
+
         p5 = ttk.Frame(pf); p5.pack(fill=tk.X, pady=2)
         ttk.Label(p5, text="模式:", width=5).pack(side=tk.LEFT)
         ttk.Radiobutton(p5, text="绝对", variable=self._cur_pos_abs, value=True).pack(side=tk.LEFT, padx=2)
@@ -1011,6 +1027,44 @@ class RosmasterGUI:
         ttk.Button(a2, text="回零", command=lambda: self._cmd_reset_cur_pos(self.query_addr_var.get())).pack(side=tk.LEFT, padx=3)
         ttk.Button(a2, text="解除堵转", command=lambda: self._cmd_reset_clog(self.query_addr_var.get())).pack(side=tk.LEFT, padx=3)
         ttk.Button(a2, text="同步触发", command=lambda: self._cmd_sync_motion(self.query_addr_var.get())).pack(side=tk.LEFT, padx=3)
+
+        # ---- 抓手手动控制 ----
+        hf = ttk.LabelFrame(parent, text="抓手手动控制", padding=5)
+        hf.pack(fill=tk.X, padx=5, pady=(5,0))
+        h1 = ttk.Frame(hf); h1.pack(fill=tk.X, pady=2)
+        ttk.Label(h1, text="点位:").pack(side=tk.LEFT)
+        self._hand_pos = tk.StringVar(value="1")
+        ttk.Combobox(h1, textvariable=self._hand_pos, values=[str(i) for i in range(1,9)], width=3, state="readonly").pack(side=tk.LEFT, padx=3)
+        self._hand_dir = tk.BooleanVar(value=False)
+        ttk.Radiobutton(h1, text="逆", variable=self._hand_dir, value=False).pack(side=tk.LEFT, padx=2)
+        ttk.Radiobutton(h1, text="顺", variable=self._hand_dir, value=True).pack(side=tk.LEFT, padx=2)
+        ttk.Button(h1, text="去点位", width=6,
+                   command=lambda: self._sm_manual_move()).pack(side=tk.LEFT, padx=3)
+        ttk.Button(h1, text="抓取", width=5,
+                   command=lambda: self._sm_manual_grab()).pack(side=tk.LEFT, padx=3)
+        ttk.Button(h1, text="急停", width=5,
+                   command=lambda: self._sm_manual_stop()).pack(side=tk.LEFT, padx=3)
+        ttk.Button(h1, text="设原点", width=6,
+                   command=lambda: self._send_cmd_raw(
+                       self._current_device, 0x7B, [int(self._hand_pos.get())])).pack(side=tk.LEFT, padx=3)
+
+    def _sm_manual_move(self):
+        d = self._current_device
+        p, cw = int(self._hand_pos.get()), self._hand_dir.get()
+        self._send_cmd_raw(d, 0x7A, [p, 1 if cw else 0])
+        self._log("info", f"手动 {self._device_names[d]} 去点位{p} {'顺' if cw else '逆'}")
+
+    def _sm_manual_grab(self):
+        d = self._current_device
+        self._send_cmd_raw(d, 0x79, [])
+        self._log("info", f"手动 {self._device_names[d]} 抓取")
+
+    def _sm_manual_stop(self):
+        d = self._current_device
+        self._send_cmd_raw(d, 0x63, [1,0])
+        self._send_cmd_raw(d, 0x63, [2,0])
+        self._send_cmd_raw(d, 0x6E, [])
+        self._log("info", f"手动 {self._device_names[d]} 急停")
 
     def _on_motor_sel(self):
         is_m1 = (self._cur_motor.get() == 1)
@@ -1187,17 +1241,16 @@ class RosmasterGUI:
         self._sm_update_ui()
 
     def _sm_step(self):
-        """单步执行"""
-        self._sm_execute()
-        self._sm_timer = 0
+        """单步执行 (异步, 不阻塞 UI)"""
+        self.root.after(10, self._sm_execute)
 
     def _sm_auto(self):
         """自动运行"""
         self._sm_mode.set("auto")
-        self._sm_execute()
+        self.root.after(10, self._sm_execute)
 
     def _sm_estop(self):
-        """急停"""
+        """急停 (立即)"""
         for d in range(3):
             self._send_cmd_raw(d, 0x63, [1,0])
             self._send_cmd_raw(d, 0x63, [2,0])
@@ -1272,9 +1325,12 @@ class RosmasterGUI:
             name, _, _ = self._sm_steps[self._sm_seq]
             self._sm_state_label.set(f"状态: {self._sm_seq+1}/{len(self._sm_steps)} {name}")
         for i, name in enumerate(["左","中","右"]):
-            ms = self.recorders[i].latest_m1
-            if ms:
-                s = "✅到位" if (ms.flag & 0x02) else ("⚠堵转" if (ms.flag & 0x04) else "⏳...")
+            if self.comm and self.comm.device_connected(i):
+                ms = self.recorders[i].latest_m1
+                if ms:
+                    s = "✅到位" if (ms.flag & 0x02) else ("⚠堵转" if (ms.flag & 0x04) else "⏳...")
+                else:
+                    s = "●在线"
             else:
                 s = "○离线"
             self._sm_dev_labels[i].config(text=f"{name}:{s}")
@@ -1284,7 +1340,9 @@ class RosmasterGUI:
         if not self.comm or not self.comm.device_connected(dev):
             return
         full = bytes([cmd]) + bytes(data)
-        self.comm.send_packet(full, dev)
+        pkt = build_packet(full)
+        self.comm.send(pkt, dev)
+        self._log("tx", f"[D{dev+1}] {CMD_NAMES.get(cmd,f'0x{cmd:02X}')} | {format_hex(pkt)}")
 
     # ========== 可视化 ==========
     def _build_viz_tab(self, parent: ttk.Frame):
@@ -1454,6 +1512,14 @@ class RosmasterGUI:
         self._send_cmd(CMD_VEL_CONTROL, bytes([a, 1 if di else 0, (sp>>8)&0xFF, sp&0xFF, ac, 1 if sy else 0]),
                        f"addr={a} vel={sp}")
 
+    def _cmd_position(self, addr, di, sp, ac, pulse, ab, sy):
+        """脉冲位置 0x62"""
+        sp=max(0,min(3000,sp)); ac=max(0,min(255,ac)); pulse=max(0,min(0xFFFFFFFF,pulse))
+        self._send_cmd(CMD_POS_CONTROL, bytes([addr, 1 if di else 0, (sp>>8)&0xFF, sp&0xFF, ac,
+                       (pulse>>24)&0xFF,(pulse>>16)&0xFF,(pulse>>8)&0xFF,pulse&0xFF,
+                       1 if ab else 0, 1 if sy else 0]),
+                       f"addr={addr} pulse={pulse}")
+
     def _cmd_position_cm(self, addr, di, sp, ac, dist, ab, sy):
         sp=max(0,min(3000,sp)); ac=max(0,min(255,ac)); dist=max(0,min(0xFFFFFFFF,dist))
         self._send_cmd(CMD_POS_CM, bytes([addr, 1 if di else 0, (sp>>8)&0xFF, sp&0xFF, ac,
@@ -1492,12 +1558,38 @@ class RosmasterGUI:
     def _on_co(self, connected: bool, msg: str):
         self.root.after(0, lambda: self._log("info" if "已连接" in msg or "启动" in msg else "error", msg))
     def _on_pkt(self, frame: bytes, data: bytes, device_idx: int = 0):
+        """后台线程直接解析, 只把 UI 更新放到主线程"""
         self._rx_pkt_count += 1
-        self.root.after(0, lambda: self._handle_pkt(frame, data, device_idx))
+        cmd = data[0] if len(data) > 0 else 0
+        payload = data[1:]
+
+        # 高频数据: 后台线程直接处理, 不 post 到主线程
+        if cmd in (CMD_TX_STREAM_MPU, CMD_TX_STREAM_STEP, CMD_TX_STREAM_STATE):
+            rec = self.recorders[device_idx]
+            tnow = time.time()
+            if cmd == CMD_TX_STREAM_MPU and len(payload) >= 6:
+                rl = int.from_bytes(payload[0:2], 'little', signed=True)
+                pt = int.from_bytes(payload[2:4], 'little', signed=True)
+                yw = int.from_bytes(payload[4:6], 'little', signed=True)
+                rec.add_mpu(tnow, rl, pt, yw)
+            elif cmd == CMD_TX_STREAM_STEP and len(payload) >= 23:
+                ms = MotorState.unpack(payload[:23])
+                if ms:
+                    rec.add_motor(tnow, ms)
+            elif cmd == CMD_TX_STREAM_STATE and len(payload) >= 3:
+                s1, s2, bl = payload[0], payload[1], payload[2]
+                rec.add_pwm(tnow, s1, s2, bl)
+            # 低频 UI 更新 (2Hz)
+            if not hasattr(self, '_last_fast_ui') or tnow - self._last_fast_ui > 0.5:
+                self._last_fast_ui = tnow
+                self.root.after(0, self._upd_fast_ui)
+            return
+
+        # 低频数据: 走主线程
+        self.root.after(0, lambda f=frame, d=data, i=device_idx: self._handle_pkt(f, d, i))
 
     def _handle_pkt(self, frame: bytes, data: bytes, device_idx: int):
-        self.rx_pkt_count_var.set(f"PKT: {self._rx_pkt_count}")
-        self.rx_count_var.set(f"RX: {self._rx_count}")
+        """只处理低频指令 (ACK/Query/0x7C), 流数据已在 _on_pkt 处理"""
         rec = self.recorders[device_idx]
         if self.show_hex_var.get(): self._log("rx", f"[D{device_idx+1}] RX {format_hex(frame)}")
         if len(data) < 1: return
@@ -1506,26 +1598,6 @@ class RosmasterGUI:
         if cmd == CMD_TX_ACK_OK:
             addr = payload[0] if len(payload) > 0 else 0
             self._log("parsed", f"  ↳ {cname} | 电机={addr}")
-        elif cmd == CMD_TX_STREAM_MPU:
-            if len(payload) >= 6:
-                rl = int.from_bytes(payload[0:2], 'little', signed=True)
-                pt = int.from_bytes(payload[2:4], 'little', signed=True)
-                yw = int.from_bytes(payload[4:6], 'little', signed=True)
-                rec.add_mpu(time.time(), rl, pt, yw); self.latest_mpu = (rl, pt, yw)
-                if device_idx == self._current_device: self._upd_mpu_disp(rl, pt, yw)
-        elif cmd == CMD_TX_STREAM_STEP:
-            if len(payload) >= 23:
-                ms = MotorState.unpack(payload[:23])
-                if ms:
-                    rec.add_motor(time.time(), ms)
-                    if device_idx == self._current_device: self._upd_motor_disp(ms)
-        elif cmd == CMD_TX_STREAM_STATE:
-            if len(payload) >= 3:
-                s1, s2, bl = payload[0], payload[1], payload[2]
-                rec.add_pwm(time.time(), s1, s2, bl)
-                self.latest_servo_angles = (s1, s2); self.latest_bldc_duty = bl
-                if device_idx == self._current_device:
-                    self.pwm_status_label.config(text=f"舵1:{s1}° 舵2:{s2}° BLDC:{bl}%")
         elif cmd == CMD_QUERY_MPU_ATT:
             if len(payload) >= 6:
                 rl = int.from_bytes(payload[0:2], 'little', signed=True)
@@ -1546,6 +1618,20 @@ class RosmasterGUI:
         else:
             self._log("parsed", f"  ↳ {cname} | {format_hex(payload)}")
 
+    def _upd_fast_ui(self):
+        """批量刷新高频 UI (5Hz, 主线程调用)"""
+        # 电机状态
+        for i in range(2):
+            ms = self.recorders[self._current_device].latest_m1 if i == 0 else self.recorders[self._current_device].latest_m2
+            if ms and ms.addr == i + 1:
+                self._upd_motor_disp(ms)
+        # MPU
+        rl, pt, yw = self.recorders[self._current_device].latest_mpu
+        self._upd_mpu_disp(rl, pt, yw)
+        # 计数
+        self.rx_count_var.set(f"RX: {self._rx_count}")
+        self.rx_pkt_count_var.set(f"PKT: {self._rx_pkt_count}")
+
     def _upd_mpu_disp(self, rl, pt, yw):
         try:
             self.mpu_display.config(state=tk.NORMAL); self.mpu_display.delete(1.0, tk.END)
@@ -1556,6 +1642,12 @@ class RosmasterGUI:
     def _upd_motor_disp(self, ms: MotorState):
         t = self.m1_state_text if ms.addr == 1 else self.m2_state_text
         if t is None: return
+        # 值没变就跳过
+        tag = f"_last_motor_val_{ms.addr}"
+        new_val = (ms.voltage_mv, ms.phase_current, ms.velocity, ms.current_pos, ms.pos_error, ms.flag)
+        if hasattr(self, tag) and getattr(self, tag) == new_val:
+            return
+        setattr(self, tag, new_val)
         try:
             t.config(state=tk.NORMAL); t.delete(1.0, tk.END)
             for ln in [f"  电压: {ms.voltage_mv} mV", f"  电流: {ms.phase_current} mA",
@@ -1570,7 +1662,7 @@ class RosmasterGUI:
     def _start_plot_refresh(self):
         # SM check 轻量定时器 (每200ms)
         self._sm_check()
-        self._plot_job = self.root.after(200, self._start_plot_refresh)
+        self._plot_job = self.root.after(500, self._start_plot_refresh)
         # 绘图仅在 HAS_MPL 时刷新
         if HAS_MPL:
             self._refresh_plots()
@@ -1598,11 +1690,15 @@ class RosmasterGUI:
                 tvars['flags'].set(', '.join(fl) if fl else '-')
         if len(r.timestamps)<2: return
         t0=r.timestamps[0]; t=[ts-t0 for ts in r.timestamps]
-        self._motor_line1_pos.set_data(t[:len(r.m1_positions)], list(r.m1_positions))
-        self._motor_line2_pos.set_data(t[:len(r.m2_positions)], list(r.m2_positions))
+        n1 = min(len(t), len(r.m1_positions))
+        n2 = min(len(t), len(r.m2_positions))
+        if n1>0: self._motor_line1_pos.set_data(t[:n1], list(r.m1_positions)[:n1])
+        if n2>0: self._motor_line2_pos.set_data(t[:n2], list(r.m2_positions)[:n2])
         self._motor_ax1.relim(); self._motor_ax1.autoscale_view()
-        self._motor_line1_vel.set_data(t[:len(r.m1_velocities)], list(r.m1_velocities))
-        self._motor_line2_vel.set_data(t[:len(r.m2_velocities)], list(r.m2_velocities))
+        nv1 = min(len(t), len(r.m1_velocities))
+        nv2 = min(len(t), len(r.m2_velocities))
+        if nv1>0: self._motor_line1_vel.set_data(t[:nv1], list(r.m1_velocities)[:nv1])
+        if nv2>0: self._motor_line2_vel.set_data(t[:nv2], list(r.m2_velocities)[:nv2])
         self._motor_ax2.relim(); self._motor_ax2.autoscale_view()
         if t:
             for a in [self._motor_ax1,self._motor_ax2]:
