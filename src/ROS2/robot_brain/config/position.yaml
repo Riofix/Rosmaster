@@ -21,8 +21,8 @@ chassis:
   start_zone: 0           # 起始区 0mm
   obstacle_b: 27945       # 避障点B 1150mm (放置区方向)
   drop_zone: 30375        # 放置区 1250mm (W方向)
-  obstacle_a: 40095       # 避障点A 1650mm (抓取区方向)
-  grab_zone: 47628        # 抓取区 1960mm (S方向)
+  obstacle_a: -40095      # 避障点A 1650mm (S方向, 编码器减小)
+  grab_zone: -47628       # 抓取区 1960mm (S方向, 编码器减小)
   end_zone: 0             # 结束区 0mm
 
 # --- 抓取动作 (handle stepper_x / stepper_z, 相对脉冲数) ---

@@ -1138,10 +1138,10 @@ class BrainNode(Node):
         self.POS_7 = 900
 
         self.POS_START_ZONE = 0
-        self.POS_GRAB_ZONE = 47628
+        self.POS_GRAB_ZONE = -47628
         self.POS_DROP_ZONE = 30375
         self.POS_END_ZONE = 0
-        self.POS_OBSTACLE_A = 40095
+        self.POS_OBSTACLE_A = -40095
         self.POS_OBSTACLE_B = 27945
 
         self.GRAB_Z_DOWN_FIRST = 500

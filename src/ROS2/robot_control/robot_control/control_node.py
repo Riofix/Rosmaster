@@ -143,7 +143,7 @@ class ControlNode(Node):
                 # 1. 重置影子状态 (TaskID 握手第一步)
                 self.current_chassis_task_id = task_id
                 self.notify_protocol_reset("chassis", task_id)
-                
+
                 # 2. 启动 PID 目标
                 if action == "move_to":
                     target_pos = params.get("pos", 0)
@@ -151,6 +151,12 @@ class ControlNode(Node):
                     self.chassis_pid.reset()
                     self.is_chassis_moving = True
                     self.get_logger().info(f"底盘新任务: ID:{task_id} Target:{target_pos}")
+
+                elif action == "stop":
+                    self.is_chassis_moving = False
+                    self.chassis_pid.reset()
+                    self.stop_chassis()
+                    self.get_logger().info("🛑 底盘急停")
 
             elif action == "grab_start":
                 # 0x79: 抓取启动 — 无参数, 先清 action_done

@@ -11,9 +11,18 @@
 用法:
   ros2 launch robot_bringup chassis_test_launch.py
 
-测试底盘:
-  ros2 topic pub /brain_cmd std_msgs/msg/String \
+测试指令 (务必加 --once, 否则持续循环发送):
+  # 放置区 +30375 (W方向)
+  ros2 topic pub --once /brain_cmd std_msgs/msg/String \
     '{"data":"{\"device\":\"chassis\",\"subsystem\":\"base\",\"action\":\"move_to\",\"task_id\":1,\"params\":{\"pos\":30375}}"}'
+
+  # 抓取区 -47628 (S方向)
+  ros2 topic pub --once /brain_cmd std_msgs/msg/String \
+    '{"data":"{\"device\":\"chassis\",\"subsystem\":\"base\",\"action\":\"move_to\",\"task_id\":1,\"params\":{\"pos\":-47628}}"}'
+
+  # 急停
+  ros2 topic pub --once /brain_cmd std_msgs/msg/String \
+    '{"data":"{\"device\":\"chassis\",\"subsystem\":\"base\",\"action\":\"stop\",\"task_id\":1,\"params\":{}}"}'
 
 到位监控:
   ros2 topic echo /world_state | grep -A2 arrival_done
@@ -33,7 +42,7 @@ def generate_launch_description():
             executable='serial_node',
             name='serial_node',
             parameters=[{
-                'port': '/dev/rosmaster',
+                'port': '/dev/Rosmaster',
                 'baudrate': 115200,
             }],
             output='screen',
