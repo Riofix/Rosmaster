@@ -39,6 +39,8 @@
 typedef enum
 {
     GRAB_IDLE = 0,   /* 空闲, 不在执行抓取 */
+    GRAB_EMERGENCY,  /* 紧急停止 */
+    GRAB_RESET,      /* 复位: 电机1/2 回原点 */
     GRAB_DOWN10,     /* 降 10cm */
     GRAB_BLDC_ON,    /* 开无刷 */
     GRAB_SWEEP_CCW,  /* 逆时针横扫 */
@@ -132,6 +134,19 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
     Emm_V5_Pos_Control(1, dir, VEL_MOVE, ACC, move_pulse, 0, 0);
 }
 
+/*
+    @brief  紧急停止
+    @param  None
+    @retval None
+*/
+void App_Action_EmergencyStop(void)
+{
+    s_grab_step = GRAB_EMERGENCY;
+    App_Bldc_Stop();
+    Emm_V5_Pos_Control(1, 0, 0, 0, 0, 0, 0);
+    Emm_V5_Pos_Control(2, 0, 0, 0, 0, 0, 0);
+}
+
 /* ================================================================
  * App_Action_Grab (内部状态机)
  *
@@ -159,6 +174,33 @@ void App_Action_Grab(void)
     {
         s_grab_step = GRAB_IDLE;
         App_Bldc_Stop();
+        return;
+    }
+
+    if (s_grab_step == GRAB_EMERGENCY)
+    {
+        /* 紧急停止后, 需要手动复位才能继续抓取 */
+        return;
+    }
+
+    //---- 复位状态: 电机1/2 回原点 ----
+    if (s_grab_step == GRAB_RESET)
+    {
+        /* 复位: 电机1/2 回原点 */
+        Emm_V5_Pos_Control(1, 0, VEL_MOVE, ACC, origin_pulse_offset, 1, 0);
+        Emm_V5_Pos_Control(2, 0, VEL_VERT, ACC, 0, 1, 0);
+        g_motors[0].flag &= ~0x02; /* 清到位 */
+        g_motors[1].flag &= ~0x02;
+        //---- 等待电机1/2 到位 ----
+        if (g_motors[0].flag & 0x02 && g_motors[1].flag & 0x02)
+        {
+            s_grab_step = GRAB_IDLE;
+            s_grab_flag_low = 0;
+            s_grab_timeout = 0;
+            //---- 复位后清零编码器位置 ----
+            Emm_V5_Reset_CurPos_To_Zero(1);
+            Emm_V5_Reset_CurPos_To_Zero(2);
+        }
         return;
     }
 

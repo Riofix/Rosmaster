@@ -42,6 +42,15 @@ class BrainNode(Node):
         # ======================== 位置参数 ========================
         self._load_positions()
 
+        # 底盘测试指令 → 脉冲值映射
+        self._goto_positions = {
+            "goto_start_zone":  self.POS_START_ZONE,
+            "goto_obstacle_b":  self.POS_OBSTACLE_B,
+            "goto_place_zone":  self.POS_DROP_ZONE,
+            "goto_obstacle_a":  self.POS_OBSTACLE_A,
+            "goto_grab_zone":   self.POS_GRAB_ZONE,
+        }
+
         # ======================== 环形轨道边代价 ========================
         # 环上 7 个点位，相邻边代价（无向）
         self._edge_cost = {
@@ -118,12 +127,20 @@ class BrainNode(Node):
             self.get_logger().error(f"WorldState parse error: {e}")
 
     def start_cmd_cb(self, msg):
-        """接收外部启动指令"""
+        """接收外部指令: start(全流程启动) / goto_*(底盘测试移动)"""
         try:
             data = json.loads(msg.data)
-            if data.get("cmd") == "start":
+            cmd = data.get("cmd", "")
+
+            if cmd == "start":
                 self.start_cmd_received = True
                 self.get_logger().info("Received START command.")
+
+            elif cmd in self._goto_positions:
+                target = self._goto_positions[cmd]
+                self.dispatch_task("chassis", "base", "move_to", {"pos": target})
+                self.get_logger().info(f"GOTO: {cmd} → pos={target}")
+
         except Exception as e:
             self.get_logger().error(f"StartCmd parse error: {e}")
 
@@ -1091,6 +1108,7 @@ class BrainNode(Node):
             self.POS_DROP_ZONE = c["drop_zone"]
             self.POS_END_ZONE = c["end_zone"]
             self.POS_OBSTACLE_A = c["obstacle_a"]
+            self.POS_OBSTACLE_B = c["obstacle_b"]
 
             # --- 抓取动作参数（全部相对位移）---
             g = cfg["grab"]
@@ -1120,10 +1138,11 @@ class BrainNode(Node):
         self.POS_7 = 900
 
         self.POS_START_ZONE = 0
-        self.POS_GRAB_ZONE = 1500
-        self.POS_DROP_ZONE = 3000
+        self.POS_GRAB_ZONE = 47628
+        self.POS_DROP_ZONE = 30375
         self.POS_END_ZONE = 0
-        self.POS_OBSTACLE_A = 800
+        self.POS_OBSTACLE_A = 40095
+        self.POS_OBSTACLE_B = 27945
 
         self.GRAB_Z_DOWN_FIRST = 500
         self.GRAB_X_CW_DELTA = 800

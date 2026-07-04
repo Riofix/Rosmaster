@@ -1,0 +1,549 @@
+#!/usr/bin/env python3
+"""Rosmaster 上位机 — PyQt6"""
+
+import sys, json, os, struct, time, datetime, socket, select, threading
+from collections import deque
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+# ====== 协议常量 ======
+PACKET_HEADER1, PACKET_HEADER2_RX, PACKET_HEADER2_TX = 0xFF, 0xFC, 0xFB
+PROTOCOL_MAX_DATA_LEN = 64
+
+CMD_NAMES = {
+    0x60: "使能", 0x61: "速度", 0x62: "位置", 0x63: "急停",
+    0x64: "同步", 0x65: "设回零位", 0x67: "触发回零", 0x68: "中断回零",
+    0x69: "改模式", 0x6A: "回零", 0x6B: "解堵",
+    0x6C: "舵机", 0x6D: "无刷", 0x6E: "BLDC停", 0x70: "OLED",
+    0x72: "MPU报", 0x73: "步进报", 0x74: "PWM报",
+    0x78: "位cm", 0x79: "抓取", 0x7A: "点位", 0x7B: "原点",
+    0x7C: "抓完", 0x86: "状态", 0x87: "参数", 0x90: "ACK",
+}
+
+
+def calc_checksum(pkt_len, data):
+    return (pkt_len + sum(data)) & 0xFF
+
+
+def build_packet(data):
+    pkt_len = len(data) + 2
+    cksum = calc_checksum(pkt_len, data)
+    return bytes([PACKET_HEADER1, PACKET_HEADER2_RX, pkt_len]) + data + bytes([cksum])
+
+
+def fmt_hex(data):
+    return ' '.join(f'{b:02X}' for b in data)
+
+
+def ts():
+    return datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+
+
+class ProtocolParser:
+    def __init__(self, on_packet):
+        self._on_packet, self._buf = on_packet, bytearray()
+
+    def feed(self, raw):
+        self._buf.extend(raw)
+        while len(self._buf) >= 5:
+            if self._buf[0] != 0xFF or self._buf[1] != 0xFB:
+                self._buf.pop(0); continue
+            length = self._buf[2]
+            total = length + 2
+            if len(self._buf) < total: break
+            frame = bytes(self._buf[:total])
+            data_bytes = frame[3:3 + length - 2]
+            if frame[-1] == calc_checksum(length, data_bytes):
+                self._on_packet(frame, data_bytes)
+            del self._buf[:total]
+
+    def reset(self):
+        self._buf.clear()
+
+
+class TcpServer(QObject):
+    status_changed = pyqtSignal(str)
+    raw_received = pyqtSignal(bytes, int)
+    packet_received = pyqtSignal(bytes, bytes, int)
+    MAX_DEVICES = 3
+
+    def __init__(self):
+        super().__init__()
+        self._server, self._running = None, False
+        self._socks, self._parsers = [None] * self.MAX_DEVICES, [
+            ProtocolParser(lambda f, d, i=i: self.packet_received.emit(f, d, i)) for i in range(self.MAX_DEVICES)]
+
+    def start(self, port=3456):
+        try:
+            self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self._server.settimeout(1.0); self._server.bind(('0.0.0.0', port))
+            self._server.listen(self.MAX_DEVICES); self._running = True
+            threading.Thread(target=self._loop, daemon=True).start()
+            self.status_changed.emit(f"TCP 监听端口 {port}"); return True
+        except OSError as e:
+            self.status_changed.emit(f"TCP 失败: {e}"); return False
+
+    def stop(self):
+        self._running = False
+        for i in range(self.MAX_DEVICES):
+            if self._socks[i]:
+                try: self._socks[i].close()
+                except: pass
+                self._socks[i] = None
+        if self._server:
+            try: self._server.close()
+            except: pass; self._server = None
+
+    def send(self, data: bytes, dev=0):
+        if self._socks[dev] and self._running:
+            try: self._socks[dev].sendall(data); return True
+            except: self._close_dev(dev); return False
+        return False
+
+    def send_packet(self, data: bytes, dev=0):
+        return self.send(build_packet(data), dev)
+
+    def device_connected(self, dev):
+        return self._socks[dev] is not None
+
+    def _close_dev(self, i):
+        if self._socks[i]:
+            try: self._socks[i].close()
+            except: pass
+            self._socks[i] = None
+        self._parsers[i].reset()
+
+    def _loop(self):
+        watch = [self._server]
+        while self._running:
+            try: r, _, _ = select.select(watch, [], [], 0.5)
+            except: break
+            for s in r:
+                if s is self._server:
+                    try:
+                        cli, addr = self._server.accept()
+                        idx = next((i for i in range(self.MAX_DEVICES) if self._socks[i] is None), -1)
+                        if idx < 0: cli.close(); continue
+                        cli.settimeout(0.1); self._socks[idx] = cli; watch.append(cli)
+                        self.status_changed.emit(f"CONNECT:{idx}:{addr[0]}")
+                    except: pass
+                else:
+                    idx = next((i for i in range(self.MAX_DEVICES) if self._socks[i] is s), -1)
+                    if idx < 0: continue
+                    try:
+                        data = s.recv(4096)
+                        if data:
+                            self.raw_received.emit(data, idx); self._parsers[idx].feed(data)
+                        else:
+                            watch.remove(s); self._close_dev(idx); self.status_changed.emit(f"DISCONNECT:{idx}")
+                    except socket.timeout: continue
+                    except:
+                        if s in watch: watch.remove(s)
+                        self._close_dev(idx); self.status_changed.emit(f"DISCONNECT:{idx}")
+
+
+class MonitorPage(QWidget):
+    def __init__(self):
+        super().__init__()
+        self._setup_ui()
+        self.server = TcpServer()
+        self.server.status_changed.connect(self._log)
+        self.server.raw_received.connect(self._on_raw)
+        self.server.packet_received.connect(self._on_pkt)
+        self._tx_count = self._rx_count = self._pkt_count = 0
+
+    def _setup_ui(self):
+        layout = QVBoxLayout(self)
+        top = QHBoxLayout()
+        top.addWidget(QLabel("端口:"))
+        self.port_edit = QLineEdit("3456"); self.port_edit.setFixedWidth(60); top.addWidget(self.port_edit)
+        self.btn_conn = QPushButton("启动监听"); self.btn_conn.clicked.connect(self._toggle_server); top.addWidget(self.btn_conn)
+        self._online = [False, False, False]
+        self.dev_labels = []
+        for _ in range(3):
+            lbl = QLabel(" ○离线"); lbl.setStyleSheet("color: gray;"); top.addWidget(lbl); self.dev_labels.append(lbl)
+        top.addStretch(); layout.addLayout(top)
+
+        self.log_text = QTextEdit(); self.log_text.setReadOnly(True)
+        self.log_text.setFont(QFont("Consolas", 10))
+        self.log_text.setStyleSheet("background-color: #1E1E1E; color: #D4D4D4;"); layout.addWidget(self.log_text)
+
+        bottom = QHBoxLayout()
+        self.tx_label, self.rx_label, self.pkt_label = QLabel("TX: 0"), QLabel("RX: 0"), QLabel("PKT: 0")
+        bottom.addWidget(self.tx_label); bottom.addWidget(self.rx_label); bottom.addWidget(self.pkt_label); bottom.addStretch()
+        self.cb_scroll = QCheckBox("自动滚动"); self.cb_scroll.setChecked(True); bottom.addWidget(self.cb_scroll)
+        btn_clear = QPushButton("清空"); btn_clear.clicked.connect(self.log_text.clear); bottom.addWidget(btn_clear)
+        layout.addLayout(bottom)
+
+    def _toggle_server(self):
+        if self.server._running:
+            self.server.stop(); self.btn_conn.setText("启动监听")
+        else:
+            self.server.start(int(self.port_edit.text())); self.btn_conn.setText("停止监听")
+
+    def _log(self, msg):
+        if msg.startswith("CONNECT:"):
+            parts = msg.split(":")
+            idx = int(parts[1])
+            ip = parts[2] if len(parts) > 2 else ""
+            self._online[idx] = True
+            self.dev_labels[idx].setText(f" ●在线({ip})"); self.dev_labels[idx].setStyleSheet("color: #2E7D32;")
+            line = f"[{ts()}] 设备{idx+1} 已连接 ({ip})"
+            self.log_text.append(f'<span style="color:#FFB74D">{line}</span>')
+        elif msg.startswith("DISCONNECT:"):
+            idx = int(msg.split(":")[1])
+            self._online[idx] = False
+            self.dev_labels[idx].setText(" ○离线"); self.dev_labels[idx].setStyleSheet("color: gray;")
+            line = f"[{ts()}] 设备{idx+1} 已断开"
+            self.log_text.append(f'<span style="color:#FFB74D">{line}</span>')
+        else:
+            line = f"[{ts()}] {msg}"
+            self.log_text.append(f'<span style="color:#FFB74D">{line}</span>')
+            if self.cb_scroll.isChecked(): self.log_text.verticalScrollBar().setValue(self.log_text.verticalScrollBar().maximum())
+
+    def _on_raw(self, data, dev):
+        self._rx_count += len(data); self.rx_label.setText(f"RX: {self._rx_count}")
+
+    def _on_pkt(self, frame, data, dev):
+        self._pkt_count += 1; self.pkt_label.setText(f"PKT: {self._pkt_count}")
+        if len(data) > 0:
+            # 流数据转发给监测页
+            if data[0] in (0x5A, 0x5B, 0x5C, 0x5D):
+                mw = self.window()
+                if hasattr(mw, 'data_page'):
+                    mw.data_page.update_data(data[0], data[1:], dev)
+                return
+            cmd = data[0]; name = CMD_NAMES.get(cmd, f"0x{cmd:02X}")
+            line = f"[{ts()}] [D{dev+1}] RX {fmt_hex(frame)}  ↳ {name}"
+            self.log_text.append(f'<span style="color:#81C784">{line}</span>')
+            if self.cb_scroll.isChecked(): self.log_text.verticalScrollBar().setValue(self.log_text.verticalScrollBar().maximum())
+
+    def log_tx(self, cmd, pkt, desc="", suffix=""):
+        self._tx_count += 1; self.tx_label.setText(f"TX: {self._tx_count}")
+        tag = f"[ALL] " if suffix == "ALL" else ""
+        name = CMD_NAMES.get(cmd, f"0x{cmd:02X}")
+        line = f"[{ts()}] TX {tag}{name} {desc} | {fmt_hex(pkt)}"
+        self.log_text.append(f'<span style="color:#4FC3F7">{line}</span>')
+        if self.cb_scroll.isChecked(): self.log_text.verticalScrollBar().setValue(self.log_text.verticalScrollBar().maximum())
+
+    def send_cmd(self, cmd, data, combo_idx=-1):
+        if combo_idx < 0: return False
+        dev = combo_idx - 1  # combo: 0=全部, 1=抓手1→dev0, 2=抓手2→dev1, 3=抓手3→dev2
+        if combo_idx != 0 and not self._online[dev]:
+            self._log(f"设备{combo_idx} 离线, 无法发送")
+            return False
+        if combo_idx == 0:  # 全部
+            full = bytes([cmd]) + bytes(data); pkt = build_packet(full)
+            ok = False
+            for i in range(3):
+                if self.server.send(pkt, i): ok = True
+            if ok: self.log_tx(cmd, pkt, "ALL")
+            return ok
+        full = bytes([cmd]) + bytes(data); pkt = build_packet(full)
+        if self.server.send(pkt, dev):
+            self.log_tx(cmd, pkt); return True
+        return False
+
+
+# ====== 电机控制页 ======
+class MotorPanel(QGroupBox):
+    """单个电机面板"""
+    def __init__(self, monitor, dev_combo, addr, name, dir_opts):
+        super().__init__(f"{name} (地址{addr})")
+        self.mon, self.dev_combo, self.addr = monitor, dev_combo, addr
+        self.dir_opts = dir_opts
+        self._build()
+
+    def _send(self, cmd, data):
+        dev = self.dev_combo.currentIndex()
+        self.mon.send_cmd(cmd, data, dev)
+
+    def _w(self, name):
+        return self.__dict__[name]
+
+    def _build(self):
+        a = self.addr
+        layout = QVBoxLayout(self)
+
+        # 使能 + 基本
+        g1 = QGroupBox("使能 & 基本"); l1 = QHBoxLayout(g1)
+        self._en = QCheckBox("使能"); l1.addWidget(self._en)
+        l1.addWidget(self._btn("发送", lambda: [a, 1 if self._en.isChecked() else 0, 0], 0x60))
+        l1.addWidget(self._btn("急停", lambda: [a, 0], 0x63))
+        l1.addWidget(self._btn("回零", lambda: [a], 0x6A))
+        l1.addWidget(self._btn("解堵", lambda: [a], 0x6B))
+        l1.addWidget(self._btn("同步", lambda: [a], 0x64))
+        layout.addWidget(g1)
+
+        # 速度
+        g2 = QGroupBox("速度模式"); l2 = QGridLayout(g2)
+        l2.addWidget(QLabel("方向:"), 0, 0)
+        self._vd = QComboBox(); self._vd.addItems(self.dir_opts); l2.addWidget(self._vd, 0, 1)
+        l2.addWidget(QLabel("速度:"), 0, 2)
+        self._vs = QSpinBox(); self._vs.setRange(0, 3000); self._vs.setValue(500); l2.addWidget(self._vs, 0, 3)
+        l2.addWidget(QLabel("加速度:"), 0, 4)
+        self._va = QSpinBox(); self._va.setRange(0, 255); self._va.setValue(100); l2.addWidget(self._va, 0, 5)
+        l2.addWidget(self._btn("▶", lambda:
+        [a, self._vd.currentIndex(), (self._vs.value() >> 8) & 0xFF, self._vs.value() & 0xFF,
+         self._va.value(), 0], 0x61), 0, 6)
+        layout.addWidget(g2)
+
+        # 位置 cm
+        g3 = QGroupBox("位置 (cm)"); l3 = QGridLayout(g3)
+        l3.addWidget(QLabel("方向:"), 0, 0)
+        self._pd = QComboBox(); self._pd.addItems(self.dir_opts); l3.addWidget(self._pd, 0, 1)
+        l3.addWidget(QLabel("距离:"), 0, 2)
+        self._pdist = QDoubleSpinBox(); self._pdist.setRange(0, 999); self._pdist.setValue(10.0); l3.addWidget(self._pdist, 0, 3)
+        l3.addWidget(QLabel("cm"), 0, 4)
+        l3.addWidget(QLabel("速度:"), 1, 0)
+        self._ps = QSpinBox(); self._ps.setRange(0, 3000); self._ps.setValue(500); l3.addWidget(self._ps, 1, 1)
+        l3.addWidget(QLabel("加速度:"), 1, 2)
+        self._pa = QSpinBox(); self._pa.setRange(0, 255); self._pa.setValue(100); l3.addWidget(self._pa, 1, 3)
+        self._pabs = QCheckBox("绝对"); self._pabs.setChecked(True); l3.addWidget(self._pabs, 1, 4)
+        l3.addWidget(self._btn("▶", lambda: [
+            a, self._pd.currentIndex(),
+            (self._ps.value() >> 8) & 0xFF, self._ps.value() & 0xFF, self._pa.value(),
+            (int(self._pdist.value() * 100) >> 24) & 0xFF,
+            (int(self._pdist.value() * 100) >> 16) & 0xFF,
+            (int(self._pdist.value() * 100) >> 8) & 0xFF,
+            int(self._pdist.value() * 100) & 0xFF,
+            1 if self._pabs.isChecked() else 0, 0
+        ], 0x78), 1, 5)
+        layout.addWidget(g3)
+
+        # 位置 脉冲
+        g4 = QGroupBox("位置 (脉冲)"); l4 = QGridLayout(g4)
+        l4.addWidget(QLabel("方向:"), 0, 0)
+        self._pld = QComboBox(); self._pld.addItems(self.dir_opts); l4.addWidget(self._pld, 0, 1)
+        l4.addWidget(QLabel("脉冲:"), 0, 2)
+        self._plp = QSpinBox(); self._plp.setRange(0, 99999999); self._plp.setValue(1000); l4.addWidget(self._plp, 0, 3)
+        l4.addWidget(QLabel("速度:"), 1, 0)
+        self._pls = QSpinBox(); self._pls.setRange(0, 3000); self._pls.setValue(500); l4.addWidget(self._pls, 1, 1)
+        l4.addWidget(QLabel("加速度:"), 1, 2)
+        self._pla = QSpinBox(); self._pla.setRange(0, 255); self._pla.setValue(100); l4.addWidget(self._pla, 1, 3)
+        self._plabs = QCheckBox("绝对"); self._plabs.setChecked(True); l4.addWidget(self._plabs, 1, 4)
+        l4.addWidget(self._btn("▶", lambda: [
+            a, self._pld.currentIndex(),
+            (self._pls.value() >> 8) & 0xFF, self._pls.value() & 0xFF, self._pla.value(),
+            (self._plp.value() >> 24) & 0xFF, (self._plp.value() >> 16) & 0xFF,
+            (self._plp.value() >> 8) & 0xFF, self._plp.value() & 0xFF,
+            1 if self._plabs.isChecked() else 0, 0
+        ], 0x62), 1, 4)
+        layout.addWidget(g4)
+
+        # 高级
+        g6 = QGroupBox("高级 & 查询"); l6 = QHBoxLayout(g6)
+        for txt, cmd, d in [("状态", 0x86, [a]), ("参数", 0x87, [a, 0]),
+                             ("设回零位", 0x65, [a, 0]), ("触发回零", 0x67, [a, 0, 0]),
+                             ("中断回零", 0x68, [a])]:
+            l6.addWidget(self._btn(txt, lambda d2=d: d2, cmd))
+        layout.addWidget(g6)
+
+    def _btn(self, text, data_fn, cmd):
+        b = QPushButton(text)
+        b.clicked.connect(lambda checked, c=cmd, f=data_fn: self._send(c, f()))
+        return b
+
+
+class MotorPage(QWidget):
+    def __init__(self, monitor: MonitorPage, dev_combo: QComboBox):
+        super().__init__()
+        layout = QHBoxLayout(self)
+        left = QVBoxLayout()
+        self.m1 = MotorPanel(monitor, dev_combo, 1, "电机1", ["逆时针", "顺时针"])
+        left.addWidget(self.m1)
+        # 点位 (仅电机1)
+        g5 = QGroupBox("点位移动 & 原点"); l5 = QGridLayout(g5)
+        l5.addWidget(QLabel("点位:"), 0, 0)
+        self.move_pos = QComboBox(); self.move_pos.addItems([str(i) for i in range(1, 9)]); l5.addWidget(self.move_pos, 0, 1)
+        l5.addWidget(QLabel("方向:"), 0, 2)
+        self.move_dir = QComboBox(); self.move_dir.addItems(["逆时针", "顺时针"]); l5.addWidget(self.move_dir, 0, 3)
+        btn_m = QPushButton("移动"); btn_m.clicked.connect(lambda: monitor.send_cmd(0x7A,
+            [int(self.move_pos.currentText()), self.move_dir.currentIndex()], dev_combo.currentIndex()))
+        l5.addWidget(btn_m, 0, 4)
+        btn_o = QPushButton("设原点"); btn_o.clicked.connect(
+            lambda: monitor.send_cmd(0x7B, [int(self.move_pos.currentText())], dev_combo.currentIndex()))
+        l5.addWidget(btn_o, 0, 5)
+        btn_grab = QPushButton("抓取"); btn_grab.clicked.connect(
+            lambda: monitor.send_cmd(0x79, [], dev_combo.currentIndex()))
+        l5.addWidget(btn_grab, 0, 6)
+        left.addWidget(g5); left.addStretch()
+        layout.addLayout(left)
+        right = QVBoxLayout()
+        self.m2 = MotorPanel(monitor, dev_combo, 2, "电机2", ["上升", "下降"])
+        right.addWidget(self.m2); right.addStretch()
+        layout.addLayout(right)
+
+
+
+
+
+class DataPage(QWidget):
+    """数据监测: 曲线图 + 状态"""
+    def __init__(self, monitor, dev_combo):
+        super().__init__()
+        self.mon, self.dc = monitor, dev_combo
+        layout = QVBoxLayout(self)
+
+        # ── 自动上报开关 (跟设备选择器) ──
+        sr = QHBoxLayout(); sr.addWidget(QLabel("自动上报:"))
+        def _stream(cmd, v):
+            d = dev_combo.currentIndex()
+            devs = range(3) if d == 0 else [d-1]
+            for i in devs: monitor.send_cmd(cmd, [1 if v else 0], i)
+        for txt, cmd in [("MPU",0x72),("步进",0x73),("PWM",0x74)]:
+            cb = QCheckBox(txt); cb.toggled.connect(lambda v,c=cmd: _stream(c,v)); sr.addWidget(cb)
+        sr.addStretch(); layout.addLayout(sr)
+
+        # ── MPU 曲线 ──
+        try:
+            import pyqtgraph as pg
+            self.mpu_plot = pg.PlotWidget(title="MPU 姿态角"); self.mpu_plot.showGrid(x=True,y=True,alpha=0.3); self.mpu_plot.addLegend()
+            self.mpu_c = [self.mpu_plot.plot(pen=c,name=n) for c,n in [((255,0,0),"Roll"),((0,255,0),"Pitch"),((0,0,255),"Yaw")]]
+            self.mpu_d = [[],[],[]]; layout.addWidget(self.mpu_plot)
+        except: layout.addWidget(QLabel("pyqtgraph not installed"))
+
+        # ── 电机曲线 (6条) ──
+        try:
+            import pyqtgraph as pg
+            self.mtr_plot = pg.PlotWidget(title="电机位置"); self.mtr_plot.showGrid(x=True,y=True,alpha=0.3); self.mtr_plot.addLegend()
+            colors = [(255,100,0),(200,50,0),(0,200,100),(0,120,50),(50,100,255),(30,60,200)]
+            names = [f"D{d+1}M{m}" for d in range(3) for m in (1,2)]
+            self.mtr_c = [self.mtr_plot.plot(pen=c,name=n) for c,n in zip(colors,names)]
+            self.mtr_d = [[] for _ in range(6)]; layout.addWidget(self.mtr_plot)
+        except: layout.addWidget(QLabel("pyqtgraph not installed"))
+
+        # 状态标签
+        self._st = QLabel("就绪"); layout.addWidget(self._st)
+
+    def update_data(self, cmd, payload, dev):
+        import struct
+        if cmd == 0x5A and len(payload)>=6 and hasattr(self,'mpu_d'):
+            r=struct.unpack("<h",payload[0:2])[0]/100.0
+            p=struct.unpack("<h",payload[2:4])[0]/100.0
+            y=struct.unpack("<h",payload[4:6])[0]/100.0
+            for d,lst in [(r,0),(p,1),(y,2)]:
+                self.mpu_d[lst].append(d); 
+                if len(self.mpu_d[lst])>300: self.mpu_d[lst].pop(0)
+            self.mpu_c[0].setData(self.mpu_d[0])
+            self.mpu_c[1].setData(self.mpu_d[1])
+            self.mpu_c[2].setData(self.mpu_d[2])
+        elif cmd == 0x5B and len(payload)>=23 and hasattr(self,'mtr_d'):
+            try:
+                addr=payload[0]; cpos=struct.unpack("<i",payload[18:22])[0]
+                idx=dev*2+(0 if addr==1 else 1)
+                self.mtr_d[idx].append(cpos)
+                if len(self.mtr_d[idx])>300: self.mtr_d[idx].pop(0)
+                self.mtr_c[idx].setData(self.mtr_d[idx])
+            except: pass
+        elif cmd in (0x5C,0x5D):
+            self._st.setText(f"[D{dev+1}] {'PWM' if cmd==0x5C else '颜色'} 已更新")
+
+
+class SensorPage(QWidget):
+    def __init__(self, monitor: MonitorPage, dev_combo: QComboBox):
+        super().__init__()
+        self.mon, self.dc = monitor, dev_combo
+
+        # 上排: 舵机/无刷 (左) + MPU (右)
+        top = QHBoxLayout()
+        # 舵机 & 无刷
+        c1 = QVBoxLayout(); c1.addWidget(QLabel("<b>舵机 & 无刷</b>"))
+        gs = QGroupBox("舵机 (0x6C)"); gs_lay = QVBoxLayout(gs)
+        for ch, name in [(0,"广播"),(1,"通道1"),(2,"通道2")]:
+            row = QHBoxLayout(); row.addWidget(QLabel(name))
+            sl = QSlider(Qt.Orientation.Horizontal); sl.setRange(0,180); sl.setValue(90)
+            lb = QLabel(" 90"); self.__dict__[f"sv_{ch}"] = lb
+            sl.valueChanged.connect(lambda v,l=lb:l.setText(f" {v}"))
+            row.addWidget(sl); row.addWidget(lb)
+            btn = QPushButton("设"); btn.clicked.connect(lambda _,c=ch,s=sl:monitor.send_cmd(0x6C,[c,s.value()],dev_combo.currentIndex()))
+            row.addWidget(btn); gs_lay.addLayout(row)
+        c1.addWidget(gs)
+        gb = QGroupBox("无刷 (0x6D/0x6E)"); gb_lay = QVBoxLayout(gb)
+        br = QHBoxLayout(); br.addWidget(QLabel("占空比:"))
+        self.bldc_s = QSlider(Qt.Orientation.Horizontal); self.bldc_s.setRange(0,100); self.bldc_s.setValue(50)
+        self.bldc_l = QLabel(" 50%"); br.addWidget(self.bldc_s); br.addWidget(self.bldc_l)
+        self.bldc_s.valueChanged.connect(lambda v:self.bldc_l.setText(f" {v}%")); gb_lay.addLayout(br)
+        bb = QHBoxLayout()
+        bb.addWidget(QPushButton("设",clicked=lambda:monitor.send_cmd(0x6D,[self.bldc_s.value()],dev_combo.currentIndex())))
+        bb.addWidget(QPushButton("停",clicked=lambda:monitor.send_cmd(0x6E,[],dev_combo.currentIndex())))
+        gb_lay.addLayout(bb); c1.addWidget(gb)
+        qrow = QHBoxLayout()
+        qrow.addWidget(QPushButton("查舵机",clicked=lambda:monitor.send_cmd(0x84,[0],dev_combo.currentIndex())))
+        qrow.addWidget(QPushButton("查无刷",clicked=lambda:monitor.send_cmd(0x85,[],dev_combo.currentIndex())))
+        c1.addLayout(qrow); c1.addStretch(); top.addLayout(c1)
+
+        # MPU
+        c2 = QVBoxLayout(); c2.addWidget(QLabel("<b>MPU6050</b>"))
+        gm = QGroupBox("控制"); gm_lay = QVBoxLayout(gm)
+        gm_lay.addWidget(QPushButton("校准",clicked=lambda:monitor.send_cmd(0x71,[],dev_combo.currentIndex())))
+        gm_lay.addWidget(QPushButton("姿态(0x80)",clicked=lambda:monitor.send_cmd(0x80,[],dev_combo.currentIndex())))
+        gm_lay.addWidget(QPushButton("原始(0x81)",clicked=lambda:monitor.send_cmd(0x81,[],dev_combo.currentIndex())))
+        c2.addWidget(gm)
+        self.mpu_disp = QTextEdit(); self.mpu_disp.setReadOnly(True)
+        self.mpu_disp.setFont(QFont("Consolas",10))
+        self.mpu_disp.setStyleSheet("background:#F5F5F5;"); c2.addWidget(self.mpu_disp)
+        c2.addStretch(); top.addLayout(c2)
+
+        # 下排: OLED & 颜色 (占满宽)
+        bot = QHBoxLayout()
+        go = QGroupBox("OLED 显示"); go_lay = QHBoxLayout(go)
+        self.oled_cb = QComboBox()
+        self.oled_cb.addItems([f"{i}:{n}" for i,n in enumerate(["关闭","MPU","电机","RGB原始","RGB滤波","RGB占比","HSV","融合","豆子","智能"])])
+        go_lay.addWidget(self.oled_cb)
+        go_lay.addWidget(QPushButton("设置",clicked=lambda:monitor.send_cmd(0x70,[int(self.oled_cb.currentText().split(':')[0])],dev_combo.currentIndex())))
+        bot.addWidget(go)
+
+        gc = QGroupBox("颜色传感器"); gc_lay = QVBoxLayout(gc)
+        self.cl = QLabel("未检测"); self.cl.setFont(QFont("",12,QFont.Weight.Bold)); self.cl.setStyleSheet("color:#E65100;"); gc_lay.addWidget(self.cl)
+        self.crgb = QLabel("R:- G:- B:-"); gc_lay.addWidget(self.crgb)
+        bot.addWidget(gc)
+
+        # 组装
+        main = QVBoxLayout(self)
+        main.addLayout(top, 2)
+        main.addLayout(bot, 1)
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Rosmaster 上位机"); self.resize(1200, 780)
+
+        # 顶层设备选择器
+        top_bar = QToolBar()
+        top_bar.addWidget(QLabel(" 设备: "))
+        self.dev_combo = QComboBox(); self.dev_combo.addItems(["全部", "抓手1", "抓手2", "抓手3"])
+        top_bar.addWidget(self.dev_combo)
+        top_bar.addSeparator()
+        estop = QPushButton("⚠ 一键急停")
+        estop.setStyleSheet("QPushButton{background:#D32F2F;color:white;font-size:14px;font-weight:bold;padding:5px 15px;}")
+        estop.clicked.connect(self._emergency_stop)
+        top_bar.addWidget(estop)
+        self.addToolBar(top_bar)
+
+        self.monitor = MonitorPage()
+        tabs = QTabWidget()
+        tabs.addTab(self.monitor, "通信监测")
+        tabs.addTab(MotorPage(self.monitor, self.dev_combo), "电机控制")
+        tabs.addTab(SensorPage(self.monitor, self.dev_combo), "传感器")
+        self.data_page = DataPage(self.monitor, self.dev_combo)
+        tabs.addTab(self.data_page, "数据监测")
+        tabs.addTab(QWidget(), "状态机")
+        self.setCentralWidget(tabs)
+
+    def _emergency_stop(self):
+        """所有设备急停"""
+        for i in range(3):
+            self.monitor.send_cmd(0x63, [1, 0], i)
+            self.monitor.send_cmd(0x63, [2, 0], i)
+            self.monitor.send_cmd(0x6E, [], i)
+        self.monitor._log("⚠ 一键急停已触发 (全部设备)")
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = MainWindow(); win.show()
+    sys.exit(app.exec())

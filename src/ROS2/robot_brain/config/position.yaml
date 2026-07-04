@@ -16,13 +16,14 @@ rail:
   pos_6: 750
   pos_7: 900
 
-# --- 底盘目标位置 (chassis, 编码器计数) ---
+# --- 底盘目标位置 (chassis, 编码器计数, 1cm=243脉冲) ---
 chassis:
-  start_zone: 0
-  grab_zone: 1500
-  drop_zone: 3000
-  end_zone: 0
-  obstacle_a: 800       # 避障点A（介于起始区和抓豆区之间）
+  start_zone: 0           # 起始区 0mm
+  obstacle_b: 27945       # 避障点B 1150mm (放置区方向)
+  drop_zone: 30375        # 放置区 1250mm (W方向)
+  obstacle_a: 40095       # 避障点A 1650mm (抓取区方向)
+  grab_zone: 47628        # 抓取区 1960mm (S方向)
+  end_zone: 0             # 结束区 0mm
 
 # --- 抓取动作 (handle stepper_x / stepper_z, 相对脉冲数) ---
 grab:

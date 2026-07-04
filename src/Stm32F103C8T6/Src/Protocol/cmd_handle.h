@@ -35,6 +35,7 @@
 #define CMD_RX_ACTION_MOVE 0x7A       // 电机1点位移动 [pos_id, clockwise]
 #define CMD_RX_SET_ORIGIN 0x7B        // 校准原点 [pos_id(1~8)]
 #define CMD_TX_ACTION_DONE 0x7C       // 抓取完成通知 (下位机→上位机)
+#define CMD_RX_ACTION_EMERGENCY 0x7D  // 抓取紧急停止 (上位机→下位机)
 
 // ======================== 查询类型指令 (0x80~0x87) ==========================
 #define CMD_RX_QUERY_MPU_ATT 0x80    // 查询MPU6050解算数据（返回俯仰角等）

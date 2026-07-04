@@ -87,7 +87,8 @@ static void Handle_Pos_Control(uint8_t *data, uint8_t len)
  */
 static void Handle_Pos_Control_Cm(uint8_t *data, uint8_t len)
 {
-  if (len < 10) return;
+  if (len < 10)
+    return;
   uint8_t addr = data[0];
   uint8_t dir = (data[1] != 0);
   uint16_t vel = (uint16_t)(data[3] | (data[2] << 8));
@@ -110,7 +111,8 @@ static void Handle_Pos_Control_Cm(uint8_t *data, uint8_t len)
  */
 static void Handle_Action_Grab(uint8_t *data, uint8_t len)
 {
-  (void)data; (void)len;
+  (void)data;
+  (void)len;
   App_Action_GrabStart();
   Send_Ok_Ack(0, CMD_RX_ACTION_GRAB);
 }
@@ -121,7 +123,8 @@ static void Handle_Action_Grab(uint8_t *data, uint8_t len)
  */
 static void Handle_Action_Move(uint8_t *data, uint8_t len)
 {
-  if (len < 2) return;
+  if (len < 2)
+    return;
   App_Action_MoveTo(data[0], data[1]);
   Send_Ok_Ack(data[0], CMD_RX_ACTION_MOVE);
 }
@@ -132,7 +135,8 @@ static void Handle_Action_Move(uint8_t *data, uint8_t len)
  */
 static void Handle_SetOrigin(uint8_t *data, uint8_t len)
 {
-  if (len < 1) return;
+  if (len < 1)
+    return;
   App_Action_SetOrigin(data[0]);
   Send_Ok_Ack(data[0], CMD_RX_SET_ORIGIN);
 }
@@ -425,6 +429,18 @@ static void Handle_Rgb_Stream(uint8_t *data, uint8_t len)
   g_app_context.rgb_serson_stream = data[0];
   Send_Ok_Ack(0, CMD_RX_RGB_SENSOR_STREAM);
 }
+/**
+ * @brief 处理抓取紧急停止指令 (0x7D)
+ * @param data 无参数
+ * @param len 忽略
+ */
+static void Handle_Action_Emergency(uint8_t *data, uint8_t len)
+{
+  (void)data;
+  (void)len;
+  App_Action_EmergencyStop();
+  Send_Ok_Ack(0, CMD_RX_ACTION_EMERGENCY);
+}
 
 // ======================= 0x8x 查询指令 Handler =======================
 /**
@@ -566,7 +582,7 @@ static void Handle_Query_BldcStat(uint8_t *data, uint8_t len)
   Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
 }
 
-// =========查询步进电机当前状态 0x86 ========= 
+// =========查询步进电机当前状态 0x86 =========
 /**
  * @brief 查询步进电机当前状态 (0x86)
  * @param data [0]电机索引(1或2,可选,默认第一个)
@@ -681,7 +697,7 @@ static const CmdTable_t g_cmd_table[] = {
     {CMD_RX_STEP_MOTOR_STREAM, Handle_StepMotor_Stream},
     {CMD_RX_PWM_STATE_STREAM, Handle_PWM_State_Stream},
     {CMD_RX_RGB_SENSOR_STREAM, Handle_Rgb_Stream},
-
+    {CMD_RX_ACTION_EMERGENCY, Handle_Action_Emergency},
     // ---- 8 个查询指令 ----
     {CMD_RX_QUERY_MPU_ATT, Handle_Query_MpuAtt},
     {CMD_RX_QUERY_MPU_RAW, Handle_Query_MpuRaw},
