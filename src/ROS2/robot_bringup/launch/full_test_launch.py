@@ -1,6 +1,5 @@
 """
-全链路测试 Launch — 串口(底盘) + TCP(抓手) + 协议 + 融合 + 控制
-不启动 brain/vision/hotspot — 避免状态机自动运行
+全链路测试 Launch — 除 brain_node 外全部启动
 
 启动节点:
   1. serial_node       → 串口通信 (底盘 /dev/Rosmaster)
@@ -9,23 +8,10 @@
   4. protocol_pack_node→ 下行封包 (JSON → FF FC)
   5. fusion_node       → 状态融合 → /world_state (50Hz)
   6. control_node      → PID 控制 + 指令映射
+  7. vision_node       → 视觉识别
 
 用法:
   ros2 launch robot_bringup full_test_launch.py
-
-连接后查看日志确认抓手 IP, 修改本文件中 ip_left/mid/right 后重新启动
-
-底盘测试 (务必加 --once):
-  # 放置区
-  ros2 topic pub --once /brain_cmd std_msgs/msg/String \
-    '{"data":"{\"device\":\"chassis\",\"subsystem\":\"base\",\"action\":\"move_to\",\"task_id\":1,\"params\":{\"pos\":30375}}"}'
-  # 抓取区
-  ros2 topic pub --once /brain_cmd std_msgs/msg/String \
-    '{"data":"{\"device\":\"chassis\",\"subsystem\":\"base\",\"action\":\"move_to\",\"task_id\":1,\"params\":{\"pos\":-47628}}"}'
-  # 急停
-  ros2 topic pub --once /brain_cmd std_msgs/msg/String \
-    '{"data":"{\"device\":\"chassis\",\"subsystem\":\"base\",\"action\":\"stop\",\"task_id\":1,\"params\":{}}"}'
-"""
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -55,9 +41,9 @@ def generate_launch_description():
             name='tcp_server_node',
             parameters=[{
                 'port': 3456,
-                'ip_left': '10.245.159.101',     # TODO: 确认后修改
-                'ip_mid': '10.245.159.102',      # TODO: 确认后修改
-                'ip_right': '10.245.159.103',    # TODO: 确认后修改
+                'ip_left': '10.245.159.251',
+                'ip_mid': '10.245.159.29',
+                'ip_right': '10.245.159.17',
             }],
             output='screen',
         ),
@@ -97,7 +83,15 @@ def generate_launch_description():
             output='screen',
         ),
 
+        # ── 视觉层 ──────────────────────────────────────────
+        # 7. 视觉识别
+        Node(
+            package='robot_vision',
+            executable='vision_node',
+            name='vision_node',
+            output='screen',
+        ),
+
         # ⚠️ 不启动 brain_node (状态机)
-        # ⚠️ 不启动 vision_node (视觉)
         # ⚠️ 不启动 hotspot_node (热点)
     ])
