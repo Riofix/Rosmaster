@@ -77,7 +77,8 @@ class VisionNode(Node):
         self.is_published = False
         self.final_result_msg = None
 
-        self.debug_mode = True
+        self.declare_parameter('debug_mode', True)
+        self.debug_mode = self.get_parameter('debug_mode').value
         self.debug_window_closed = False
 
         # ---------- 模板 ----------
