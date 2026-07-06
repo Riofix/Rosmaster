@@ -96,7 +96,7 @@ def generate_launch_description():
             package='robot_vision',
             executable='vision_node',
             name='vision_node',
-            parameters=[{'debug_mode': False}],
+            parameters=[{'debug_mode': False, 'broadcast_enabled': False}],
             output='screen',
         ),
 

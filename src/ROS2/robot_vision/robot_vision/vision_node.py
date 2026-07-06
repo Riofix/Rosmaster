@@ -95,7 +95,9 @@ class VisionNode(Node):
         # ---------- ROS ----------
         self.pub = self.create_publisher(String, '/vision_detections', 10)
         self.create_timer(0.03, self.vision_engine)
-        self.create_timer(1.0, self.broadcast_final_result)
+        self.declare_parameter('broadcast_enabled', True)
+        if self.get_parameter('broadcast_enabled').value:
+            self.create_timer(1.0, self.broadcast_final_result)
 
         self.get_logger().info("🔥 最终稳定版视觉节点启动（含旋转+Debug）")
 

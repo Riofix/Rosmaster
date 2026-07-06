@@ -331,10 +331,10 @@ class BrainNode(Node):
 
                 flag = (self.world.get("handles", {})
                         .get(h, {}).get("stepmotor", {})
-                        .get(0x02, {}).get("flag", 0))
+                        .get("2", {}).get("flag", 0))
 
                 if state == 0:
-                    # 等待堵转保护触发 (flag bit3, 0x08)
+                    # 等待堵转保护触发 (flag bit4, 0x08)
                     if flag & 0x08:
                         self.dispatch_task(h, "stepper_z", "stop", {})
                         self._init_stall_state[h] = 1
