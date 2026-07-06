@@ -170,6 +170,7 @@ class BrainNode(Node):
             # ── 复位 (急停 + 解锁 + 进 ST_RESET) ──
             elif cmd == "reset":
                 self.estop_locked = True   # 复位期间锁定, estop 可打断
+                self.step_paused = False   # 解除单步暂停让 ST_RESET 跑起来
                 self._do_emergency_stop()
                 self._transition_to(self.ST_RESET)
                 self.get_logger().info("[CMD] 复位 → ST_RESET")
@@ -440,7 +441,8 @@ class BrainNode(Node):
         # --- 避障点 A 触发检查 ---
         if not self.mid_obstacle_triggered:
             avg_pos = self._get_chassis_avg_pos()
-            if avg_pos is not None and avg_pos >= self.POS_OBSTACLE_A:
+            # S方向(负), encoder ≤ -40095 才算越过
+            if avg_pos is not None and avg_pos <= self.POS_OBSTACLE_A:
                 self._move_hand_to("handle_mid", 7, self.DIR_CCW)
                 self.mid_obstacle_triggered = True
                 self.mid_d2_debounce = 0
