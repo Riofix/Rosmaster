@@ -25,7 +25,7 @@ STM32 固件新增 `app_action.c`：
 | 1 | protocol_pack_node | ✅ |
 | 2 | control_node | ✅ |
 | 3 | 0x7C 抓取完成通知 (固件 + protocol_node) | ✅ |
-| 4 | brain_node 重构 | ⏳ |
+| 4 | brain_node 重构 | ✅ |
 
 ---
 
@@ -173,3 +173,55 @@ _edge_cost = {
 - `_move_hand_x()` → 替换为 `dispatch_task(hand, "stepper_x", "track_move", {"pos_id": idx, "clockwise": dir})`
 - `_ring_displacement()` → 删除
 - `_plan_ideal_paths` / `_plan_nonideal_paths`: 起点坐标更新
+
+---
+
+## 5. 已完成修改 (2026-07-06)
+
+### Phase 1: 补齐缺失指令 ✅
+- control_node: +stream子系统, +handle_stream cmd_map, +reset_clog(0x6B)
+- protocol_pack: +0x6A/0x6B/0x72/0x73/0x74/0x7D 封包
+
+### Phase 2: Bug修复 ✅
+- INIT→ST_WAIT_START_CMD (跳过WAIT_VISION)
+- reset cmd删estop_locked检查
+
+### Phase 3: INIT重写 ✅
+- 步骤0~10 per plan_readme 4.2
+- 新增 init_step / init_step_cmd_sent 状态变量
+
+### Phase 4: 轨道7→8 ✅
+- position.yaml: +pos_8
+- edge_cost: 8节点拓扑
+- DROP_TRACK_POS: [5,1,2,3,4]
+- 全部7→8边界更新
+- AVOID_1/2状态更新
+- MOVE_TO_GRAB目标更新
+- _plan_ideal/_nonideal起点更新
+
+---
+
+## 6. 待确认问题
+
+### Q1: INIT步骤4堵转检测
+步骤4对三抓手同时发 velocity(Z轴, dir=0), 等待 flag & 0x04。
+- flag & 0x04 确认是堵转标志位吗?
+- 三抓手Z轴行程一致吗? 堵转位置能正常触发吗?
+
+
+### Q2: 自动上报指令 (0x72/0x73/0x74)
+这些指令在新版下位机固件中是否还保留? 如果下位机默认已经开启上报, 
+步骤0.5可以跳过。
+
+### Q3: pos_1~pos_8 脉冲值
+当前为占位值(0,150,300,...), 需要实际校准。
+环轨 pulse/mm 换算关系是什么? ring_max=178000 是否对应一整圈?
+
+### Q4: GRABBING状态
+grab_bean() 尚未替换为 grab_start(0x79)。plan_readme 4.6 要求删除 grab_bean,
+改用下位机 0x79 抓取序列。但现有 grab_bean 逻辑复杂, 需要单独处理。
+
+### Q5: _move_hand_x 替换
+plan_readme 4.14 要求改为 track_move(0x7A), 传 pos_id 而非脉冲值。
+当前 _move_hand_x 读编码器→算位移→发 move_relative(0x62)。
+替换需要确保下位机 0x7A 正确工作。

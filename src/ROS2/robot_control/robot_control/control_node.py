@@ -72,19 +72,22 @@ class ControlNode(Node):
                 "stepper_x": {"motor_addr": 0x01, "type": "handle_stepper"},
                 "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
                 "servo": {"channel": 0x00, "type": "handle_servo"},
-                "bldc": {"type": "handle_bldc"}
+                "bldc": {"type": "handle_bldc"},
+                "stream": {"type": "handle_stream"}
             },
             "handle_mid": {
                 "stepper_x": {"motor_addr": 0x01, "type": "handle_stepper"},
                 "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
                 "servo": {"channel": 0x00, "type": "handle_servo"},
-                "bldc": {"type": "handle_bldc"}
+                "bldc": {"type": "handle_bldc"},
+                "stream": {"type": "handle_stream"}
             },
             "handle_right": {
                 "stepper_x": {"motor_addr": 0x01, "type": "handle_stepper"},
                 "stepper_z": {"motor_addr": 0x02, "type": "handle_stepper"},
                 "servo": {"channel": 0x00, "type": "handle_servo"},
-                "bldc": {"type": "handle_bldc"}
+                "bldc": {"type": "handle_bldc"},
+                "stream": {"type": "handle_stream"}
             },
         }
 
@@ -99,6 +102,7 @@ class ControlNode(Node):
                 "move_absolute": 0x62,
                 "stop": 0x63,
                 "reset_encoder": 0x6A,
+                "reset_clog": 0x6B,
                 "move_cm": 0x78,
                 "grab_start": 0x79,
                 "track_move": 0x7A,
@@ -106,7 +110,12 @@ class ControlNode(Node):
                 "emergency_stop": 0x7D
             },
             "handle_servo": {"move_to": 0x6C, "set_angle": 0x6C},
-            "handle_bldc": {"start": 0x6D, "stop": 0x6E}
+            "handle_bldc": {"start": 0x6D, "stop": 0x6E},
+            "handle_stream": {
+                "mpu_enable": 0x72,
+                "step_enable": 0x73,
+                "pwm_enable": 0x74,
+            }
         }
 
         # --- PID 实例初始化 (针对底盘) ---

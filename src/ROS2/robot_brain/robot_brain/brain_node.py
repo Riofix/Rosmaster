@@ -54,29 +54,21 @@ class BrainNode(Node):
 
         # ======================== 环形轨道边代价 ========================
         # 环上 7 个点位，相邻边代价（无向）
+        # 顺时针: 1→2→7→3→4→8→6→5→(回1)
         self._edge_cost = {
-            1: {2: 0.1, 7: 0.2},
-            2: {1: 0.1, 3: 0.1},
-            3: {2: 0.1, 4: 0.2},
-            4: {3: 0.2, 5: 0.3},
-            5: {4: 0.3, 6: 0.25},
-            6: {5: 0.25, 7: 0.3},
-            7: {6: 0.3, 1: 0.2},
+            1: {2: 0.2, 5: 0.1},
+            2: {1: 0.2, 7: 0.01, 3: 0.2},
+            7: {2: 0.01, 3: 0.19},
+            3: {7: 0.19, 2: 0.2, 4: 0.1},
+            4: {3: 0.1, 8: 0.2},
+            8: {4: 0.2, 6: 0.25},
+            6: {8: 0.25, 5: 0.2},
+            5: {6: 0.2, 1: 0.1},
         }
 
-        # ======================== 状态 0：初始化 ========================
-        self.init_error_count = 0
-        self.init_grace_period = 2.0       # 初始宽容期（秒）
-        self.init_enter_time = 0.0          # 进入 INIT 的时间戳
-        self.init_checks = {
-            "chassis":      {"type": "lower"},
-            "handle_left":  {"type": "lower"},
-            "handle_mid":   {"type": "lower"},
-            "handle_right": {"type": "lower"},
-            "vision":       {"type": "upper"},
-            "heartbeat":    {"type": "upper"},
-        }
-        self.init_check_state = {}          # {key: {"error_start": t, "reported": bool}}
+        # ======================== 状态 0：初始化 (plan_readme 4.2) ========================
+        self.init_step = 0              # 步骤 0~10
+        self.init_step_cmd_sent = False
 
         # ======================== 状态 2：启动指令 ========================
         self.start_cmd_received = False
@@ -92,11 +84,6 @@ class BrainNode(Node):
         self.target_L = 0                   # 左抓手目标位置
         self.target_M = 0                   # 中抓手目标位置
         self.target_R = 0                   # 右抓手目标位置
-        self.grab_seq_step = 0              # 抓取序列步骤 0~10
-        self.grab_seq_cmd_sent = False      # 当前步骤指令是否已下发
-        self.grab_seq_repeat = 0            # 步骤3-6 循环次数
-        self.grab_done = False              # 抓取全流程完成标志
-        self.grab_color_snapshot = {}       # 进入状态 4 时的颜色快照
 
         # ======================== 状态 9：放豆执行计划 ========================
         self._execute_done = False
@@ -181,9 +168,6 @@ class BrainNode(Node):
 
             # ── 复位 (急停 + 解锁 + 进 ST_RESET) ──
             elif cmd == "reset":
-                if self.estop_locked:
-                    self.get_logger().warn("[CMD] reset 无效: 请等待上一轮复位完成")
-                    return
                 self.estop_locked = True   # 复位期间锁定, estop 可打断
                 self._do_emergency_stop()
                 self._transition_to(self.ST_RESET)
@@ -278,84 +262,131 @@ class BrainNode(Node):
             )
 
     # =================================================================
-    #  状态 0：INIT — 初始化
+    #  状态 0：INIT — 初始化 (plan_readme 4.2, 步骤 0~10)
     # =================================================================
 
     def _handle_init(self):
-        """设备在线自检 + 话题健康检查"""
+        """逐步执行初始化流程, 每周期推进一次"""
+        handles = ["handle_left", "handle_mid", "handle_right"]
 
-        # 记录进入时间
-        if self.init_enter_time == 0.0:
-            self.init_enter_time = time.time()
-            self.init_check_state = {
-                key: {"error_start": 0.0, "reported": False}
-                for key in self.init_checks
-            }
+        # ── 步骤 0: 设备连接检查 ──
+        if self.init_step == 0:
+            try:
+                chassis_ok = bool(self.world.get("chassis", {}).get("motor_encoder"))
+                h_ok = all(
+                    bool(self.world.get("handles", {}).get(h, {}))
+                    for h in handles
+                )
+                if chassis_ok and h_ok:
+                    self.get_logger().info("[INIT 0/10] 设备全部在线")
+                    self.init_step = 0.5
+                    self.init_step_cmd_sent = False
+            except Exception:
+                pass
 
-        now = time.time()
+        # ── 步骤 0.5: 开启自动上报 ──
+        elif self.init_step == 0.5:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "stream", "mpu_enable", {"enable": 1})
+                    self.dispatch_task(h, "stream", "step_enable", {"enable": 1})
+                    self.dispatch_task(h, "stream", "pwm_enable", {"enable": 1})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 0.5/10] 自动上报已开启")
+            self.init_step = 1
+            self.init_step_cmd_sent = False
 
-        # 初始宽容期：前 N 秒静默等待，不做检查
-        if now - self.init_enter_time < self.init_grace_period:
-            return
+        # ── 步骤 1~3: 校准原点 (左=1, 中=2, 右=3) ──
+        elif self.init_step in (1, 2, 3):
+            mapping = {1: ("handle_left",  1),
+                       2: ("handle_mid",   2),
+                       3: ("handle_right", 3)}
+            if self.init_step in mapping:
+                h, pos_id = mapping[self.init_step]
+                if not self.init_step_cmd_sent:
+                    self.dispatch_task(h, "stepper_x", "set_origin",
+                                       {"pos_id": pos_id})
+                    self.init_step_cmd_sent = True
+                    self.get_logger().info(f"[INIT {self.init_step}/10] {h} 校准原点 pos={pos_id}")
+                # set_origin 是即时指令, 等下个周期推进
+                self.init_step = self.init_step + 1
+                self.init_step_cmd_sent = False
 
-        all_ok = True
+        # ── 步骤 4: 电机2上升至堵转 (flag & 0x04) ──
+        elif self.init_step == 4:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "stepper_z", "velocity",
+                                       {"dir": 0, "speed": 500, "acc": 100})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 4/10] 电机2上升, 等堵转...")
+            # 检测三抓手是否都触发堵转 (flag bit2)
+            all_stall = True
+            for h in handles:
+                flag = (self.world.get("handles", {})
+                        .get(h, {}).get("stepmotor", {})
+                        .get(0x02, {}).get("flag", 0))
+                if not (flag & 0x04):
+                    all_stall = False
+                    break
+            if all_stall:
+                self.get_logger().info("[INIT 4/10] 堵转全部触发")
+                self.init_step = 5
+                self.init_step_cmd_sent = False
 
-        for key, cfg in self.init_checks.items():
-            ok = self._check_item(key)
+        # ── 步骤 5: 停止电机2 ──
+        elif self.init_step == 5:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "stepper_z", "stop", {})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 5/10] 电机2停止")
+            self.init_step = 6
+            self.init_step_cmd_sent = False
 
-            if ok:
-                # 恢复正常：清除异常记录
-                if self.init_check_state[key]["error_start"] != 0.0:
-                    self.init_check_state[key] = {"error_start": 0.0, "reported": False}
-            else:
-                all_ok = False
-                state = self.init_check_state[key]
-                check_type = cfg["type"]
+        # ── 步骤 6: 电机2回零 ──
+        elif self.init_step == 6:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "stepper_z", "reset_encoder", {})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 6/10] 电机2编码器清零")
+            self.init_step = 7
+            self.init_step_cmd_sent = False
 
-                if check_type == "lower":
-                    # 下位机异常：首次记录时间，等 5 秒再上报
-                    if state["error_start"] == 0.0:
-                        state["error_start"] = now
-                    elif now - state["error_start"] >= 5.0 and not state["reported"]:
-                        self.get_logger().error(
-                            f"[INIT] 下位机 {key} 连接异常（已等待 {now - state['error_start']:.1f}s）"
-                        )
-                        state["reported"] = True
-                        self.init_error_count += 1
-                else:
-                    # 上位机异常：立即上报
-                    if not state["reported"]:
-                        self.get_logger().error(
-                            f"[INIT] 上位机 {key} 话题异常"
-                        )
-                        state["reported"] = True
-                        self.init_error_count += 1
+        # ── 步骤 7: 解除堵转保护 ──
+        elif self.init_step == 7:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "stepper_z", "reset_clog", {})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 7/10] 解除堵转保护")
+            self.init_step = 8
+            self.init_step_cmd_sent = False
 
-        if all_ok:
-            self.init_error_count = 0
-            self.get_logger().info("[INIT] 全部设备就绪，进入 WAIT_VISION")
-            self._transition_to(self.ST_WAIT_VISION)
+        # ── 步骤 8: 舵机闭合 90° ──
+        elif self.init_step == 8:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "servo", "move_to", {"angle": 90})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 8/10] 舵机闭合 90°")
+            self.init_step = 9
+            self.init_step_cmd_sent = False
 
-    def _check_item(self, key):
-        """检查单个项目是否正常"""
-        try:
-            if key == "chassis":
-                w = self.world.get("chassis", {})
-                return bool(w) and "motor_encoder" in w
-            elif key == "handle_left":
-                return bool(self.world.get("handles", {}).get("handle_left", {}))
-            elif key == "handle_mid":
-                return bool(self.world.get("handles", {}).get("handle_mid", {}))
-            elif key == "handle_right":
-                return bool(self.world.get("handles", {}).get("handle_right", {}))
-            elif key == "vision":
-                return "vision" in self.world and bool(self.world["vision"])
-            elif key == "heartbeat":
-                last = self.world.get("last_heartbeat", 0)
-                return (time.time() - last) < 2.0
-        except Exception:
-            return False
-        return False
+        # ── 步骤 9: 获取视觉序列 ──
+        elif self.init_step == 9:
+            seq = self.world.get("vision", {}).get("sequence", [])
+            if seq and len(seq) == 5:
+                self.target_seq = seq
+                self.get_logger().info(f"[INIT 9/10] 视觉序列: {seq}")
+                self.init_step = 10
+                self.init_step_cmd_sent = False
+
+        # ── 步骤 10: 完成 → WAIT_START_CMD ──
+        elif self.init_step == 10:
+            self.get_logger().info("[INIT 10/10] 初始化完成 → WAIT_START_CMD")
+            self._transition_to(self.ST_WAIT_START_CMD)
 
     # =================================================================
     #  状态 1：WAIT_VISION — 等待视觉识别结果
@@ -397,9 +428,9 @@ class BrainNode(Node):
         if not self.has_sent_cmd:
             self.dispatch_task("chassis", "base", "move_to",
                                {"pos": self.POS_GRAB_ZONE})
-            self._move_hand_x("handle_left",  self.POS_6, self.DIR_CCW)
-            self._move_hand_x("handle_right", self.POS_5, self.DIR_CW)
-            self._move_hand_x("handle_mid",   self.POS_3, self.DIR_CW)
+            self._move_hand_to("handle_left",  6, self.DIR_CCW)
+            self._move_hand_to("handle_right", 8, self.DIR_CW)
+            self._move_hand_to("handle_mid",   3, self.DIR_CW)
             self.has_sent_cmd = True
             self.mid_obstacle_triggered = False
             self.mid_d2_debounce = 0
@@ -409,7 +440,7 @@ class BrainNode(Node):
         if not self.mid_obstacle_triggered:
             avg_pos = self._get_chassis_avg_pos()
             if avg_pos is not None and avg_pos >= self.POS_OBSTACLE_A:
-                self._move_hand_x("handle_mid", self.POS_2, self.DIR_CCW)
+                self._move_hand_to("handle_mid", 7, self.DIR_CCW)
                 self.mid_obstacle_triggered = True
                 self.mid_d2_debounce = 0
                 self.get_logger().info(
@@ -438,53 +469,38 @@ class BrainNode(Node):
 
     def _handle_grabbing(self):
         """
-        阶段一（抓取动作序列）与 阶段二（等待颜色更新）并行。
-        grab_bean() 每周期推进序列步骤。
-        颜色全部更新 + 抓取完成 → 阶段三（数据融合）→ 进入下一状态。
+        1. 发 grab_start(0x79) 三抓手并行
+        2. 等待 action_done(0x7C)
+        3. 读 color_id → 数据融合 → 下一状态
         """
         handles = ["handle_left", "handle_mid", "handle_right"]
 
-        # --- 初始化 ---
+        # ── 阶段 0: 发抓取指令 ──
         if not self.has_sent_cmd:
-            self.grab_seq_step = 0
-            self.grab_seq_cmd_sent = False
-            self.grab_seq_repeat = 0
-            self.grab_done = False
-            # 同时开始阶段二：记录当前颜色作为快照
-            self.grab_color_snapshot = {}
             for h in handles:
-                self.grab_color_snapshot[h] = (
-                    self.world.get("handles", {}).get(h, {}).get("color_id", 0)
-                )
+                self.dispatch_task(h, "stepper_x", "grab_start", {})
             self.has_sent_cmd = True
-            self.get_logger().info(
-                f"[GRABBING] 进入抓取状态，颜色快照: {self.grab_color_snapshot}"
-            )
+            self.get_logger().info("[GRABBING] 三抓手 grab_start 已下发")
 
-        # --- 阶段一：每周期推进抓取序列 ---
-        if not self.grab_done:
-            self.grab_bean()
+        # ── 阶段 1: 等待抓取完成 (0x7C) ──
+        all_done = all(
+            self.world.get("handles", {}).get(h, {}).get("action_done", False)
+            for h in handles
+        )
+        if not all_done:
+            return
 
-        # --- 阶段二：等待颜色数据更新 ---
-        all_updated = True
+        # ── 阶段 2: 读颜色 → 数据融合 ──
+        grabbed = {}
         for h in handles:
-            current = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
-            if current == 0 or current == self.grab_color_snapshot.get(h, 0):
-                all_updated = False
-                break
-
-        # --- 阶段三：两者都完成 → 数据融合 ---
-        if self.grab_done and all_updated:
-            grabbed = {}
-            for h in handles:
-                grabbed[h] = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
-            self._data_fusion(grabbed)
-            self.get_logger().info(
-                f"[GRABBING] 数据融合完成: colors={grabbed}, "
-                f"targets=({self.target_L},{self.target_M},{self.target_R}), "
-                f"is_ideal={self.is_ideal}"
-            )
-            self._transition_to(self.ST_HANDS_TO_AVOID_1)
+            grabbed[h] = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
+        self._data_fusion(grabbed)
+        self.get_logger().info(
+            f"[GRABBING] 完成: colors={grabbed}, "
+            f"targets=({self.target_L},{self.target_M},{self.target_R}), "
+            f"is_ideal={self.is_ideal}"
+        )
+        self._transition_to(self.ST_HANDS_TO_AVOID_1)
 
     def _data_fusion(self, grabbed_colors):
         """
@@ -498,7 +514,7 @@ class BrainNode(Node):
         color_to_box = {1: 1, 2: 2, 3: 3}
         # 放豆区箱子顺时针对应轨道位置
         # target_seq[0]→pos7, [1]→pos1, [2]→pos2, [3]→pos3, [4]→pos4
-        DROP_TRACK_POS = [7, 1, 2, 3, 4]
+        DROP_TRACK_POS = [5, 1, 2, 3, 4]
 
         box_targets = {}
         for hand in ["handle_left", "handle_mid", "handle_right"]:
@@ -543,7 +559,7 @@ class BrainNode(Node):
                 hit_M = True
             if pos == tR:
                 return hit_M   # 遇到R时, 之前遇到过M → True, 否则 False
-            pos = pos + 1 if pos < 7 else 1
+            pos = pos + 1 if pos < 8 else 1
             if pos == tL:       # 绕了一圈
                 return False
 
@@ -552,10 +568,11 @@ class BrainNode(Node):
     # =================================================================
 
     def _pos_to_pulse(self, pos_idx):
-        """POS 索引 (1~7) → 脉冲值"""
+        """POS 索引 (1~8) → 脉冲值"""
         mapping = {
             1: self.POS_1, 2: self.POS_2, 3: self.POS_3,
             4: self.POS_4, 5: self.POS_5, 6: self.POS_6, 7: self.POS_7,
+            8: self.POS_8,
         }
         return mapping.get(pos_idx, 0)
 
@@ -564,7 +581,7 @@ class BrainNode(Node):
         cost = 0.0
         pos = start
         while pos != end:
-            nxt = pos + 1 if pos < 7 else 1
+            nxt = pos + 1 if pos < 8 else 1
             cost += self._edge_cost[pos][nxt]
             pos = nxt
         return cost
@@ -574,7 +591,7 @@ class BrainNode(Node):
         cost = 0.0
         pos = start
         while pos != end:
-            prv = pos - 1 if pos > 1 else 7
+            prv = pos - 1 if pos > 1 else 8
             cost += self._edge_cost[pos][prv]
             pos = prv
         return cost
@@ -584,7 +601,7 @@ class BrainNode(Node):
         nodes = []
         pos = start
         while pos != end:
-            nxt = pos + 1 if pos < 7 else 1
+            nxt = pos + 1 if pos < 8 else 1
             nodes.append(nxt)
             pos = nxt
         if nodes and nodes[-1] == end:
@@ -596,7 +613,7 @@ class BrainNode(Node):
         nodes = []
         pos = start
         while pos != end:
-            prv = pos - 1 if pos > 1 else 7
+            prv = pos - 1 if pos > 1 else 8
             nodes.append(prv)
             pos = prv
         if nodes and nodes[-1] == end:
@@ -610,7 +627,7 @@ class BrainNode(Node):
         理想情况只有一批，三个手各一条指令，全部 drop=True。
         """
         # AVOID_2 终点 = 状态9起点
-        current = {"handle_left": 7, "handle_mid": 3, "handle_right": 6}
+        current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
@@ -664,9 +681,9 @@ class BrainNode(Node):
         """将 pos 沿 direction 方向移动 steps 站，返回新位置 (1~7)"""
         for _ in range(steps):
             if direction == self.DIR_CW:
-                pos = pos + 1 if pos < 7 else 1
+                pos = pos + 1 if pos < 8 else 1
             else:
-                pos = pos - 1 if pos > 1 else 7
+                pos = pos - 1 if pos > 1 else 8
         return pos
 
     def _count_stations(self, start, end, direction):
@@ -675,9 +692,9 @@ class BrainNode(Node):
         pos = start
         while pos != end:
             if direction == self.DIR_CW:
-                pos = pos + 1 if pos < 7 else 1
+                pos = pos + 1 if pos < 8 else 1
             else:
-                pos = pos - 1 if pos > 1 else 7
+                pos = pos - 1 if pos > 1 else 8
             count += 1
         return count
 
@@ -688,7 +705,7 @@ class BrainNode(Node):
         返回 POS 索引 1~7，若无安全位返回 None。
         """
         candidates = []
-        for p in range(1, 8):
+        for p in range(1, 9):
             if p in blocked:
                 continue
             to_target = min(
@@ -714,7 +731,7 @@ class BrainNode(Node):
         4. 第三手算最优方向+站数 → 全员同向同站数伴飞
         """
         hands = ["handle_left", "handle_mid", "handle_right"]
-        current = {"handle_left": 7, "handle_mid": 3, "handle_right": 6}
+        current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
@@ -794,11 +811,11 @@ class BrainNode(Node):
     # =================================================================
 
     def _handle_hands_avoid1(self):
-        """左逆→5, 右逆→4, 中逆→1"""
+        """左→8(CCW), 中→1(CCW), 右→4(CCW) — plan_readme 4.7"""
         if not self.has_sent_cmd:
-            self._move_hand_x("handle_left",  self.POS_5, self.DIR_CCW)
-            self._move_hand_x("handle_right", self.POS_4, self.DIR_CCW)
-            self._move_hand_x("handle_mid",   self.POS_1, self.DIR_CCW)
+            self._move_hand_to("handle_left",  8, self.DIR_CCW)
+            self._move_hand_to("handle_right", 4, self.DIR_CCW)
+            self._move_hand_to("handle_mid",   1, self.DIR_CCW)
             self.has_sent_cmd = True
             self.get_logger().info("[AVOID_1] 3路并行指令已下发")
 
@@ -826,11 +843,11 @@ class BrainNode(Node):
     # =================================================================
 
     def _handle_hands_avoid2(self):
-        """左顺→7, 右顺→6, 中顺→3"""
+        """左→5(CW), 中→3(CW), 右→6(CW) — plan_readme 4.9"""
         if not self.has_sent_cmd:
-            self._move_hand_x("handle_left",  self.POS_7, self.DIR_CW)
-            self._move_hand_x("handle_right", self.POS_6, self.DIR_CW)
-            self._move_hand_x("handle_mid",   self.POS_3, self.DIR_CW)
+            self._move_hand_to("handle_left",  5, self.DIR_CW)
+            self._move_hand_to("handle_right", 6, self.DIR_CW)
+            self._move_hand_to("handle_mid",   3, self.DIR_CW)
             self.has_sent_cmd = True
             self.get_logger().info("[AVOID_2] 3路并行指令已下发")
 
@@ -983,9 +1000,9 @@ class BrainNode(Node):
             self.dispatch_task("chassis", "base", "move_to",
                                {"pos": self.POS_START_ZONE})
             # 三抓手最短路径回位
-            self._move_hand_shortest("handle_left",  self.POS_1)
-            self._move_hand_shortest("handle_mid",   self.POS_2)
-            self._move_hand_shortest("handle_right", self.POS_3)
+            self._move_hand_shortest("handle_left",  1)
+            self._move_hand_shortest("handle_mid",   2)
+            self._move_hand_shortest("handle_right", 3)
             self.has_sent_cmd = True
             self.get_logger().info("[RESET] 4路并行回位指令已下发")
 
@@ -1012,20 +1029,9 @@ class BrainNode(Node):
         self._transition_to(self.ST_INIT)
         self.get_logger().info("[RESET] 复位完成 → INIT (已解锁, 单步模式)")
 
-    def _move_hand_shortest(self, hand, target_pulse):
-        """单抓手 X 轴最短路径移动: 算 CW/CCW 距离, 选短的"""
-        cur = self._hand_encoder(hand, "x")
-        if cur is None:
-            self.get_logger().error(f"[RESET] {hand} encoder read failed")
-            return
-        dist_cw = self._ring_displacement(cur, target_pulse, self.DIR_CW)
-        dist_ccw = self._ring_displacement(cur, target_pulse, self.DIR_CCW)
-        if dist_cw <= dist_ccw:
-            self.dispatch_task(hand, "stepper_x", "move_relative",
-                               {"pos": dist_cw, "dir": self.DIR_CW})
-        else:
-            self.dispatch_task(hand, "stepper_x", "move_relative",
-                               {"pos": dist_ccw, "dir": self.DIR_CCW})
+    def _move_hand_shortest(self, hand, pos_id):
+        """track_move 环轨点位, 下位机按方向走最短路径"""
+        self._move_hand_to(hand, pos_id, self.DIR_CW)
 
     # =================================================================
     #  工具方法
@@ -1046,160 +1052,11 @@ class BrainNode(Node):
             pass
         return None
 
-    def grab_bean(self):
-        """
-        抓取动作序列（全部相对位移）。
-        步骤: 1降→2转→3顺→4降→5逆→6降→[×5]→8标→9停→10升
-        """
-        h = ["handle_left", "handle_mid", "handle_right"]
-
-        # --- 步骤0: 初始化 ---
-        if self.grab_seq_step == 0:
-            self.grab_seq_step = 1
-            self.grab_seq_cmd_sent = False
-            self.grab_seq_repeat = 0
-
-        # --- 步骤1: Z轴相对下降 GRAB_Z_DOWN_FIRST ---
-        elif self.grab_seq_step == 1:
-            if not self.grab_seq_cmd_sent:
-                for hand in h:
-                    self.dispatch_task(hand, "stepper_z", "move_relative",
-                                       {"pos": self.GRAB_Z_DOWN_FIRST, "dir": self.DIR_DOWN})
-                self.grab_seq_cmd_sent = True
-                self.get_logger().info(f"[GRAB:1/10] Z轴下降 {self.GRAB_Z_DOWN_FIRST}")
-            if self._all_hands_arrived():
-                self._next_grab_step()
-
-        # --- 步骤2: 开启无刷电机 占空比100% ---
-        elif self.grab_seq_step == 2:
-            for hand in h:
-                self.dispatch_task(hand, "bldc", "start", {"duty": 100})
-            self.get_logger().info("[GRAB:2/10] 无刷电机启动 100%")
-            self._next_grab_step()
-
-        # --- 步骤3: X轴相对顺时针 GRAB_X_CW_DELTA ---
-        elif self.grab_seq_step == 3:
-            if not self.grab_seq_cmd_sent:
-                for hand in h:
-                    self.dispatch_task(hand, "stepper_x", "move_relative",
-                                       {"pos": self.GRAB_X_CW_DELTA, "dir": self.DIR_CW})
-                self.grab_seq_cmd_sent = True
-                self.get_logger().info(
-                    f"[GRAB:3/10] X轴顺移 {self.GRAB_X_CW_DELTA} (第{self.grab_seq_repeat + 1}次)"
-                )
-            if self._all_hands_arrived():
-                self._next_grab_step()
-
-        # --- 步骤4: Z轴相对下降 GRAB_Z_DELTA ---
-        elif self.grab_seq_step == 4:
-            if not self.grab_seq_cmd_sent:
-                for hand in h:
-                    self.dispatch_task(hand, "stepper_z", "move_relative",
-                                       {"pos": self.GRAB_Z_DELTA, "dir": self.DIR_DOWN})
-                self.grab_seq_cmd_sent = True
-                self.get_logger().info(
-                    f"[GRAB:4/10] Z轴下降 {self.GRAB_Z_DELTA} (第{self.grab_seq_repeat + 1}次)"
-                )
-            if self._all_hands_arrived():
-                self._next_grab_step()
-
-        # --- 步骤5: X轴相对逆时针 GRAB_X_CCW_DELTA ---
-        elif self.grab_seq_step == 5:
-            if not self.grab_seq_cmd_sent:
-                for hand in h:
-                    self.dispatch_task(hand, "stepper_x", "move_relative",
-                                       {"pos": self.GRAB_X_CCW_DELTA, "dir": self.DIR_CCW})
-                self.grab_seq_cmd_sent = True
-                self.get_logger().info(
-                    f"[GRAB:5/10] X轴逆移 {self.GRAB_X_CCW_DELTA} (第{self.grab_seq_repeat + 1}次)"
-                )
-            if self._all_hands_arrived():
-                self._next_grab_step()
-
-        # --- 步骤6: Z轴相对下降 GRAB_Z_DELTA ---
-        elif self.grab_seq_step == 6:
-            if not self.grab_seq_cmd_sent:
-                for hand in h:
-                    self.dispatch_task(hand, "stepper_z", "move_relative",
-                                       {"pos": self.GRAB_Z_DELTA, "dir": self.DIR_DOWN})
-                self.grab_seq_cmd_sent = True
-                self.get_logger().info(
-                    f"[GRAB:6/10] Z轴下降 {self.GRAB_Z_DELTA} (第{self.grab_seq_repeat + 1}次)"
-                )
-            if self._all_hands_arrived():
-                self.grab_seq_repeat += 1
-                if self.grab_seq_repeat < 5:
-                    self.grab_seq_step = 3
-                    self.grab_seq_cmd_sent = False
-                else:
-                    self.grab_seq_step = 8
-                    self.grab_seq_cmd_sent = False
-
-        # --- 步骤8: 设置抓取完成标志位 ---
-        elif self.grab_seq_step == 8:
-            self.get_logger().info("[GRAB:8/10] 抓取完成标志位已设置")
-            self._next_grab_step()
-
-        # --- 步骤9: 关闭无刷电机 ---
-        elif self.grab_seq_step == 9:
-            for hand in h:
-                self.dispatch_task(hand, "bldc", "stop", {})
-            self.get_logger().info("[GRAB:9/10] 无刷电机关闭")
-            self._next_grab_step()
-
-        # --- 步骤10: Z轴相对上升 GRAB_Z_UP_TOTAL ---
-        elif self.grab_seq_step == 10:
-            if not self.grab_seq_cmd_sent:
-                for hand in h:
-                    self.dispatch_task(hand, "stepper_z", "move_relative",
-                                       {"pos": self.GRAB_Z_UP_TOTAL, "dir": self.DIR_UP})
-                self.grab_seq_cmd_sent = True
-                self.get_logger().info(f"[GRAB:10/10] Z轴上升 {self.GRAB_Z_UP_TOTAL}")
-            if self._all_hands_arrived():
-                self.grab_done = True
-                self.get_logger().info("[GRAB] 抓取全流程完成")
-
-    def _next_grab_step(self):
-        """抓取序列推进到下一步骤"""
-        self.grab_seq_step += 1
-        self.grab_seq_cmd_sent = False
-
-    def _hand_encoder(self, hand, axis="x"):
-        """读取单个抓手当前编码器值"""
-        addr = 0x01 if axis == "x" else 0x02
-        motor = (self.world.get("handles", {})
-                 .get(hand, {}).get("stepmotor", {}).get(addr, {}))
-        return motor.get("current_pos") if motor else None
-
-    def _ring_displacement(self, current, target, direction):
-        """
-        环形轨道相对脉冲计算。
-        current:  当前编码器值
-        target:   position.yaml 中的物理位置值
-        direction: DIR_CW / DIR_CCW
-        返回相对脉冲数。
-        """
-        ring = self.RING_MAX
-        if direction == self.DIR_CW:
-            if target >= current:
-                return target - current
-            else:
-                return ring - current + target
-        else:
-            if target <= current:
-                return current - target
-            else:
-                return current + ring - target
-
-    def _move_hand_x(self, hand, target, direction):
-        """单抓手 X 轴环形移动：读编码器 → 算位移 → 下 move_relative"""
-        cur = self._hand_encoder(hand, "x")
-        if cur is None:
-            self.get_logger().error(f"[MOVE] {hand} encoder read failed")
-            return
-        dist = self._ring_displacement(cur, target, direction)
-        self.dispatch_task(hand, "stepper_x", "move_relative",
-                           {"pos": dist, "dir": direction})
+    def _move_hand_to(self, hand, pos_id, direction):
+        """track_move(0x7A): 环轨点位移动, pos_id 1~8"""
+        clockwise = 1 if direction == self.DIR_CW else 0
+        self.dispatch_task(hand, "stepper_x", "track_move",
+                           {"pos_id": pos_id, "clockwise": clockwise})
 
     def _all_hands_arrived(self):
         """检查三个抓手是否全部到位（通过 /world_state 中的 track_arrived 字段）"""
@@ -1231,6 +1088,7 @@ class BrainNode(Node):
             self.POS_5 = r["pos_5"]
             self.POS_6 = r["pos_6"]
             self.POS_7 = r["pos_7"]
+            self.POS_8 = r["pos_8"]
 
             # --- 底盘目标位置 ---
             c = cfg["chassis"]
@@ -1240,14 +1098,6 @@ class BrainNode(Node):
             self.POS_END_ZONE = c["end_zone"]
             self.POS_OBSTACLE_A = c["obstacle_a"]
             self.POS_OBSTACLE_B = c["obstacle_b"]
-
-            # --- 抓取动作参数（全部相对位移）---
-            g = cfg["grab"]
-            self.GRAB_Z_DOWN_FIRST = g["z_down_first"]
-            self.GRAB_X_CW_DELTA = g["x_cw_delta"]
-            self.GRAB_X_CCW_DELTA = g["x_ccw_delta"]
-            self.GRAB_Z_DELTA = g["z_delta"]
-            self.GRAB_Z_UP_TOTAL = g["z_up_total"]
 
             self.get_logger().info(f"Loaded position params from {config_path}")
 
@@ -1259,14 +1109,15 @@ class BrainNode(Node):
 
     def _set_default_positions(self):
         """硬编码默认值（YAML 加载失败时的兜底）"""
-        self.RING_MAX = 178000
+        self.RING_MAX = 141303
         self.POS_1 = 0
-        self.POS_2 = 150
-        self.POS_3 = 300
-        self.POS_4 = 450
-        self.POS_5 = 600
-        self.POS_6 = 750
-        self.POS_7 = 900
+        self.POS_7 = 14022
+        self.POS_2 = 14382
+        self.POS_3 = 28764
+        self.POS_4 = 46741
+        self.POS_8 = 70471
+        self.POS_6 = 101393
+        self.POS_5 = 123325
 
         self.POS_START_ZONE = 0
         self.POS_GRAB_ZONE = -47628
@@ -1274,12 +1125,6 @@ class BrainNode(Node):
         self.POS_END_ZONE = 0
         self.POS_OBSTACLE_A = -40095
         self.POS_OBSTACLE_B = 27945
-
-        self.GRAB_Z_DOWN_FIRST = 500
-        self.GRAB_X_CW_DELTA = 800
-        self.GRAB_X_CCW_DELTA = 300
-        self.GRAB_Z_DELTA = 50
-        self.GRAB_Z_UP_TOTAL = 200
 
     # =================================================================
     #  便于外部查看的状态名称映射
