@@ -439,15 +439,16 @@ class BrainNode(Node):
             self.get_logger().info("[MOVE_TO_GRAB] 4路并行指令已下发")
 
         # --- 避障点 A 触发检查 ---
+        chassis_arrived = self.world.get("chassis", {}).get("arrival_done", False)
         if not self.mid_obstacle_triggered:
             avg_pos = self._get_chassis_avg_pos()
-            # S方向(负), encoder ≤ -40095 才算越过
-            if avg_pos is not None and avg_pos <= self.POS_OBSTACLE_A:
+            # S方向(负), encoder ≤ -40095 或底盘已到位 都算越过
+            if (avg_pos is not None and avg_pos <= self.POS_OBSTACLE_A) or chassis_arrived:
                 self._move_hand_to("handle_mid", 7, self.DIR_CCW)
                 self.mid_obstacle_triggered = True
                 self.mid_d2_debounce = 0
                 self.get_logger().info(
-                    f"[MOVE_TO_GRAB] 底盘到达避障点A(pos={avg_pos})，触发D2"
+                    f"[MOVE_TO_GRAB] 触发D2 (pos={avg_pos}, arrived={chassis_arrived})"
                 )
 
         # --- D2 触发后消抖：等 3 个周期让 track_arrived 被重置 ---
@@ -1002,10 +1003,10 @@ class BrainNode(Node):
             # 底盘回起始区
             self.dispatch_task("chassis", "base", "move_to",
                                {"pos": self.POS_START_ZONE})
-            # 三抓手最短路径回位
-            self._move_hand_shortest("handle_left",  1)
-            self._move_hand_shortest("handle_mid",   2)
-            self._move_hand_shortest("handle_right", 3)
+            # 三抓手固定方向回位
+            self._move_hand_to("handle_left",  1, self.DIR_CW)   # 顺时针
+            self._move_hand_to("handle_mid",   2, self.DIR_CCW)  # 逆时针
+            self._move_hand_to("handle_right", 3, self.DIR_CCW)  # 逆时针
             self.has_sent_cmd = True
             self.get_logger().info("[RESET] 4路并行回位指令已下发")
 
@@ -1031,10 +1032,6 @@ class BrainNode(Node):
         self.step_paused = True
         self._transition_to(self.ST_INIT)
         self.get_logger().info("[RESET] 复位完成 → INIT (已解锁, 单步模式)")
-
-    def _move_hand_shortest(self, hand, pos_id):
-        """track_move 环轨点位, 下位机按方向走最短路径"""
-        self._move_hand_to(hand, pos_id, self.DIR_CW)
 
     # =================================================================
     #  工具方法
