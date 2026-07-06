@@ -98,10 +98,12 @@ class ControlNode(Node):
                 "move_relative": 0x62,
                 "move_absolute": 0x62,
                 "stop": 0x63,
+                "reset_encoder": 0x6A,
                 "move_cm": 0x78,
                 "grab_start": 0x79,
                 "track_move": 0x7A,
-                "set_origin": 0x7B
+                "set_origin": 0x7B,
+                "emergency_stop": 0x7D
             },
             "handle_servo": {"move_to": 0x6C, "set_angle": 0x6C},
             "handle_bldc": {"start": 0x6D, "stop": 0x6E}

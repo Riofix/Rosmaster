@@ -27,6 +27,7 @@ class BrainNode(Node):
         self.ST_EXECUTE_TARGET    = 9   # 执行目标移动+放豆（理想/非理想）
         self.ST_CHASSIS_TO_END    = 10  # 底盘→结束区
         self.ST_DONE              = 11  # 任务完成
+        self.ST_RESET             = 12  # 复位: 回起始位 + 编码器清零
 
         self.state = self.ST_INIT
         self.world = None
@@ -107,6 +108,13 @@ class BrainNode(Node):
         # ======================== 全局指令计数器 ========================
         self._task_counter = 0        # 自增 task_id
 
+        # ======================== 调试控制 ========================
+        self.declare_parameter('debug_mode', True)  # launch 可控
+        self.step_mode = self.get_parameter('debug_mode').value
+        self.step_paused = True         # 单步暂停标志
+        self.estop_locked = False       # 急停锁定, 只有 reset 能解除
+        self._step_prev_state = self.state  # 记录上一步状态, 检测状态变化
+
         # ======================== ROS 接口 ========================
         self.create_subscription(String, '/world_state', self.world_cb, 10)
         self.create_subscription(String, '/task_control', self.start_cmd_cb, 10)
@@ -127,22 +135,68 @@ class BrainNode(Node):
             self.get_logger().error(f"WorldState parse error: {e}")
 
     def start_cmd_cb(self, msg):
-        """接收外部指令: start(全流程启动) / goto_*(底盘测试移动)"""
+        """接收外部指令"""
         try:
             data = json.loads(msg.data)
             cmd = data.get("cmd", "")
 
+            # ── 流程控制 ──
             if cmd == "start":
                 self.start_cmd_received = True
-                self.get_logger().info("Received START command.")
+                self.get_logger().info("[CMD] 全流程启动")
 
+            # ── 底盘测试移动 ──
             elif cmd in self._goto_positions:
                 target = self._goto_positions[cmd]
                 self.dispatch_task("chassis", "base", "move_to", {"pos": target})
-                self.get_logger().info(f"GOTO: {cmd} → pos={target}")
+                self.get_logger().info(f"[CMD] GOTO: {cmd} → pos={target}")
+
+            # ── 单步/自动切换 ──
+            elif cmd == "step_mode":
+                if self.estop_locked:
+                    self.get_logger().warn("[CMD] step_mode 无效: 已急停锁定, 请先 reset")
+                    return
+                self.step_mode = True
+                self.step_paused = True
+                self.get_logger().info(f"[CMD] 进入单步模式 → 当前 {self.state_name}")
+
+            elif cmd == "step_next":
+                if self.estop_locked:
+                    self.get_logger().warn("[CMD] step_next 无效: 已急停锁定, 请先 reset")
+                    return
+                if not self.step_mode:
+                    self.get_logger().warn("[CMD] step_next 无效: 非单步模式, 请先 step_mode")
+                    return
+                self.step_paused = False
+                self.get_logger().info(
+                    f"[CMD] 单步推进 → 从 {self.state_name} 开始"
+                )
+
+            # ── 急停 (锁死, 只有 reset 可解除) ──
+            elif cmd == "estop":
+                self._do_emergency_stop()
+                self.estop_locked = True
+                self.step_paused = True
+                self.get_logger().info("[CMD] 🛑 紧急停止 (已锁定, 请 reset)")
+
+            # ── 复位 (急停 + 解锁 + 进 ST_RESET) ──
+            elif cmd == "reset":
+                if self.estop_locked:
+                    self.get_logger().warn("[CMD] reset 无效: 请等待上一轮复位完成")
+                    return
+                self.estop_locked = True   # 复位期间锁定, estop 可打断
+                self._do_emergency_stop()
+                self._transition_to(self.ST_RESET)
+                self.get_logger().info("[CMD] 复位 → ST_RESET")
 
         except Exception as e:
             self.get_logger().error(f"StartCmd parse error: {e}")
+
+    def _do_emergency_stop(self):
+        """急停: 底盘刹车 + 三抓手 0x7D"""
+        self.dispatch_task("chassis", "base", "stop", {})
+        for h in ["handle_left", "handle_mid", "handle_right"]:
+            self.dispatch_task(h, "stepper_x", "emergency_stop", {})
 
     # =================================================================
     #  指令下发
@@ -177,6 +231,18 @@ class BrainNode(Node):
         if not self.world:
             return
 
+        # ── 急停锁定: 只有 ST_RESET 可以穿透, 其余冻结 ──
+        if self.estop_locked and self.state != self.ST_RESET:
+            return
+
+        # ── 单步模式: 暂停等待 step_next ──
+        if self.step_mode and self.step_paused:
+            return
+
+        # ── 记录单步开始时的状态 ──
+        if self.step_mode:
+            self._step_prev_state = self.state
+
         if self.state == self.ST_INIT:
             self._handle_init()
         elif self.state == self.ST_WAIT_VISION:
@@ -201,6 +267,15 @@ class BrainNode(Node):
             self._handle_chassis_end()
         elif self.state == self.ST_DONE:
             self._handle_done()
+        elif self.state == self.ST_RESET:
+            self._handle_reset()
+
+        # ── 单步模式: 状态发生变化时自动暂停 ──
+        if self.step_mode and self.state != self._step_prev_state:
+            self.step_paused = True
+            self.get_logger().info(
+                f"[单步] {self.state_name}, 已暂停 (发 step_next 继续)"
+            )
 
     # =================================================================
     #  状态 0：INIT — 初始化
@@ -897,6 +972,62 @@ class BrainNode(Node):
         rclpy.shutdown()
 
     # =================================================================
+    #  ST_RESET — 复位: 底盘回0 + 抓手回位 + 编码器清零
+    # =================================================================
+
+    def _handle_reset(self):
+        """复位流程: 并发移动 → 等到齐 → 清零编码器"""
+        # ── 阶段 0: 发移动指令 ──
+        if not self.has_sent_cmd:
+            # 底盘回起始区
+            self.dispatch_task("chassis", "base", "move_to",
+                               {"pos": self.POS_START_ZONE})
+            # 三抓手最短路径回位
+            self._move_hand_shortest("handle_left",  self.POS_1)
+            self._move_hand_shortest("handle_mid",   self.POS_2)
+            self._move_hand_shortest("handle_right", self.POS_3)
+            self.has_sent_cmd = True
+            self.get_logger().info("[RESET] 4路并行回位指令已下发")
+
+        # ── 阶段 1: 等待全部到齐 ──
+        chassis_ok = self.world.get("chassis", {}).get("arrival_done", False)
+        handles = self.world.get("handles", {})
+        hands_ok = all(
+            handles.get(h, {}).get("track_arrived", False)
+            for h in ["handle_left", "handle_mid", "handle_right"]
+        )
+        if not (chassis_ok and hands_ok):
+            return
+
+        # ── 阶段 2: 三抓手编码器清零 (X轴+Z轴) ──
+        self.get_logger().info("[RESET] 全部到齐, 编码器清零")
+        for h in ["handle_left", "handle_mid", "handle_right"]:
+            self.dispatch_task(h, "stepper_x", "reset_encoder", {})
+            self.dispatch_task(h, "stepper_z", "reset_encoder", {})
+
+        # ── 完成 → 解锁 + 单步 + 切 INIT ──
+        self.estop_locked = False
+        self.step_mode = True
+        self.step_paused = True
+        self._transition_to(self.ST_INIT)
+        self.get_logger().info("[RESET] 复位完成 → INIT (已解锁, 单步模式)")
+
+    def _move_hand_shortest(self, hand, target_pulse):
+        """单抓手 X 轴最短路径移动: 算 CW/CCW 距离, 选短的"""
+        cur = self._hand_encoder(hand, "x")
+        if cur is None:
+            self.get_logger().error(f"[RESET] {hand} encoder read failed")
+            return
+        dist_cw = self._ring_displacement(cur, target_pulse, self.DIR_CW)
+        dist_ccw = self._ring_displacement(cur, target_pulse, self.DIR_CCW)
+        if dist_cw <= dist_ccw:
+            self.dispatch_task(hand, "stepper_x", "move_relative",
+                               {"pos": dist_cw, "dir": self.DIR_CW})
+        else:
+            self.dispatch_task(hand, "stepper_x", "move_relative",
+                               {"pos": dist_ccw, "dir": self.DIR_CCW})
+
+    # =================================================================
     #  工具方法
     # =================================================================
 
@@ -1169,6 +1300,7 @@ class BrainNode(Node):
             9:  "EXECUTE_TARGET",
             10: "CHASSIS_TO_END",
             11: "DONE",
+            12: "RESET",
         }
         return names.get(self.state, f"UNKNOWN({self.state})")
 

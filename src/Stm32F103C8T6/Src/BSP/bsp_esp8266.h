@@ -27,6 +27,10 @@
 #define WIFI_PWD "44704470"
 #define SERVER_IP "10.245.159.63"
 #define SERVER_PORT "3456"
+// #define WIFI_SSID "Redmi K70"
+// #define WIFI_PWD "44704470"
+// #define SERVER_IP "10.245.159.175"
+// #define SERVER_PORT "3456"
 #else
 // AP 模式参数
 #define AP_SSID "STM32_Robot"

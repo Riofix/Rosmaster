@@ -1,5 +1,5 @@
 """
-全链路测试 Launch — 除 brain_node 外全部启动
+全链路测试 Launch — 全部节点, 默认单步模式
 
 启动节点:
   1. serial_node       → 串口通信 (底盘 /dev/Rosmaster)
@@ -8,7 +8,13 @@
   4. protocol_pack_node→ 下行封包 (JSON → FF FC)
   5. fusion_node       → 状态融合 → /world_state (50Hz)
   6. control_node      → PID 控制 + 指令映射
-  7. vision_node       → 视觉识别
+  7. brain_node        → 状态机 (默认单步, step_next 推进)
+  8. vision_node       → 视觉识别 (debug 窗口关闭)
+
+测试指令:
+  ros2 topic pub --once /task_control ... '{"cmd":"step_next"}'
+  ros2 topic pub --once /task_control ... '{"cmd":"reset"}'
+  ros2 topic pub --once /task_control ... '{"cmd":"estop"}'
 
 用法:
   ros2 launch robot_bringup full_test_launch.py
@@ -94,6 +100,15 @@ def generate_launch_description():
             output='screen',
         ),
 
-        # ⚠️ 不启动 brain_node (状态机)
+        # ── 大脑层 ──────────────────────────────────────────
+        # 8. 状态机 (debug_mode=true → 启动即单步)
+        Node(
+            package='robot_brain',
+            executable='brain_node',
+            name='brain_node',
+            parameters=[{'debug_mode': True}],
+            output='screen',
+        ),
+
         # ⚠️ 不启动 hotspot_node (热点)
     ])

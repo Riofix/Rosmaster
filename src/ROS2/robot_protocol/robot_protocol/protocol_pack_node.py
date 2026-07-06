@@ -106,6 +106,10 @@ class ProtocolPackNode(Node):
         if cmd_hex == 0x63:
             return bytearray([cmd_hex, motor_addr, snf])
 
+        # 0x6A: 编码器清零 (无参, 仅传 motor_addr)
+        if cmd_hex == 0x6A:
+            return bytearray([cmd_hex, motor_addr])
+
         # 0x78: CM 位置控制 (dist_cm = cm × 100)
         if cmd_hex == 0x78:
             direction = int(params.get("dir", params.get("direction", 0)))
@@ -146,6 +150,10 @@ class ProtocolPackNode(Node):
             return bytearray([cmd_hex, duty & 0xFF])
 
         if cmd_hex == 0x6E:
+            return bytearray([cmd_hex])
+
+        # 0x7D: 抓取紧急停止 (无参数)
+        if cmd_hex == 0x7D:
             return bytearray([cmd_hex])
 
         raise ValueError(f"Unsupported handle cmd_hex: {cmd_hex}")
