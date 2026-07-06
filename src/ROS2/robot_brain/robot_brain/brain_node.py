@@ -69,6 +69,7 @@ class BrainNode(Node):
         # ======================== 状态 0：初始化 (plan_readme 4.2) ========================
         self.init_step = 0              # 步骤 0~10
         self.init_step_cmd_sent = False
+        self._init_stall_state = {}     # {hand: 0=等堵转, 1=停, 2=清零, 3=done}
 
         # ======================== 状态 2：启动指令 ========================
         self.start_cmd_received = False
@@ -312,57 +313,49 @@ class BrainNode(Node):
                 self.init_step = self.init_step + 1
                 self.init_step_cmd_sent = False
 
-        # ── 步骤 4: 电机2上升至堵转 (flag & 0x04) ──
+        # ── 步骤 4~7: 电机2堵转回零 (每抓手独立检测) ──
         elif self.init_step == 4:
             if not self.init_step_cmd_sent:
                 for h in handles:
                     self.dispatch_task(h, "stepper_z", "velocity",
                                        {"dir": 0, "speed": 500, "acc": 100})
+                self._init_stall_state = {h: 0 for h in handles}
                 self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 4/10] 电机2上升, 等堵转...")
-            # 检测三抓手是否都触发堵转 (flag bit2)
-            all_stall = True
+                self.get_logger().info("[INIT 4/10] 电机2上升, 各抓手独立检测堵转...")
+
             for h in handles:
+                state = self._init_stall_state.get(h, 0)
+                if state >= 3:
+                    continue  # 已完成
+
                 flag = (self.world.get("handles", {})
                         .get(h, {}).get("stepmotor", {})
                         .get(0x02, {}).get("flag", 0))
-                if not (flag & 0x04):
-                    all_stall = False
-                    break
-            if all_stall:
-                self.get_logger().info("[INIT 4/10] 堵转全部触发")
-                self.init_step = 5
-                self.init_step_cmd_sent = False
 
-        # ── 步骤 5: 停止电机2 ──
-        elif self.init_step == 5:
-            if not self.init_step_cmd_sent:
-                for h in handles:
-                    self.dispatch_task(h, "stepper_z", "stop", {})
-                self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 5/10] 电机2停止")
-            self.init_step = 6
-            self.init_step_cmd_sent = False
+                if state == 0:
+                    # 等待堵转
+                    if flag & 0x04:
+                        self.dispatch_task(h, "stepper_z", "stop", {})
+                        self._init_stall_state[h] = 1
+                        self.get_logger().info(f"[INIT 4/10] {h} 堵转触发 → 停止")
 
-        # ── 步骤 6: 电机2回零 ──
-        elif self.init_step == 6:
-            if not self.init_step_cmd_sent:
-                for h in handles:
+                elif state == 1:
+                    # 编码器清零
                     self.dispatch_task(h, "stepper_z", "reset_encoder", {})
-                self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 6/10] 电机2编码器清零")
-            self.init_step = 7
-            self.init_step_cmd_sent = False
+                    self._init_stall_state[h] = 2
+                    self.get_logger().info(f"[INIT 4/10] {h} 编码器清零")
 
-        # ── 步骤 7: 解除堵转保护 ──
-        elif self.init_step == 7:
-            if not self.init_step_cmd_sent:
-                for h in handles:
+                elif state == 2:
+                    # 解除堵转保护
                     self.dispatch_task(h, "stepper_z", "reset_clog", {})
-                self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 7/10] 解除堵转保护")
-            self.init_step = 8
-            self.init_step_cmd_sent = False
+                    self._init_stall_state[h] = 3
+                    self.get_logger().info(f"[INIT 4/10] {h} 解除堵转, 完成")
+
+            # 全部完成 → 步骤 8
+            if all(s >= 3 for s in self._init_stall_state.values()):
+                self.get_logger().info("[INIT 4/10] 三抓手堵转回零全部完成")
+                self.init_step = 8
+                self.init_step_cmd_sent = False
 
         # ── 步骤 8: 舵机闭合 90° ──
         elif self.init_step == 8:
