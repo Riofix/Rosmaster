@@ -957,7 +957,8 @@ class BrainNode(Node):
         if self._drop_step == 0:
             for hand in hands:
                 target, direction, _ = batch[hand]
-                self._move_hand_x(hand, target, direction)
+                pos_id = self._pulse_to_id(target)
+                self._move_hand_to(hand, pos_id, direction)
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} {hand} → pos={target} dir={direction}"
                 )
@@ -1070,6 +1071,12 @@ class BrainNode(Node):
         """状态切换，重置状态锁"""
         self.state = new_state
         self.has_sent_cmd = False
+
+    def _pulse_to_id(self, pulse):
+        """脉冲值 → 最近的 pos_id (1~8)"""
+        mapping = {self.POS_1:1, self.POS_2:2, self.POS_3:3, self.POS_4:4,
+                   self.POS_5:5, self.POS_6:6, self.POS_7:7, self.POS_8:8}
+        return mapping[min(mapping, key=lambda p: abs(p - pulse))]
 
     def _move_hand_to(self, hand, pos_id, direction):
         """track_move(0x7A): 环轨点位移动, pos_id 1~8"""
