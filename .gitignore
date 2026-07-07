@@ -15,9 +15,9 @@ JLinkLog.txt
 Nu_Link_Driver.ini
 
 # 项目特定
-STM32F103/Listings/
-STM32F103/Objects/
-STM32F103/RTE/
+src/STM32F103/Listings/
+src/STM32F103/Objects/
+src/STM32F103/RTE/
 
 # ROS2 / Python
 build/

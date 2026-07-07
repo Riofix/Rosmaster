@@ -24,6 +24,7 @@
 #define DOWN10_PULSE 160000 /* 电机2 下降 10cm */
 #define DOWN1_PULSE 16000   /* 电机2 下降 1cm */
 #define UP13_PULSE 208000   /* 电机2 上升 13cm */
+#define UP11_PULSE 176000   /* 电机2 上升 11cm */
 
 /* ================================================================
  * 速度参数
@@ -38,20 +39,20 @@
  * ================================================================ */
 typedef enum
 {
-    GRAB_IDLE = 0,   /* 空闲, 不在执行抓取 */
-    GRAB_EMERGENCY,  /* 紧急停止 */
-    GRAB_RESET,      /* 复位: 电机1/2 回原点 */
-    GRAB_DOWN10,     /* 降 10cm */
-    GRAB_BLDC_ON,    /* 开无刷 */
-    GRAB_SWEEP_CCW,  /* 逆时针横扫 */
-    GRAB_DOWN1_A,    /* 降 1cm (第1次) */
-    GRAB_SWEEP_CW,   /* 顺时针横扫 */
-    GRAB_DOWN1_B,    /* 降 1cm (第2次) */
-    GRAB_SWEEP_CCW2, /* 逆时针横扫 (第2组) */
-    GRAB_DOWN1_C,    /* 降 1cm (第3次) */
-    GRAB_SWEEP_CW2,  /* 顺时针横扫 (第2组) */
-    GRAB_BLDC_OFF,   /* 关无刷 */
-    GRAB_UP13        /* 升 13cm 回位 */
+    GRAB_IDLE = 0,  /* 空闲, 不在执行抓取 */
+    GRAB_EMERGENCY, /* 紧急停止 */
+    GRAB_RESET,     /* 复位: 电机1/2 回原点 */
+    GRAB_DOWN10,    /* 降 10cm */
+    GRAB_BLDC_ON,   /* 开无刷 */
+    GRAB_SWEEP_CW,  /* 顺时针横扫 */
+    GRAB_DOWN1_A,   /* 降 1cm (第1次) */
+    GRAB_SWEEP_CCW, /* 逆时针横扫 */
+    // GRAB_DOWN1_B,   /* 降 1cm (第2次) */
+    // GRAB_SWEEP_CW2, /* 顺时针横扫 (第2组) */
+    // GRAB_DOWN1_C,    /* 降 1cm (第3次) */
+    // GRAB_SWEEP_CCW2,  /* 逆时针横扫 (第2组) */
+    GRAB_BLDC_OFF, /* 关无刷 */
+    GRAB_UP11      /* 升 11cm 回位 */
 } GrabStep_t;
 
 /* Grab 静态状态 */
@@ -214,9 +215,9 @@ void App_Action_Grab(void)
     /* 电机2 等待: 降/升 */
     case GRAB_DOWN10:
     case GRAB_DOWN1_A:
-    case GRAB_DOWN1_B:
-    case GRAB_DOWN1_C:
-    case GRAB_UP13:
+    // case GRAB_DOWN1_B:
+    // case GRAB_DOWN1_C:
+    case GRAB_UP11:
         if (!(g_motors[1].flag & 0x02))
             s_grab_flag_low |= 0x02; /* 见识低位 → 标记"已清零" */
         else if (s_grab_flag_low & 0x02)
@@ -226,8 +227,8 @@ void App_Action_Grab(void)
     /* 电机1 等待: 横扫 */
     case GRAB_SWEEP_CCW:
     case GRAB_SWEEP_CW:
-    case GRAB_SWEEP_CCW2:
-    case GRAB_SWEEP_CW2:
+        // case GRAB_SWEEP_CCW2:
+        // case GRAB_SWEEP_CW2:
         if (!(g_motors[0].flag & 0x02))
             s_grab_flag_low |= 0x01; /* 见识低位 → 标记"已清零" */
         else if (s_grab_flag_low & 0x01)
@@ -244,8 +245,8 @@ void App_Action_Grab(void)
         break;
     }
 
-    /* ---- 检查推进后是否到了最后一步 (GRAB_UP13 之后) ---- */
-    if (s_grab_step > GRAB_UP13)
+    /* ---- 检查推进后是否到了最后一步 (GRAB_UP11 之后) ---- */
+    if (s_grab_step > GRAB_UP11)
     {
         uint8_t done = CMD_TX_ACTION_DONE;
         Protocol_PackAndSend(&done, 1); /* 通知上位机抓取完成 */
@@ -285,8 +286,8 @@ void App_Action_Grab(void)
                 break;
 
             case GRAB_DOWN1_A:
-            case GRAB_DOWN1_B:
-            case GRAB_DOWN1_C:
+                // case GRAB_DOWN1_B:
+                // case GRAB_DOWN1_C:
                 /* 电机2 反转(下降) 1cm */
                 Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC, DOWN1_PULSE, 0, 0);
                 g_motors[1].flag &= ~0x02;
@@ -298,23 +299,26 @@ void App_Action_Grab(void)
                 g_motors[0].flag &= ~0x02;
                 break;
 
-            case GRAB_SWEEP_CCW2:
-                Emm_V5_Pos_Control(1, 0, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
-                g_motors[0].flag &= ~0x02;
-                break;
+                // 上升 13cm改为上升12，只做一组抓取，若需要多一组，则可以把下面的注释打开
+                // case GRAB_SWEEP_CCW2:
+                //     /* 电机1 正转(逆时针) 横扫 18cm */
+                //     Emm_V5_Pos_Control(1, 0, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
+                //     g_motors[0].flag &= ~0x02;
+                //     break;
 
-            case GRAB_SWEEP_CW2:
-                Emm_V5_Pos_Control(1, 1, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
-                g_motors[0].flag &= ~0x02;
-                break;
+                // case GRAB_SWEEP_CW2:
+                //     /* 电机1 反转(顺时针) 横扫 18cm */
+                //     Emm_V5_Pos_Control(1, 1, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
+                //     g_motors[0].flag &= ~0x02;
+                //     break;
 
             case GRAB_BLDC_OFF:
                 App_Bldc_Stop();
                 break;
 
-            case GRAB_UP13:
-                /* 电机2 正转(上升) 13cm */
-                Emm_V5_Pos_Control(2, 0, VEL_VERT, ACC, UP13_PULSE, 0, 0);
+            case GRAB_UP11:
+                /* 电机2 正转(上升) 11cm */
+                Emm_V5_Pos_Control(2, 0, VEL_VERT, ACC, UP11_PULSE, 0, 0);
                 g_motors[1].flag &= ~0x02;
                 break;
 

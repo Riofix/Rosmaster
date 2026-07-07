@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /* 点位脉冲表 (pos_id 1~8, 索引 0~7) */
-#define POS_PULSE(pos) ((uint32_t[]){0,14382,28764,46741,123325,101393,14022,70471}[(pos)-1])
+#define POS_PULSE(pos) ((uint32_t[]){0, 14382, 28764, 46741, 123325, 101393, 14022, 64000}[(pos) - 1])
 
 /* 环形轨道一圈脉冲数 */
 #define CIRCLE_PULSE 141303
@@ -25,10 +25,22 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise);
  * 没在执行时立即返回, CPU 开销为零。
  *
  * 抓取序列:
- *   降10cm → 开无刷 → 逆扫18cm → 降1cm → 顺扫18cm → 降1cm
- *   → 逆扫18cm → 降1cm → 顺扫18cm → 关无刷 → 升13cm → 完成
+ *      降10cm →
+ *      开无刷 →
+ *      顺扫18cm →
+ *      降1cm →
+ *      逆扫18cm →
+ *      ----取消这里的步骤-------若需要则把注释打开
+ *      降1cm →
+ *      逆扫18cm →
+ *      降1cm →
+ *      顺扫18cm →
+ *      ----取消这里的步骤-------
+ *      关无刷 →
+ *      升12cm →
+ *      完成
  */
-void App_Action_Grab(void);       /* 内部状态机, App_Tick 末尾周期调用 */
+void App_Action_Grab(void);                /* 内部状态机, App_Tick 末尾周期调用 */
 void App_Action_GrabStart(void);           /* 启动抓取, cmd_handle 调用 */
 void App_Action_SetOrigin(uint8_t pos_id); /* 校准原点: 记录编码器0对应的物理位 */
-#endif /* __APP_ACTION_H */
+#endif                                     /* __APP_ACTION_H */
