@@ -112,6 +112,7 @@ class ControlNode(Node):
             "handle_servo": {"move_to": 0x6C, "set_angle": 0x6C},
             "handle_bldc": {"start": 0x6D, "stop": 0x6E},
             "handle_stream": {
+                "oled_mode": 0x70,
                 "mpu_enable": 0x72,
                 "step_enable": 0x73,
                 "pwm_enable": 0x74,

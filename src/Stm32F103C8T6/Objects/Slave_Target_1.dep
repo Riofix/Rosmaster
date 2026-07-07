@@ -990,7 +990,7 @@ I (.\FWlib\inc\stm32f10x_wwdg.h)(0x6A2805D4)
 I (.\FWlib\inc\misc.h)(0x6A2805D4)
 I (D:\Keil_arm\Keil_v5\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 F (.\Src\APP\app_servo.h)(0x6A2805D4)()
-F (.\Src\APP\app_action.c)(0x6A4CA0D3)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\FWlib\inc -I .\FWlib\src -I .\Src\APP -I .\Src\BSP -I .\Src\Protocol-ID:\Keil_arm\Arm\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="543" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER-o .\objects\app_action.o --omf_browse .\objects\app_action.crf --depend .\objects\app_action.d)
+F (.\Src\APP\app_action.c)(0x6A4CAFE2)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\FWlib\inc -I .\FWlib\src -I .\Src\APP -I .\Src\BSP -I .\Src\Protocol-ID:\Keil_arm\Arm\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="543" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER-o .\objects\app_action.o --omf_browse .\objects\app_action.crf --depend .\objects\app_action.d)
 I (Src\APP\app_action.h)(0x6A4C9FDC)
 I (D:\Keil_arm\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
 I (Src\APP\app_motor.h)(0x6A3CCB9D)

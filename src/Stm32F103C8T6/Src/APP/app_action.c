@@ -299,7 +299,7 @@ void App_Action_Grab(void)
                 g_motors[0].flag &= ~0x02;
                 break;
 
-                // 上升 13cm改为上升12，只做一组抓取，若需要多一组，则可以把下面的注释打开
+                // 上升 13cm改为上升11，只做一组抓取，若需要多一组，则可以把下面的注释打开
                 // case GRAB_SWEEP_CCW2:
                 //     /* 电机1 正转(逆时针) 横扫 18cm */
                 //     Emm_V5_Pos_Control(1, 0, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
@@ -317,8 +317,8 @@ void App_Action_Grab(void)
                 break;
 
             case GRAB_UP11:
-                /* 电机2 正转(上升) 11cm */
-                Emm_V5_Pos_Control(2, 0, VEL_VERT, ACC, UP11_PULSE, 0, 0);
+                /* 电机2 正转(上升) 回到0位置 */
+                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC, 16000, 1, 0);
                 g_motors[1].flag &= ~0x02;
                 break;
 

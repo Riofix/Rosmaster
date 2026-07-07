@@ -160,6 +160,10 @@ class ProtocolPackNode(Node):
         if cmd_hex == 0x7D:
             return bytearray([cmd_hex])
 
+        # 0x70: OLED 显示模式 [cmd_hex, mode]
+        if cmd_hex == 0x70:
+            return bytearray([cmd_hex, int(params.get("mode", 0))])
+
         # 0x72/0x73/0x74: 自动上报开关 [cmd_hex, enable(0/1)]
         if cmd_hex in (0x72, 0x73, 0x74):
             enable = 1 if params.get("enable", True) else 0

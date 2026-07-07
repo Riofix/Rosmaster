@@ -52,14 +52,17 @@ class BrainNode(Node):
             "goto_grab_zone":   self.POS_GRAB_ZONE,
         }
 
-        # ======================== 环形轨道边代价 ========================
-        # 环上 7 个点位，相邻边代价（无向）
-        # 顺时针: 1→2→7→3→4→8→6→5→(回1)
+        # ======================== 环形轨道拓扑 ========================
+        # 顺时针: 1→7→2→3→4→8→6→5→(回1)
+        self._cw_next = {1:7, 7:2, 2:3, 3:4, 4:8, 8:6, 6:5, 5:1}
+        self._ccw_next = {7:1, 2:7, 3:2, 4:3, 8:4, 6:8, 5:6, 1:5}
+
+        # 环形轨道边代价（无向）
         self._edge_cost = {
-            1: {2: 0.2, 5: 0.1},
-            2: {1: 0.2, 7: 0.01, 3: 0.2},
-            7: {2: 0.01, 3: 0.19},
-            3: {7: 0.19, 2: 0.2, 4: 0.1},
+            1: {7: 0.1, 5: 0.1},
+            7: {1: 0.1, 2: 0.01},
+            2: {7: 0.01, 3: 0.1},
+            3: {2: 0.1, 4: 0.1},
             4: {3: 0.1, 8: 0.2},
             8: {4: 0.2, 6: 0.25},
             6: {8: 0.25, 5: 0.2},
@@ -295,6 +298,16 @@ class BrainNode(Node):
                     self.dispatch_task(h, "stream", "pwm_enable", {"enable": 1})
                 self.init_step_cmd_sent = True
                 self.get_logger().info("[INIT 0.5/10] 自动上报已开启")
+            self.init_step = 0.6
+            self.init_step_cmd_sent = False
+
+        # ── 步骤 0.6: OLED 智能模式 ──
+        elif self.init_step == 0.6:
+            if not self.init_step_cmd_sent:
+                for h in handles:
+                    self.dispatch_task(h, "stream", "oled_mode", {"mode": 9})
+                self.init_step_cmd_sent = True
+                self.get_logger().info("[INIT 0.6/10] OLED → 智能模式")
             self.init_step = 1
             self.init_step_cmd_sent = False
 
@@ -563,7 +576,7 @@ class BrainNode(Node):
                 hit_M = True
             if pos == tR:
                 return hit_M   # 遇到R时, 之前遇到过M → True, 否则 False
-            pos = pos + 1 if pos < 8 else 1
+            pos = self._cw_next[pos]
             if pos == tL:       # 绕了一圈
                 return False
 
@@ -585,7 +598,7 @@ class BrainNode(Node):
         cost = 0.0
         pos = start
         while pos != end:
-            nxt = pos + 1 if pos < 8 else 1
+            nxt = self._cw_next[pos]
             cost += self._edge_cost[pos][nxt]
             pos = nxt
         return cost
@@ -595,7 +608,7 @@ class BrainNode(Node):
         cost = 0.0
         pos = start
         while pos != end:
-            prv = pos - 1 if pos > 1 else 8
+            prv = self._ccw_next[pos]
             cost += self._edge_cost[pos][prv]
             pos = prv
         return cost
@@ -605,7 +618,7 @@ class BrainNode(Node):
         nodes = []
         pos = start
         while pos != end:
-            nxt = pos + 1 if pos < 8 else 1
+            nxt = self._cw_next[pos]
             nodes.append(nxt)
             pos = nxt
         if nodes and nodes[-1] == end:
@@ -617,7 +630,7 @@ class BrainNode(Node):
         nodes = []
         pos = start
         while pos != end:
-            prv = pos - 1 if pos > 1 else 8
+            prv = self._ccw_next[pos]
             nodes.append(prv)
             pos = prv
         if nodes and nodes[-1] == end:
@@ -685,9 +698,9 @@ class BrainNode(Node):
         """将 pos 沿 direction 方向移动 steps 站，返回新位置 (1~7)"""
         for _ in range(steps):
             if direction == self.DIR_CW:
-                pos = pos + 1 if pos < 8 else 1
+                pos = self._cw_next[pos]
             else:
-                pos = pos - 1 if pos > 1 else 8
+                pos = self._ccw_next[pos]
         return pos
 
     def _count_stations(self, start, end, direction):
@@ -696,9 +709,9 @@ class BrainNode(Node):
         pos = start
         while pos != end:
             if direction == self.DIR_CW:
-                pos = pos + 1 if pos < 8 else 1
+                pos = self._cw_next[pos]
             else:
-                pos = pos - 1 if pos > 1 else 8
+                pos = self._ccw_next[pos]
             count += 1
         return count
 
@@ -1115,12 +1128,12 @@ class BrainNode(Node):
         self.POS_2 = 14382
         self.POS_3 = 28764
         self.POS_4 = 46741
-        self.POS_8 = 70471
+        self.POS_8 = 64000
         self.POS_6 = 101393
         self.POS_5 = 123325
 
         self.POS_START_ZONE = 0
-        self.POS_GRAB_ZONE = -47628
+        self.POS_GRAB_ZONE = -48114
         self.POS_DROP_ZONE = 30375
         self.POS_END_ZONE = 0
         self.POS_OBSTACLE_A = -40095
