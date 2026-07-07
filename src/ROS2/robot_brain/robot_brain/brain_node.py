@@ -482,15 +482,32 @@ class BrainNode(Node):
             for h in handles:
                 self.dispatch_task(h, "stepper_x", "grab_start", {})
             self._grab_color_buf = {h: [] for h in handles}
+            self._grab_logged = {h: False for h in handles}
             self.has_sent_cmd = True
             self.get_logger().info("[GRABBING] 三抓手 grab_start 已下发")
 
-        # ── 阶段 1: 等 action_done, 持续收集颜色 ──
+        # ── 阶段 1: 等 action_done, 持续收集颜色, 独立输出日志 ──
         for h in handles:
+            if self._grab_logged[h]:
+                continue  # 已输出过
             cid = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
             if cid != 0:
                 self._grab_color_buf[h].append(cid)
+            if self.world.get("handles", {}).get(h, {}).get("action_done", False):
+                buf = self._grab_color_buf[h]
+                if buf:
+                    result = Counter(buf).most_common(1)[0][0]
+                    name = {1:"黄豆", 2:"绿豆", 3:"白芸豆"}.get(result, "?")
+                    self.get_logger().info(
+                        f"[GRAB] {h} 完成! buf={buf} → {result}({name})"
+                    )
+                else:
+                    self.get_logger().warn(f"[GRAB] {h} 完成但无颜色数据!")
+                    result = 0
+                self.grab_colors[h] = result
+                self._grab_logged[h] = True
 
+        # ── 阶段 2: 全部完成 → 融合 ──
         all_done = all(
             self.world.get("handles", {}).get(h, {}).get("action_done", False)
             for h in handles
@@ -498,19 +515,9 @@ class BrainNode(Node):
         if not all_done:
             return
 
-        # ── 阶段 2: 投票 → 数据融合 ──
-        grabbed = {}
-        for h in handles:
-            buf = self._grab_color_buf[h]
-            if buf:
-                grabbed[h] = Counter(buf).most_common(1)[0][0]
-                self.get_logger().info(f"[GRABBING] {h} 投票: {buf} → {grabbed[h]}")
-            else:
-                grabbed[h] = 0
-                self.get_logger().warn(f"[GRABBING] {h} 无颜色数据!")
-        self._data_fusion(grabbed)
+        self._data_fusion(self.grab_colors)
         self.get_logger().info(
-            f"[GRABBING] 完成: colors={grabbed}, "
+            f"[GRABBING] 融合: colors={self.grab_colors}, "
             f"targets=({self.target_L},{self.target_M},{self.target_R}), "
             f"is_ideal={self.is_ideal}"
         )
@@ -523,6 +530,18 @@ class BrainNode(Node):
         放豆区 5 个箱在轨道上的位置（顺时针）: [7, 1, 2, 3, 4]
         """
         self.grab_colors = grabbed_colors
+
+        # 2已知 → 推第3 (三种豆子互斥)
+        known = {v for v in grabbed_colors.values() if v in (1,2,3)}
+        if len(known) == 2:
+            missing_color = ({1,2,3} - known).pop()
+            for h in ["handle_left", "handle_mid", "handle_right"]:
+                if grabbed_colors.get(h, 0) not in (1,2,3):
+                    grabbed_colors[h] = missing_color
+                    self.get_logger().info(
+                        f"[FUSION] {h} 推断为 {missing_color}"
+                    )
+                    break
 
         # 颜色→箱号（同号直接映射）
         color_to_box = {1: 1, 2: 2, 3: 3}
