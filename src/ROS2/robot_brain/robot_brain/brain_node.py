@@ -3,6 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import json
 import time
+from collections import Counter
 
 # =====================================================================
 #  BrainNode — 状态机决策节点
@@ -78,10 +79,10 @@ class BrainNode(Node):
         self.start_cmd_received = False
 
         # ======================== 状态 3：移动到抓豆区 ========================
-        self.mid_obstacle_triggered = False
-        self.mid_d2_debounce = 0            # D2 触发后等待周期
+        self._grab_move_phase = 0           # 0=等中+底盘, 1=等左右, 2=到齐
 
         # ======================== 状态 4：抓取+融合 ========================
+        self._grab_color_buf = {}           # {hand: [color_id...]} 投票用
         self.target_seq = None              # 视觉目标序列 [1-5 排列]
         self.is_ideal = False               # 是否理想状态
         self.grab_colors = {}               # {hand: color_id}
@@ -432,53 +433,37 @@ class BrainNode(Node):
 
     def _handle_move_grab(self):
         """
-        并行执行:
-          A: chassis          → 抓豆区
-          B: handle_left      → 6号位（逆时针）
-          C: handle_right     → 5号位（顺时针）
-          D1: handle_mid      → 3号位（顺时针）
-        条件触发:
-          D2: 底盘到达避障点A → handle_mid → 2号位（逆时针）
+        Phase0(并发): mid→7(CCW) + chassis→grab_zone
+        Phase1(底盘到位): left→6(CCW) + right→8(CW)
+        Phase2(全部到位): → GRABBING
         """
-        if not self.has_sent_cmd:
-            self.dispatch_task("chassis", "base", "move_to",
-                               {"pos": self.POS_GRAB_ZONE})
-            self._move_hand_to("handle_left",  6, self.DIR_CCW)
-            self._move_hand_to("handle_right", 8, self.DIR_CW)
-            self._move_hand_to("handle_mid",   3, self.DIR_CW)
-            self.has_sent_cmd = True
-            self.mid_obstacle_triggered = False
-            self.mid_d2_debounce = 0
-            self.get_logger().info("[MOVE_TO_GRAB] 4路并行指令已下发")
+        if self._grab_move_phase == 0:
+            if not self.has_sent_cmd:
+                self._move_hand_to("handle_mid",   7, self.DIR_CCW)
+                self.dispatch_task("chassis", "base", "move_to",
+                                   {"pos": self.POS_GRAB_ZONE})
+                self.has_sent_cmd = True
+                self.get_logger().info("[MOVE_TO_GRAB] Phase0: mid→7 + chassis→grab")
 
-        # --- 避障点 A 触发检查 ---
-        chassis_arrived = self.world.get("chassis", {}).get("arrival_done", False)
-        if not self.mid_obstacle_triggered:
-            avg_pos = self._get_chassis_avg_pos()
-            # S方向(负), encoder ≤ -40095 或底盘已到位 都算越过
-            if (avg_pos is not None and avg_pos <= self.POS_OBSTACLE_A) or chassis_arrived:
-                self._move_hand_to("handle_mid", 7, self.DIR_CCW)
-                self.mid_obstacle_triggered = True
-                self.mid_d2_debounce = 0
-                self.get_logger().info(
-                    f"[MOVE_TO_GRAB] 触发D2 (pos={avg_pos}, arrived={chassis_arrived})"
-                )
+            mid_ok = self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False)
+            chassis_ok = self.world.get("chassis", {}).get("arrival_done", False)
+            if mid_ok and chassis_ok:
+                self.get_logger().info("[MOVE_TO_GRAB] Phase0 完成, 进入 Phase1")
+                self._grab_move_phase = 1
+                self.has_sent_cmd = False
 
-        # --- D2 触发后消抖：等 3 个周期让 track_arrived 被重置 ---
-        if self.mid_obstacle_triggered and self.mid_d2_debounce < 3:
-            self.mid_d2_debounce += 1
-            return
+        elif self._grab_move_phase == 1:
+            if not self.has_sent_cmd:
+                self._move_hand_to("handle_left",  6, self.DIR_CCW)
+                self._move_hand_to("handle_right", 8, self.DIR_CW)
+                self.has_sent_cmd = True
+                self.get_logger().info("[MOVE_TO_GRAB] Phase1: left→6 + right→8")
 
-        # --- 全部到位检查 ---
-        chassis_ok = self.world.get("chassis", {}).get("arrival_done", False)
-        left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
-        right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
-        mid_ok = (self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False)
-                  and self.mid_obstacle_triggered)
-
-        if chassis_ok and left_ok and right_ok and mid_ok:
-            self.get_logger().info("[MOVE_TO_GRAB] 全部到位，进入 GRABBING")
-            self._transition_to(self.ST_GRABBING)
+            left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
+            right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
+            if left_ok and right_ok:
+                self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
+                self._transition_to(self.ST_GRABBING)
 
     # =================================================================
     #  状态 4：GRABBING — 抓取 + 颜色数据融合 + 理想状态判定
@@ -496,10 +481,16 @@ class BrainNode(Node):
         if not self.has_sent_cmd:
             for h in handles:
                 self.dispatch_task(h, "stepper_x", "grab_start", {})
+            self._grab_color_buf = {h: [] for h in handles}
             self.has_sent_cmd = True
             self.get_logger().info("[GRABBING] 三抓手 grab_start 已下发")
 
-        # ── 阶段 1: 等待抓取完成 (0x7C) ──
+        # ── 阶段 1: 等 action_done, 持续收集颜色 ──
+        for h in handles:
+            cid = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
+            if cid != 0:
+                self._grab_color_buf[h].append(cid)
+
         all_done = all(
             self.world.get("handles", {}).get(h, {}).get("action_done", False)
             for h in handles
@@ -507,10 +498,16 @@ class BrainNode(Node):
         if not all_done:
             return
 
-        # ── 阶段 2: 读颜色 → 数据融合 ──
+        # ── 阶段 2: 投票 → 数据融合 ──
         grabbed = {}
         for h in handles:
-            grabbed[h] = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
+            buf = self._grab_color_buf[h]
+            if buf:
+                grabbed[h] = Counter(buf).most_common(1)[0][0]
+                self.get_logger().info(f"[GRABBING] {h} 投票: {buf} → {grabbed[h]}")
+            else:
+                grabbed[h] = 0
+                self.get_logger().warn(f"[GRABBING] {h} 无颜色数据!")
         self._data_fusion(grabbed)
         self.get_logger().info(
             f"[GRABBING] 完成: colors={grabbed}, "
@@ -1054,16 +1051,6 @@ class BrainNode(Node):
         """状态切换，重置状态锁"""
         self.state = new_state
         self.has_sent_cmd = False
-
-    def _get_chassis_avg_pos(self):
-        """获取底盘平均编码器位置"""
-        try:
-            encoders = self.world.get("chassis", {}).get("motor_encoder", [])
-            if encoders and len(encoders) == 4:
-                return sum(encoders) / 4.0
-        except Exception:
-            pass
-        return None
 
     def _move_hand_to(self, hand, pos_id, direction):
         """track_move(0x7A): 环轨点位移动, pos_id 1~8"""
