@@ -394,7 +394,7 @@ class BrainNode(Node):
         elif self.init_step == 9:
             seq = self.world.get("vision", {}).get("sequence", [])
             if seq and len(seq) == 5:
-                self.target_seq = seq
+                self.target_seq = [int(x) for x in seq]
                 self.get_logger().info(f"[INIT 9/10] 视觉序列: {seq}")
                 self.init_step = 10
                 self.init_step_cmd_sent = False
@@ -491,7 +491,7 @@ class BrainNode(Node):
             if self._grab_logged[h]:
                 continue  # 已输出过
             cid = self.world.get("handles", {}).get(h, {}).get("color_id", 0)
-            if cid != 0:
+            if cid not in (0, 255):
                 self._grab_color_buf[h].append(cid)
             if self.world.get("handles", {}).get(h, {}).get("action_done", False):
                 buf = self._grab_color_buf[h]
