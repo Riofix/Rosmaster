@@ -101,7 +101,7 @@ def generate_launch_description():
         ),
 
         # ── 大脑层 ──────────────────────────────────────────
-        # 8. 状态机 (debug_mode=true → 启动即单步)
+        # 8. 状态机 (debug_mode=true → 单步, 可命令行覆盖)
         Node(
             package='robot_brain',
             executable='brain_node',

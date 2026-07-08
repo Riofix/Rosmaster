@@ -4,6 +4,7 @@ from std_msgs.msg import String
 import json
 import time
 from collections import Counter
+from ament_index_python.packages import get_package_share_directory
 
 # =====================================================================
 #  BrainNode — 状态机决策节点
@@ -276,7 +277,7 @@ class BrainNode(Node):
         """逐步执行初始化流程, 每周期推进一次"""
         handles = ["handle_left", "handle_mid", "handle_right"]
 
-        # ── 步骤 0: 设备连接检查 ──
+        # ── 步骤 0: 等待设备数据上线 (固件默认开启上报) ──
         if self.init_step == 0:
             try:
                 chassis_ok = bool(self.world.get("chassis", {}).get("motor_encoder"))
@@ -291,7 +292,7 @@ class BrainNode(Node):
             except Exception:
                 pass
 
-        # ── 步骤 0.5: 开启自动上报 ──
+        # ── 步骤 0.5: 开启自动上报 (TCP已连, 保险) ──
         elif self.init_step == 0.5:
             if not self.init_step_cmd_sent:
                 for h in handles:
@@ -1118,8 +1119,8 @@ class BrainNode(Node):
         从 config/position.yaml 加载位置参数，失败则使用默认值。
         """
         import yaml, os
-        pkg_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        config_path = os.path.join(pkg_dir, 'config', 'position.yaml')
+        config_path = os.path.join(
+            get_package_share_directory('robot_brain'), 'config', 'position.yaml')
 
         try:
             with open(config_path, 'r') as f:
