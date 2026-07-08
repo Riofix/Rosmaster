@@ -81,6 +81,7 @@ class BrainNode(Node):
 
         # ======================== 状态 3：移动到抓豆区 ========================
         self._grab_move_phase = 0           # 0=等中+底盘, 1=等左右, 2=到齐
+        self._grab_move_timer = 0           # 到位后稳定计时
 
         # ======================== 状态 4：抓取+融合 ========================
         self._grab_color_buf = {}           # {hand: [color_id...]} 投票用
@@ -456,6 +457,7 @@ class BrainNode(Node):
                 self.get_logger().info("[MOVE_TO_GRAB] Phase0 完成, 进入 Phase1")
                 self._grab_move_phase = 1
                 self.has_sent_cmd = False
+                self._grab_move_timer = 0
 
         elif self._grab_move_phase == 1:
             if not self.has_sent_cmd:
@@ -467,8 +469,10 @@ class BrainNode(Node):
             left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
             right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
             if left_ok and right_ok:
-                self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
-                self._transition_to(self.ST_GRABBING)
+                self._grab_move_timer += 1
+                if self._grab_move_timer >= 10:   # 1s 稳定
+                    self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
+                    self._transition_to(self.ST_GRABBING)
 
     # =================================================================
     #  状态 4：GRABBING — 抓取 + 颜色数据融合 + 理想状态判定
