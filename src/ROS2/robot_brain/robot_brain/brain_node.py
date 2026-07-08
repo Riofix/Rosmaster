@@ -96,6 +96,7 @@ class BrainNode(Node):
         self._drop_batch = 0          # 当前批次索引
         self._drop_step = 0           # 0=发移动 1=等到位 2=舵机放豆
         self._drop_step_timer = 0     # 舵机步骤消抖计数器
+        self._drop_saw_low = False    # 到位消抖: 先见低再见高
 
         # ======================== 全局指令计数器 ========================
         self._task_counter = 0        # 自增 task_id
@@ -958,9 +959,11 @@ class BrainNode(Node):
                 )
             self._drop_step = 1
 
-        # ──── step 1: 等待 X 轴到位 ────
+        # ──── step 1: 等待 X 轴到位 (先低后高消抖) ────
         elif self._drop_step == 1:
-            if self._hands_arrived(hands):
+            if not self._hands_arrived(hands):
+                self._drop_saw_low = True          # 见过低: 已经发出, track_arrived 开始清零
+            elif self._drop_saw_low:               # 再见高: 真正到位
                 if droppers:
                     self.get_logger().info(
                         f"[DROP] 批次{self._drop_batch} X轴到位，放豆 "
@@ -968,12 +971,14 @@ class BrainNode(Node):
                     )
                     self._drop_step = 2
                     self._drop_step_timer = 0
+                    self._drop_saw_low = False
                 else:
                     self.get_logger().info(
                         f"[DROP] 批次{self._drop_batch} X轴到位，无放豆手，跳过"
                     )
                     self._drop_batch += 1
                     self._drop_step = 0
+                    self._drop_saw_low = False
 
         # ──── step 2: 舵机转 90° 放豆 (消抖 5 周期) ────
         elif self._drop_step == 2:
