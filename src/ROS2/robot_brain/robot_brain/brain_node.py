@@ -280,14 +280,19 @@ class BrainNode(Node):
         # ── 步骤 0: 等待设备数据上线 (固件默认开启上报) ──
         if self.init_step == 0:
             chassis_ok = bool(self.world.get("chassis", {}).get("motor_encoder"))
-            h_ok = all(
-                bool(self.world.get("handles", {}).get(h, {}))
-                for h in handles
-            )
+            hw = self.world.get("handles", {})
+            h_ok = all(bool(hw.get(h, {})) for h in handles)
             if chassis_ok and h_ok:
                 self.get_logger().info("[INIT 0/10] 设备全部在线")
                 self.init_step = 0.5
                 self.init_step_cmd_sent = False
+            else:
+                self.get_logger().info(
+                    f"[INIT 0] chassis={chassis_ok} "
+                    f"L={bool(hw.get('handle_left',{}))} "
+                    f"M={bool(hw.get('handle_mid',{}))} "
+                    f"R={bool(hw.get('handle_right',{}))}",
+                    throttle_duration_sec=2.0)
 
         # ── 步骤 0.5: 开启自动上报 (TCP已连, 保险) ──
         elif self.init_step == 0.5:
