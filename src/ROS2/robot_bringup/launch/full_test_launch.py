@@ -21,11 +21,15 @@
 """
 
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    debug_mode = LaunchConfiguration('debug_mode', default='True')
     return LaunchDescription([
+        DeclareLaunchArgument('debug_mode', default_value='True'),
 
         # ── 链路层 ──────────────────────────────────────────
         # 1. 串口通信 (底盘 USB)
@@ -106,7 +110,7 @@ def generate_launch_description():
             package='robot_brain',
             executable='brain_node',
             name='brain_node',
-            parameters=[{'debug_mode': True}],
+            parameters=[{'debug_mode': debug_mode}],
             output='screen',
         ),
 
