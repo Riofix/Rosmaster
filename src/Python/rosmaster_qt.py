@@ -134,6 +134,18 @@ def i32_le(data):
     return struct.unpack("<i", bytes(data[:4]))[0]
 
 
+def decode_step_param_value(param, payload):
+    if param in (0, 8, 9) and len(payload) >= 1:
+        return str(payload[0])
+    if param in (1, 3) and len(payload) >= 2:
+        return str(struct.unpack("<H", bytes(payload[:2]))[0])
+    if param in (2, 5) and len(payload) >= 2:
+        return str(i16_le(payload[:2]))
+    if param in (4, 6, 7) and len(payload) >= 4:
+        return str(i32_le(payload[:4]))
+    return fmt_hex(payload)
+
+
 def describe_payload(data):
     if not data:
         return "空包"
@@ -913,18 +925,115 @@ class DataPage(QWidget):
                     self.mpu_curves[idx].setData(list(self.mpu_data[idx]))
             self.value_labels["MPU"].setText(f"D{dev + 1} Roll {values[0]:.2f}  Pitch {values[1]:.2f}  Yaw {values[2]:.2f}")
         elif cmd in (0x5B, 0x86) and len(payload) >= 23:
-            addr = payload[0]
-            pos = i32_le(payload[18:22])
+            import struct
+            fmt = '<B H h H i h i i B B'
+            (addr, volt, curr, enc, tgt, vel, cpos, perr, org, flag) = struct.unpack(fmt, payload[:23])
             idx = dev * 2 + (0 if addr == 1 else 1)
             if 0 <= idx < len(self.step_data):
-                self.step_data[idx].append(pos)
+                self.step_data[idx].append(cpos)
                 if self.step_curves:
                     self.step_curves[idx].setData(list(self.step_data[idx]))
-                self.value_labels[f"D{dev + 1}M{1 if addr == 1 else 2}"].setText(f"当前位置 {pos}")
+            flags = ",".join(filter(None, ["使能" if flag&1 else "", "到位" if flag&2 else "", "堵转" if flag&4 else ""]))
+            self.value_labels[f"D{dev + 1}M{1 if addr == 1 else 2}"].setText(
+                f"位置{cpos} 转速{vel} 电压{volt}mV 电流{curr}mA 编码器{enc} 目标{tgt} 误差{perr} org={org} flag=0x{flag:02X}[{flags}]"
+            )
         elif cmd == 0x87:
             self.value_labels["PWM/颜色"].setText(f"D{dev + 1} 步进参数 {fmt_hex(payload)}")
         elif cmd in (0x5C, 0x5D, 0x84, 0x85):
             self.value_labels["PWM/颜色"].setText(f"D{dev + 1} {describe_payload(data)}")
+
+
+class MachineTextPage(QWidget):
+    def __init__(self, monitor, dev_combo):
+        super().__init__()
+        self.mon = monitor
+        self.dev_combo = dev_combo
+        self.state = {
+            dev: {
+                "online": "离线",
+                "mpu": "-",
+                "m1": "-",
+                "m2": "-",
+                "servo": "-",
+                "bldc": "-",
+                "color": "-",
+                "last": "-",
+            }
+            for dev in range(3)
+        }
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(12)
+
+        controls = make_section("文字总览")
+        row = QHBoxLayout(controls)
+        row.addWidget(QLabel("自动上报打开后，这里会按抓手汇总 MPU、步进、电机外设和最近一帧。"))
+        row.addStretch()
+        refresh = QPushButton("刷新显示")
+        refresh.clicked.connect(self._refresh)
+        row.addWidget(refresh)
+        layout.addWidget(controls)
+
+        self.text = QTextEdit()
+        self.text.setReadOnly(True)
+        self.text.setFont(QFont("Consolas", 11))
+        self.text.setObjectName("machineText")
+        layout.addWidget(self.text, 1)
+
+        self.mon.online_changed.connect(self._on_online)
+        self.mon.packet_decoded.connect(self._on_packet)
+        self._refresh()
+
+    def _on_online(self, online):
+        for dev, ok in enumerate(online):
+            self.state[dev]["online"] = "在线" if ok else "离线"
+        self._refresh()
+
+    def _on_packet(self, dev, data):
+        if not data:
+            return
+        cmd = data[0]
+        payload = data[1:]
+        self.state[dev]["last"] = f"{CMD_NAMES.get(cmd, f'0x{cmd:02X}')}  {fmt_hex(payload)}"
+        if cmd in (0x5A, 0x80) and len(payload) >= 6:
+            roll = i16_le(payload[0:2]) / 100.0
+            pitch = i16_le(payload[2:4]) / 100.0
+            yaw = i16_le(payload[4:6]) / 100.0
+            self.state[dev]["mpu"] = f"Roll {roll:7.2f}  Pitch {pitch:7.2f}  Yaw {yaw:7.2f}"
+        elif cmd in (0x5B, 0x86) and len(payload) >= 23:
+            import struct
+            fmt2 = '<B H h H i h i i B B'
+            (addr, volt, curr, enc, tgt, vel, cpos, perr, org, flag) = struct.unpack(fmt2, payload[:23])
+            key = "m1" if addr == 1 else "m2"
+            flags = ",".join(filter(None, ["使能" if flag&1 else "", "到位" if flag&2 else "", "堵转" if flag&4 else ""]))
+            self.state[dev][key] = (f"位置{cpos} 转速{vel} 电压{volt}mV 电流{curr}mA "
+                                    f"编码器{enc} 目标{tgt} 误差{perr} org={org} flag=0x{flag:02X}[{flags}]")
+        elif cmd == 0x84:
+            self.state[dev]["servo"] = describe_payload(data)
+        elif cmd == 0x85:
+            self.state[dev]["bldc"] = describe_payload(data)
+        elif cmd == 0x5C:
+            self.state[dev]["servo"] = describe_payload(data)
+        elif cmd in (0x5D, 0x82, 0x83):
+            self.state[dev]["color"] = describe_payload(data)
+        self._refresh()
+
+    def _refresh(self):
+        lines = []
+        lines.append("Rosmaster 整机数据文字总览")
+        lines.append("=" * 72)
+        for dev in range(3):
+            st = self.state[dev]
+            lines.append(f"抓手{dev + 1}  [{st['online']}]")
+            lines.append(f"  MPU       : {st['mpu']}")
+            lines.append(f"  步进电机1 : {st['m1']}")
+            lines.append(f"  步进电机2 : {st['m2']}")
+            lines.append(f"  舵机/PWM  : {st['servo']}")
+            lines.append(f"  无刷电机  : {st['bldc']}")
+            lines.append(f"  颜色传感器: {st['color']}")
+            lines.append(f"  最近数据  : {st['last']}")
+            lines.append("-" * 72)
+        self.text.setPlainText("\n".join(lines))
 
 
 class StatusPage(QWidget):
@@ -932,6 +1041,8 @@ class StatusPage(QWidget):
         super().__init__()
         self.mon = monitor
         self.dev_combo = dev_combo
+        self.pending_param_queries = [deque() for _ in range(3)]
+        self.param_values = {}
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 14, 14, 14)
         layout.setSpacing(12)
@@ -953,21 +1064,37 @@ class StatusPage(QWidget):
         layout.addWidget(quick)
 
         params = make_section("步进参数查询")
-        prow = QHBoxLayout(params)
+        param_layout = QVBoxLayout(params)
+        prow = QHBoxLayout()
         self.motor_addr = QComboBox()
         self.motor_addr.addItems(["电机1", "电机2"])
         self.param_id = QComboBox()
         self.param_id.addItems([f"{k} {v}" for k, v in STEP_PARAM_NAMES.items()])
         query = QPushButton("查询参数")
         query.clicked.connect(self._query_param)
+        query_motor_all = QPushButton("查询当前电机全部参数")
+        query_motor_all.clicked.connect(self._query_current_motor_all_params)
+        query_machine_all = QPushButton("查询整机全部参数")
+        query_machine_all.setObjectName("primaryButton")
+        query_machine_all.clicked.connect(self._query_machine_all_params)
         prow.addWidget(QLabel("电机"))
         prow.addWidget(self.motor_addr)
         prow.addWidget(QLabel("参数"))
         prow.addWidget(self.param_id)
         prow.addWidget(query)
+        prow.addWidget(query_motor_all)
+        prow.addWidget(query_machine_all)
         prow.addStretch()
+        param_layout.addLayout(prow)
+        self.param_text = QTextEdit()
+        self.param_text.setReadOnly(True)
+        self.param_text.setFont(QFont("Consolas", 10))
+        self.param_text.setMinimumHeight(240)
+        param_layout.addWidget(self.param_text)
         layout.addWidget(params)
         layout.addStretch()
+        self.mon.packet_decoded.connect(self._on_packet)
+        self._refresh_param_text()
 
     def _for_each_selected_device(self, func):
         combo = self.dev_combo.currentIndex()
@@ -999,7 +1126,55 @@ class StatusPage(QWidget):
     def _query_param(self):
         addr = self.motor_addr.currentIndex() + 1
         param = int(self.param_id.currentText().split()[0])
-        self.mon.send_cmd(0x87, [addr, param], self.dev_combo.currentIndex())
+        combo = self.dev_combo.currentIndex()
+        if combo == 0:
+            for dev, online in enumerate(self.mon.online_devices()):
+                if online:
+                    self._send_param_query(dev, addr, param)
+        else:
+            self._send_param_query(combo - 1, addr, param)
+
+    def _query_current_motor_all_params(self):
+        addr = self.motor_addr.currentIndex() + 1
+        combo = self.dev_combo.currentIndex()
+        devs = [dev for dev, online in enumerate(self.mon.online_devices()) if online] if combo == 0 else [combo - 1]
+        for dev in devs:
+            for param in STEP_PARAM_NAMES:
+                self._send_param_query(dev, addr, param)
+
+    def _query_machine_all_params(self):
+        combo = self.dev_combo.currentIndex()
+        devs = [dev for dev, online in enumerate(self.mon.online_devices()) if online] if combo == 0 else [combo - 1]
+        for dev in devs:
+            for addr in (1, 2):
+                for param in STEP_PARAM_NAMES:
+                    self._send_param_query(dev, addr, param)
+
+    def _send_param_query(self, dev, addr, param):
+        if self.mon.send_dev(0x87, [addr, param], dev):
+            self.pending_param_queries[dev].append((addr, param))
+
+    def _on_packet(self, dev, data):
+        if not data or data[0] != 0x87 or not self.pending_param_queries[dev]:
+            return
+        addr, param = self.pending_param_queries[dev].popleft()
+        value = decode_step_param_value(param, data[1:])
+        self.param_values[(dev, addr, param)] = value
+        self._refresh_param_text()
+
+    def _refresh_param_text(self):
+        lines = []
+        lines.append("步进电机参数总览")
+        lines.append("=" * 78)
+        for dev in range(3):
+            lines.append(f"抓手{dev + 1}")
+            for addr in (1, 2):
+                lines.append(f"  电机{addr}")
+                for param, name in STEP_PARAM_NAMES.items():
+                    value = self.param_values.get((dev, addr, param), "-")
+                    lines.append(f"    {param:>2} {name:<10}: {value}")
+            lines.append("-" * 78)
+        self.param_text.setPlainText("\n".join(lines))
 
 
 class MainWindow(QMainWindow):
@@ -1013,6 +1188,7 @@ class MainWindow(QMainWindow):
         tabs.setDocumentMode(True)
         tabs.addTab(self._wrap(MotorPage(self.monitor, self.dev_combo)), "电机与抓取")
         tabs.addTab(self._wrap(SensorPage(self.monitor, self.dev_combo)), "传感器与外设")
+        tabs.addTab(self._wrap(MachineTextPage(self.monitor, self.dev_combo)), "整机数据")
         tabs.addTab(self._wrap(DataPage(self.monitor, self.dev_combo)), "数据监测")
         tabs.addTab(self._wrap(StatusPage(self.monitor, self.dev_combo)), "批量调试")
         tabs.addTab(self.monitor, "通信日志")
@@ -1176,6 +1352,12 @@ def apply_style(app):
             background: #101828;
             color: #e5e7eb;
             border: 1px solid #1f2937;
+        }
+        QTextEdit#machineText {
+            background: #ffffff;
+            color: #101828;
+            border: 1px solid #c8d0da;
+            line-height: 1.35;
         }
         """
     )

@@ -86,7 +86,7 @@ void App_Action_SetOrigin(uint8_t pos_id)
  * ================================================================ */
 void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise)
 {
-    uint32_t target_pulse, cur_pulse, rel_pulse;
+    int32_t target_pulse, rel_pulse;
     uint32_t move_pulse; /* 需要移动脉冲数 */
     uint8_t dir;
 

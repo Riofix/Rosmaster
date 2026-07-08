@@ -60,14 +60,14 @@ class BrainNode(Node):
 
         # 环形轨道边代价（无向）
         self._edge_cost = {
-            1: {7: 0.1, 5: 0.1},
-            7: {1: 0.1, 2: 0.01},
-            2: {7: 0.01, 3: 0.1},
-            3: {2: 0.1, 4: 0.1},
-            4: {3: 0.1, 8: 0.2},
-            8: {4: 0.2, 6: 0.25},
+            1: {7: 0.08, 5: 0.15},
+            7: {1: 0.08, 2: 0.02},
+            2: {7: 0.02, 3: 0.1},
+            3: {2: 0.1,  4: 0.15},
+            4: {3: 0.15, 8: 0.2},
+            8: {4: 0.2,  6: 0.25},
             6: {8: 0.25, 5: 0.2},
-            5: {6: 0.2, 1: 0.1},
+            5: {6: 0.2,  1: 0.15},
         }
 
         # ======================== 状态 0：初始化 (plan_readme 4.2) ========================
@@ -731,24 +731,20 @@ class BrainNode(Node):
             count += 1
         return count
 
-    def _find_safe_pos(self, pos, blocked, target):
+    def _find_safe_pos(self, pos, blocked, target, direction):
         """
-        在未被 blocked 的节点中找一个安全位。
-        优先选离 target 最近的（取 CW/CCW 中短的那条）。
-        返回 POS 索引 1~7，若无安全位返回 None。
+        沿 direction 方向找一个未被 blocked 的安全位。
+        from_here 限方向, to_target 不限(只是启发值)。
         """
         candidates = []
         for p in range(1, 9):
             if p in blocked:
                 continue
-            to_target = min(
-                self._cw_cost(p, target),
-                self._ccw_cost(p, target),
-            )
-            from_here = min(
-                self._cw_cost(pos, p),
-                self._ccw_cost(pos, p),
-            )
+            if direction == self.DIR_CW:
+                from_here = self._cw_cost(pos, p)
+            else:
+                from_here = self._ccw_cost(pos, p)
+            to_target = min(self._cw_cost(p, target), self._ccw_cost(p, target))
             candidates.append((from_here + to_target, p))
         if not candidates:
             return None
@@ -805,13 +801,11 @@ class BrainNode(Node):
             post_current = {h1: targets[h1], h2: targets[h2]}
 
             if current[h3] in occupied:
-                safe = self._find_safe_pos(current[h3], occupied, targets[h3])
+                safe = self._find_safe_pos(current[h3], occupied, targets[h3], d1)
                 if safe is None:
                     continue   # 无安全位，试下一对
-                # 给 h3 找最短路径去 safe
-                cw_to = self._cw_cost(current[h3], safe)
-                ccw_to = self._ccw_cost(current[h3], safe)
-                safe_dir = self.DIR_CW if cw_to <= ccw_to else self.DIR_CCW
+                # h3 和配对方同方向, 避免路径冲突
+                safe_dir = d1
                 batch0[h3] = (self._pos_to_pulse(safe), safe_dir, False)
                 post_current[h3] = safe
                 self.get_logger().info(
@@ -985,12 +979,12 @@ class BrainNode(Node):
         elif self._drop_step == 2:
             if self._drop_step_timer == 0:
                 for hand in droppers:
-                    self.dispatch_task(hand, "servo", "move_to", {"angle": 90})
+                    self.dispatch_task(hand, "servo", "move_to", {"angle": 0})
                 self.get_logger().info(
-                    f"[DROP] 批次{self._drop_batch} 舵机张开 90°"
+                    f"[DROP] 批次{self._drop_batch} 舵机张开 0°(放豆)"
                 )
             self._drop_step_timer += 1
-            if self._drop_step_timer >= 5:
+            if self._drop_step_timer >= 50:
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 完成"
                 )
@@ -1137,7 +1131,7 @@ class BrainNode(Node):
         """硬编码默认值（YAML 加载失败时的兜底）"""
         self.RING_MAX = 141303
         self.POS_1 = 0
-        self.POS_7 = 14022
+        self.POS_7 = 11146
         self.POS_2 = 14382
         self.POS_3 = 28764
         self.POS_4 = 46741

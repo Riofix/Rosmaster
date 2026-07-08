@@ -43,4 +43,5 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise);
 void App_Action_Grab(void);                /* 内部状态机, App_Tick 末尾周期调用 */
 void App_Action_GrabStart(void);           /* 启动抓取, cmd_handle 调用 */
 void App_Action_SetOrigin(uint8_t pos_id); /* 校准原点: 记录编码器0对应的物理位 */
+void App_Action_EmergencyStop(void);       /* 紧急停止: 立即停电机, 需要手动复位才能继续抓取 */
 #endif                                     /* __APP_ACTION_H */
