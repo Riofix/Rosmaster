@@ -980,16 +980,16 @@ class BrainNode(Node):
                     self._drop_step = 0
                     self._drop_saw_low = False
 
-        # ──── step 2: 舵机转 90° 放豆 (消抖 5 周期) ────
+        # ──── step 2: 等1s稳定 → 开舵机 → 等5s放豆 ────
         elif self._drop_step == 2:
-            if self._drop_step_timer == 0:
+            self._drop_step_timer += 1
+            if self._drop_step_timer == 10:        # 1s 机械稳定
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 0})
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 舵机张开 0°(放豆)"
                 )
-            self._drop_step_timer += 1
-            if self._drop_step_timer >= 50:
+            if self._drop_step_timer >= 60:        # 再等 5s
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 完成"
                 )
