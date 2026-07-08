@@ -497,15 +497,18 @@ class BrainNode(Node):
             if self.world.get("handles", {}).get(h, {}).get("action_done", False):
                 buf = self._grab_color_buf[h]
                 if buf:
-                    result = Counter(buf).most_common(1)[0][0]
+                    counter = Counter(buf)
+                    total = sum(counter.values())
+                    result, count = counter.most_common(1)[0]
+                    conf = count / total if total > 0 else 0
                     name = {1:"黄豆", 2:"绿豆", 3:"白芸豆"}.get(result, "?")
                     self.get_logger().info(
-                        f"[GRAB] {h} 完成! buf={buf} → {result}({name})"
+                        f"[GRAB] {h} 完成! {name} 置信度={conf:.0%} buf={buf}"
                     )
                 else:
                     self.get_logger().warn(f"[GRAB] {h} 完成但无颜色数据!")
-                    result = 0
-                self.grab_colors[h] = result
+                    result, conf = 0, 0
+                self.grab_colors[h] = (result, conf)
                 self._grab_logged[h] = True
 
         # ── 阶段 2: 全部完成 → 融合 ──
@@ -530,19 +533,38 @@ class BrainNode(Node):
         color_id: 1=黄豆→Box1, 2=绿豆→Box2, 3=白芸豆→Box3
         放豆区 5 个箱在轨道上的位置（顺时针）: [7, 1, 2, 3, 4]
         """
-        self.grab_colors = grabbed_colors
+        # 提取颜色和置信度
+        handles = ["handle_left", "handle_mid", "handle_right"]
+        colors = {}
+        confs = {}
+        for h in handles:
+            c, cf = grabbed_colors.get(h, (0, 0))
+            colors[h] = c if c in (1,2,3) else 0
+            confs[h] = cf
 
-        # 2已知 → 推第3 (三种豆子互斥)
-        known = {v for v in grabbed_colors.values() if v in (1,2,3)}
-        if len(known) == 2:
-            missing_color = ({1,2,3} - known).pop()
-            for h in ["handle_left", "handle_mid", "handle_right"]:
-                if grabbed_colors.get(h, 0) not in (1,2,3):
-                    grabbed_colors[h] = missing_color
-                    self.get_logger().info(
-                        f"[FUSION] {h} 推断为 {missing_color}"
-                    )
-                    break
+        # 冲突: 同色取置信度高的, 低的让位给缺失色
+        valid = {h: c for h, c in colors.items() if c in (1,2,3)}
+        seen = Counter(valid.values())
+        missing_set = {1,2,3} - set(valid.values())
+        for color, cnt in seen.items():
+            if cnt > 1 and missing_set:
+                # 找出该color中置信度最低的手
+                dup_hands = [h for h, c in valid.items() if c == color]
+                dup_hands.sort(key=lambda h: confs.get(h, 0))
+                loser = dup_hands[0]
+                colors[loser] = missing_set.pop()
+                self.get_logger().info(
+                    f"[FUSION] {loser} 置信度最低({confs[loser]:.0%}), 改为 {colors[loser]}"
+                )
+
+        # 有手缺失: 用排除法
+        remaining = {1,2,3} - {v for v in colors.values() if v in (1,2,3)}
+        for h in handles:
+            if colors[h] == 0 and remaining:
+                colors[h] = remaining.pop()
+                self.get_logger().info(f"[FUSION] {h} 推断为 {colors[h]}")
+
+        self.grab_colors = colors
 
         # 颜色→箱号（同号直接映射）
         color_to_box = {1: 1, 2: 2, 3: 3}
@@ -552,7 +574,7 @@ class BrainNode(Node):
 
         box_targets = {}
         for hand in ["handle_left", "handle_mid", "handle_right"]:
-            color = grabbed_colors.get(hand, 0)
+            color = colors.get(hand, 0)
             box_id = color_to_box.get(color, 0)
             if box_id > 0 and self.target_seq and box_id in self.target_seq:
                 idx = self.target_seq.index(box_id)
