@@ -105,6 +105,7 @@ class BrainNode(Node):
         # ======================== 调试控制 ========================
         self.declare_parameter('debug_mode', True)  # launch 可控
         self.step_mode = self.get_parameter('debug_mode').value
+        self.get_logger().info(f"debug_mode={self.step_mode}")
         self.step_paused = True         # 单步暂停标志
         self.estop_locked = False       # 急停锁定, 只有 reset 能解除
         self._step_prev_state = self.state  # 记录上一步状态, 检测状态变化
