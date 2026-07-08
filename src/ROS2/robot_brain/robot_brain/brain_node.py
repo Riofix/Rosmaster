@@ -289,6 +289,10 @@ class BrainNode(Node):
                     self.get_logger().info("[INIT 0/10] 设备全部在线")
                     self.init_step = 0.5
                     self.init_step_cmd_sent = False
+                else:
+                    self.get_logger().info(
+                        f"[INIT 0] 等待设备... chassis={chassis_ok} handles={h_ok}",
+                        throttle_duration_sec=2.0)
             except Exception:
                 pass
 
