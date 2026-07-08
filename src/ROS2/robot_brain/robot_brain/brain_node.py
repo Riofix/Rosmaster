@@ -82,6 +82,7 @@ class BrainNode(Node):
         # ======================== 状态 3：移动到抓豆区 ========================
         self._grab_move_phase = 0           # 0=等中+底盘, 1=等左右, 2=到齐
         self._grab_move_timer = 0           # 到位后稳定计时
+        self._avoid_saw_low = False        # 到位消抖: 先低后高
 
         # ======================== 状态 4：抓取+融合 ========================
         self._grab_color_buf = {}           # {hand: [color_id...]} 投票用
@@ -449,11 +450,14 @@ class BrainNode(Node):
                 self.dispatch_task("chassis", "base", "move_to",
                                    {"pos": self.POS_GRAB_ZONE})
                 self.has_sent_cmd = True
+                self._avoid_saw_low = False
                 self.get_logger().info("[MOVE_TO_GRAB] Phase0: mid→7 + chassis→grab")
 
             mid_ok = self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False)
             chassis_ok = self.world.get("chassis", {}).get("arrival_done", False)
-            if mid_ok and chassis_ok:
+            if not (mid_ok and chassis_ok):
+                self._avoid_saw_low = True
+            elif self._avoid_saw_low:
                 self.get_logger().info("[MOVE_TO_GRAB] Phase0 完成, 进入 Phase1")
                 self._grab_move_phase = 1
                 self.has_sent_cmd = False
@@ -875,9 +879,12 @@ class BrainNode(Node):
             self._move_hand_to("handle_right", 4, self.DIR_CCW)
             self._move_hand_to("handle_mid",   1, self.DIR_CCW)
             self.has_sent_cmd = True
+            self._avoid_saw_low = False
             self.get_logger().info("[AVOID_1] 3路并行指令已下发")
 
-        if self._all_hands_arrived():
+        if not self._all_hands_arrived():
+            self._avoid_saw_low = True
+        elif self._avoid_saw_low:
             self.get_logger().info("[AVOID_1] 全部到位，进入 CHASSIS_TO_START")
             self._transition_to(self.ST_CHASSIS_TO_START)
 
@@ -890,9 +897,13 @@ class BrainNode(Node):
             self.dispatch_task("chassis", "base", "move_to",
                                {"pos": self.POS_START_ZONE})
             self.has_sent_cmd = True
+            self._avoid_saw_low = False
             self.get_logger().info("[CHASSIS_TO_START] 指令已下发")
 
-        if self.world.get("chassis", {}).get("arrival_done", False):
+        arrived = self.world.get("chassis", {}).get("arrival_done", False)
+        if not arrived:
+            self._avoid_saw_low = True
+        elif self._avoid_saw_low:
             self.get_logger().info("[CHASSIS_TO_START] 到位，进入 AVOID_2")
             self._transition_to(self.ST_HANDS_TO_AVOID_2)
 
@@ -907,9 +918,12 @@ class BrainNode(Node):
             self._move_hand_to("handle_right", 6, self.DIR_CW)
             self._move_hand_to("handle_mid",   3, self.DIR_CW)
             self.has_sent_cmd = True
+            self._avoid_saw_low = False
             self.get_logger().info("[AVOID_2] 3路并行指令已下发")
 
-        if self._all_hands_arrived():
+        if not self._all_hands_arrived():
+            self._avoid_saw_low = True
+        elif self._avoid_saw_low:
             self.get_logger().info("[AVOID_2] 全部到位，进入 CHASSIS_TO_DROP")
             self._transition_to(self.ST_CHASSIS_TO_DROP)
 
@@ -922,9 +936,13 @@ class BrainNode(Node):
             self.dispatch_task("chassis", "base", "move_to",
                                {"pos": self.POS_DROP_ZONE})
             self.has_sent_cmd = True
+            self._avoid_saw_low = False
             self.get_logger().info("[CHASSIS_TO_DROP] 指令已下发")
 
-        if self.world.get("chassis", {}).get("arrival_done", False):
+        arrived = self.world.get("chassis", {}).get("arrival_done", False)
+        if not arrived:
+            self._avoid_saw_low = True
+        elif self._avoid_saw_low:
             self.get_logger().info("[CHASSIS_TO_DROP] 到位，进入 EXECUTE_TARGET")
             self._transition_to(self.ST_EXECUTE_TARGET)
 
@@ -1035,9 +1053,13 @@ class BrainNode(Node):
             self.dispatch_task("chassis", "base", "move_to",
                                {"pos": self.POS_END_ZONE})
             self.has_sent_cmd = True
+            self._avoid_saw_low = False
             self.get_logger().info("[CHASSIS_TO_END] 指令已下发")
 
-        if self.world.get("chassis", {}).get("arrival_done", False):
+        arrived = self.world.get("chassis", {}).get("arrival_done", False)
+        if not arrived:
+            self._avoid_saw_low = True
+        elif self._avoid_saw_low:
             self.get_logger().info("[CHASSIS_TO_END] 到位，任务完成")
             self._transition_to(self.ST_DONE)
 
@@ -1067,16 +1089,20 @@ class BrainNode(Node):
             self._move_hand_to("handle_mid",   2, self.DIR_CCW)  # 逆时针
             self._move_hand_to("handle_right", 3, self.DIR_CCW)  # 逆时针
             self.has_sent_cmd = True
+            self._avoid_saw_low = False
             self.get_logger().info("[RESET] 4路并行回位指令已下发")
 
-        # ── 阶段 1: 等待全部到齐 ──
+        # ── 阶段 1: 等待全部到齐 (先低后高) ──
         chassis_ok = self.world.get("chassis", {}).get("arrival_done", False)
-        handles = self.world.get("handles", {})
+        hw = self.world.get("handles", {})
         hands_ok = all(
-            handles.get(h, {}).get("track_arrived", False)
+            hw.get(h, {}).get("track_arrived", False)
             for h in ["handle_left", "handle_mid", "handle_right"]
         )
         if not (chassis_ok and hands_ok):
+            self._avoid_saw_low = True
+            return
+        if not self._avoid_saw_low:
             return
 
         # ── 阶段 2: 三抓手编码器清零 (X轴+Z轴) ──
