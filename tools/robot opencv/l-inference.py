@@ -27,8 +27,8 @@ MATCH_SIZE = (64, 64)
 
 # 缓冲区初始化
 frame_buffer = deque(maxlen=STACK_SIZE)
-# 为4个ROI分别建立结果历史队列
-vote_history = [deque(maxlen=VOTE_SIZE) for _ in range(4)]
+# 为3个ROI分别建立结果历史队列
+vote_history = [deque(maxlen=VOTE_SIZE) for _ in range(3)]
 
 # --- 2. 加载模板库 ---
 templates = {}
@@ -104,7 +104,7 @@ while True:
     display_frame = frame.copy()
     current_frame_results = [] # 存储本轮投票后的结果
 
-    for i in range(4):
+    for i in range(3):
         seg = binary[i*TH : (i+1)*TH, 0:TW]
         clean_seg, best_cnt = filter_by_center_logic(seg, PARAMS["Center_Dist"])
         

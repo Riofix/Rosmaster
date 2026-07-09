@@ -20,7 +20,7 @@ def load_config():
             data = json.load(f)
             rois = data['rois']
     else:
-        for i in range(4):
+        for i in range(3):
             offset = 250 * i + 50
             rois.append([[offset, 300], [offset, 400], [offset+200, 400], [offset+200, 300]])
 

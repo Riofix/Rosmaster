@@ -22,7 +22,7 @@ def load_config():
             print("成功载入右摄像头 ROI 配置")
     else:
         # 如果没有配置，在画面中间生成 4 个默认框
-        for i in range(4):
+        for i in range(3):
             x = 200 + i * 200
             rois.append([[x, 350], [x, 380], [x+100, 380], [x+100, 350]])
 
