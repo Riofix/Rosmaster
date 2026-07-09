@@ -4,7 +4,7 @@ import json
 import os
 
 # --- 1. 配置 ---
-CONFIG_FILE = 'r-roi_config.json'
+CONFIG_FILE = 'tools/robot opencv/r-roi_config.json'
 TW, TH = 300, 150  # 矫正后的显示尺寸
 W, H = 1280, 720   # 摄像头原始分辨率
 WIN_NAME = "Right_Camera_Adjuster"

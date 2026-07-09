@@ -5,8 +5,8 @@ import os
 from collections import deque, Counter
 
 # --- 1. 加载参数与配置 ---
-CONFIG_FILE = 'left_camera_params.json'
-TEMPLATE_DIR = 'dataset-l'
+CONFIG_FILE = 'tools/robot opencv/left_camera_params.json'
+TEMPLATE_DIR = 'tools/robot opencv/dataset-l'
 
 if not os.path.exists(CONFIG_FILE):
     print(f"错误：未找到配置文件 {CONFIG_FILE}")

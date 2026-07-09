@@ -8,8 +8,8 @@ from collections import deque, Counter
 def load_cfg(path):
     with open(path, 'r', encoding='utf-8') as f: return json.load(f)
 
-cfg_l = load_cfg('left_camera_params.json')   #
-cfg_r = load_cfg('right_camera_params.json') #
+cfg_l = load_cfg('tools/robot opencv/left_camera_params.json')   #
+cfg_r = load_cfg('tools/robot opencv/right_camera_params.json') #
 
 ROIS_L, PARAMS_L = cfg_l['rois'], cfg_l['preprocessing_params'] #
 ROIS_R, PARAMS_R = cfg_r['rois'], cfg_r['preprocessing_params'] #
@@ -40,8 +40,8 @@ def load_tpls(path):
                     tpls[label].append(img)
     return tpls
 
-templates_l = load_tpls('dataset-l') #
-templates_r = load_tpls('dataset-r') #
+templates_l = load_tpls('tools/robot opencv/dataset-l') #
+templates_r = load_tpls('tools/robot opencv/dataset-r') #
 
 # --- 3. 核心算法 ---
 def preprocess(buf, p):
