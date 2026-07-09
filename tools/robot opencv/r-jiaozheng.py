@@ -4,7 +4,7 @@ import json
 import os
 
 # --- 1. 配置 ---
-CONFIG_FILE = 'tools/robot opencv/r-roi_config.json'
+CONFIG_FILE = 'r-roi_config.json'
 TW, TH = 300, 150  # 矫正后的显示尺寸
 W, H = 1280, 720   # 摄像头原始分辨率
 WIN_NAME = "Right_Camera_Adjuster"
@@ -59,7 +59,7 @@ def mouse_callback(event, x, y, flags, param):
 
 # --- 4. 主程序 ---
 load_config()
-cap = cv2.VideoCapture(2) # 右摄像头
+cap = cv2.VideoCapture(1) # 右摄像头
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
 

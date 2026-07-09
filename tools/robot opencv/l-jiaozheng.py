@@ -51,7 +51,7 @@ def mouse_callback(event, x, y, flags, param):
 # --- 主程序 ---
 load_config()
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(2)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
 
@@ -96,7 +96,7 @@ while True:
     small_main = cv2.resize(display_frame, (int(W/DISPLAY_SCALE), int(H/DISPLAY_SCALE)))
     cv2.imshow(win_name, small_main)
 
-    key = cv2.waitKey(1) & 0xFF
+    key = cv2.waitKey(2) & 0xFF
     if key == ord('s'):
         with open(CONFIG_FILE, 'w') as f:
             json.dump({"rois": rois, "resolution": [W, H]}, f, indent=4)
