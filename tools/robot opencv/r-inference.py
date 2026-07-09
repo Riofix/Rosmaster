@@ -15,7 +15,7 @@ if not os.path.exists(CONFIG_FILE):
 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
     config = json.load(f)
 
-CAM_INDEX = 2  # 右摄像头
+CAM_INDEX = 1  # 右摄像头
 ROIS = config['rois']
 RES_W, RES_H = config['resolution']
 PARAMS = config['preprocessing_params']
