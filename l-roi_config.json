@@ -1,10 +1,5 @@
 {
-    "camera_side": "left",
-    "resolution": [
-        1280,
-        720
-    ],
- "rois": [
+    "rois": [
         [
             [
                 79,
@@ -60,11 +55,8 @@
             ]
         ]
     ],
-    "preprocessing_params": {
-        "CLAHE": 1,
-        "Median": 1,
-        "Threshold": 127,
-        "Morph_Size": 2,
-        "Center_Dist": 80
-    }
+    "resolution": [
+        1280,
+        720
+    ]
 }
