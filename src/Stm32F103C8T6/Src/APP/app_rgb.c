@@ -219,42 +219,41 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
 /**
  * @brief 根据实测 EMA 融合数据进行物体分类判定
  * @return uint8_t 识别到的豆子 ID (1:白, 2:黄, 3:绿, 0:未知)
- * * 判定依据 (基于用户实测数据):
- * - 白芸豆: Hue(120+), Saturation(10-25), BluePct(29)
- * - 黄豆:   Hue(60-75), Saturation(30-40), BluePct(25)
- * - 绿豆:   Hue(60-75), Saturation(40-50), BluePct(20)
+ *
+ * 判定策略 (以 Saturation 为核心分类器，Hue 为辅助确认):
+ * ┌──────────┬───────────┬───────────┬───────────┬───────────┐
+ * │   类型   │    H      │    S      │    R%     │    B%     │
+ * ├──────────┼───────────┼───────────┼───────────┼───────────┤
+ * │  白芸豆  │   ≥90     │  22～30   │  25～35   │  22～30   │
+ * │  黄豆    │  50～87   │  32～40   │  30～35   │  18～23   │
+ * │  绿豆    │  45～90   │  40～50   │  32～42   │  14～22   │
+ * └──────────┴───────────┴───────────┴───────────┴───────────┘
+ *
+ *   S 区间天然分隔: 白≤30 < 黄32-40 < 绿≥40, 间隙清晰可判
  */
-
 uint8_t App_Rgb_Get_Result(void)
 {
     uint16_t h = g_app_rgb_data.fused.hue;
     uint8_t s = g_app_rgb_data.fused.saturation;
-    uint8_t b_pct = g_app_rgb_data.fused.blue_percent;
     uint16_t c = g_app_rgb_data.clean.clear;
 
-    // 基础过滤：如果总亮度太低，认为没有放豆子
+    // 基础过滤：总亮度太低 → 无豆
     if (c < 300)
         return BEAN_NONE;
 
-    // 逻辑 A: 判定白芸豆 (H特征明显)
-    if (h >= 100 && s <= 28)
+    // 第1层：白芸豆 — H ≥ 90 + S ≤ 30（低饱和度，色相偏冷）
+    if (h >= 90 && s <= 30)
         return BEAN_WHITE; // 3
 
-    // 逻辑 B: 区分绿豆与黄豆 (利用 S 和 B% 的梯度差)
-    if (h >= 50 && h <= 85)
-    {
-        if (s > 40 && b_pct <= 22)
-            return BEAN_GREEN; // 2 绿豆
-        if (s <= 40 && b_pct > 22)
-            return BEAN_YELLOW; // 1 黄豆
-    }
-
-    // 逻辑 C: 冗余补偿 (根据 Clear 亮度做最后兜底)
-    if (c > 5000)
-        return BEAN_WHITE; // 3
-    if (c < 1800)
+    // 第2层：绿豆 — S ≥ 40（高饱和度，颜色最鲜艳）
+    if (s >= 40)
         return BEAN_GREEN; // 2
 
+    // 第3层：黄豆 — S 32～39（中等饱和度）+ H ≥ 50（暖色调确认）
+    if (s >= 32 && h >= 50)
+        return BEAN_YELLOW; // 1
+
+    // 落入间隙区 → 保守返回未知
     return BEAN_NONE; // 0
 }
 
