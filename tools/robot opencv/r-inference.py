@@ -5,8 +5,8 @@ import os
 from collections import deque, Counter
 
 # --- 1. 加载右摄像头参数 ---
-CONFIG_FILE = 'right_camera_params.json'
-TEMPLATE_DIR = 'dataset-r'  
+CONFIG_FILE = 'tools/robot opencv/right_camera_params.json'
+TEMPLATE_DIR = 'tools/robot opencv/dataset-r'  
 
 if not os.path.exists(CONFIG_FILE):
     print(f"错误：未找到配置文件 {CONFIG_FILE}")
@@ -27,8 +27,8 @@ MATCH_SIZE = (64, 64)
 
 # 缓冲区初始化
 frame_buffer = deque(maxlen=STACK_SIZE)
-# 为右侧4个ROI分别建立结果历史队列
-vote_history = [deque(maxlen=VOTE_SIZE) for _ in range(4)]
+# 为右侧3个ROI分别建立结果历史队列
+vote_history = [deque(maxlen=VOTE_SIZE) for _ in range(3)]
 
 # --- 2. 加载模板库 ---
 templates = {}
@@ -115,7 +115,7 @@ while True:
     final_clean_list = []
     voted_results = [] # 存储四个盒子投票后的最终结果
     
-    for i in range(4):
+    for i in range(3):
         seg = binary[i*TH : (i+1)*TH, 0:TW]
         clean_seg, best_cnt = filter_by_center_logic(seg, PARAMS["Center_Dist"])
         final_clean_list.append(clean_seg)

@@ -8,8 +8,8 @@ from collections import deque, Counter
 def load_cfg(path):
     with open(path, 'r', encoding='utf-8') as f: return json.load(f)
 
-cfg_l = load_cfg('left_camera_params.json')   #
-cfg_r = load_cfg('right_camera_params.json') #
+cfg_l = load_cfg('tools/robot opencv/left_camera_params.json')   #
+cfg_r = load_cfg('tools/robot opencv/right_camera_params.json') #
 
 ROIS_L, PARAMS_L = cfg_l['rois'], cfg_l['preprocessing_params'] #
 ROIS_R, PARAMS_R = cfg_r['rois'], cfg_r['preprocessing_params'] #
@@ -40,8 +40,8 @@ def load_tpls(path):
                     tpls[label].append(img)
     return tpls
 
-templates_l = load_tpls('dataset-l') #
-templates_r = load_tpls('dataset-r') #
+templates_l = load_tpls('tools/robot opencv/dataset-l') #
+templates_r = load_tpls('tools/robot opencv/dataset-r') #
 
 # --- 3. 核心算法 ---
 def preprocess(buf, p):
@@ -72,15 +72,6 @@ def get_digit(roi_seg, dist_th, tpls):
         return best_l
     return "N/A"
 
-def infer_missing_digit(seq_4):
-    """逻辑补全：如果4个数字不重复且都在1-5内，推知第5个数字"""
-    valid_digits = {'1', '2', '3', '4', '5'}
-    found = {d for d in seq_4 if d in valid_digits}
-    if len(found) == 4:
-        missing = list(valid_digits - found)[0]
-        return missing
-    return "N/A"
-
 # --- 4. 主循环 ---
 cap_l, cap_r = cv2.VideoCapture(CAM_L_IDX), cv2.VideoCapture(CAM_R_IDX)
 for c in [cap_l, cap_r]:
@@ -102,23 +93,21 @@ while True:
 
     # B. 识别原始结果
     bin_l, bin_r = preprocess(buf_l, PARAMS_L), preprocess(buf_r, PARAMS_R)
-    res_l = [get_digit(bin_l[i*TH:(i+1)*TH, 0:TW], PARAMS_L["Center_Dist"], templates_l) for i in range(4)]
-    res_r = [get_digit(bin_r[i*TH:(i+1)*TH, 0:TW], PARAMS_R["Center_Dist"], templates_r) for i in range(4)]
+    res_l = [get_digit(bin_l[i*TH:(i+1)*TH, 0:TW], PARAMS_L["Center_Dist"], templates_l) for i in range(3)]
+    res_r = [get_digit(bin_r[i*TH:(i+1)*TH, 0:TW], PARAMS_R["Center_Dist"], templates_r) for i in range(3)]
 
-    # C. 逻辑补全与融合 (利用 12345 唯一性)
-    # 右眼推知 Pos 4, 左眼推知 Pos 0
-    inferred_pos4 = infer_missing_digit(res_r)
-    inferred_pos0 = infer_missing_digit(res_l)
+    # C. 拼接: 左[pos1,pos2,pos4] + 右[pos0,pos2,pos3]
+    def vote(a, b):
+        c = [x for x in [a, b] if x != "N/A"]
+        return Counter(c).most_common(1)[0][0] if c else "N/A"
 
-    full_r = res_r + [inferred_pos4]      # 右眼推测全序列 [R0, R1, R2, R3, R4_inf]
-    full_l = [inferred_pos0] + res_l      # 左眼推测全序列 [L0_inf, L1, L2, L3, L4]
-
-    # D. 全局全排列校验
-    current_best_seq = []
-    for p in range(5):
-        # 对每个位置，结合双眼推测结果进行局部表决
-        candidates = [c for c in [full_r[p], full_l[p]] if c != "N/A"]
-        current_best_seq.append(Counter(candidates).most_common(1)[0][0] if candidates else "N/A")
+    current_best_seq = [
+        res_r[0],                  # pos0: 仅右
+        res_l[0],                  # pos1: 仅左
+        vote(res_l[1], res_r[1]),  # pos2: 左右
+        res_r[2],                  # pos3: 仅右
+        res_l[2],                  # pos4: 仅左
+    ]
 
     # 【最后一道保险】：检查是否为 1-5 的合法排列
     if len(set(current_best_seq)) == 5 and "N/A" not in current_best_seq:

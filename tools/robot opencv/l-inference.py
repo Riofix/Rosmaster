@@ -27,7 +27,7 @@ MATCH_SIZE = (64, 64)
 
 # 缓冲区初始化
 frame_buffer = deque(maxlen=STACK_SIZE)
-# 为4个ROI分别建立结果历史队列
+# 为3个ROI分别建立结果历史队列
 vote_history = [deque(maxlen=VOTE_SIZE) for _ in range(3)]
 
 # --- 2. 加载模板库 ---

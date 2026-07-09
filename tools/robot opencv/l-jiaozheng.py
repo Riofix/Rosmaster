@@ -4,7 +4,7 @@ import json
 import os
 
 # --- 全局配置 ---
-CONFIG_FILE = 'l-roi_config.json'
+CONFIG_FILE = 'tools/robot opencv/l-roi_config.json'
 TW, TH = 300, 150  # 矫正后每个盒子的显示尺寸
 W, H = 1280, 720   # 摄像头真实分辨率
 DISPLAY_SCALE = 1.2 # 画面缩小倍数（为了在屏幕上放得下）
