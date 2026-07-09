@@ -149,18 +149,21 @@ class VisionNode(Node):
         bin_l = self.preprocess(self.buf_l, self.params_l)
         bin_r = self.preprocess(self.buf_r, self.params_r)
 
-        res_l = [self.get_digit(bin_l[i*self.th:(i+1)*self.th, 0:self.tw], self.params_l["Center_Dist"], self.tpl_lib['L']) for i in range(4)]
-        res_r = [self.get_digit(bin_r[i*self.th:(i+1)*self.th, 0:self.tw], self.params_r["Center_Dist"], self.tpl_lib['R']) for i in range(4)]
+        res_l = [self.get_digit(bin_l[i*self.th:(i+1)*self.th, 0:self.tw], self.params_l["Center_Dist"], self.tpl_lib['L']) for i in range(3)]
+        res_r = [self.get_digit(bin_r[i*self.th:(i+1)*self.th, 0:self.tw], self.params_r["Center_Dist"], self.tpl_lib['R']) for i in range(3)]
 
-        # ---------- 补全 ----------
-        full_r = res_r + [self.infer_missing_digit(res_r)]
-        full_l = [self.infer_missing_digit(res_l)] + res_l
+        # ---------- 拼接: 左[pos1,pos2,pos4] + 右[pos0,pos2,pos3] ----------
+        def vote(a, b):
+            c = [x for x in [a, b] if x != "N/A"]
+            return Counter(c).most_common(1)[0][0] if c else "N/A"
 
-        # ---------- 融合 ----------
-        seq = []
-        for i in range(5):
-            c = [x for x in [full_l[i], full_r[i]] if x != "N/A"]
-            seq.append(Counter(c).most_common(1)[0][0] if c else "N/A")
+        seq = [
+            res_r[0],                  # pos0: 仅右
+            res_l[0],                  # pos1: 仅左
+            vote(res_l[1], res_r[1]),  # pos2: 左右
+            res_r[2],                  # pos3: 仅右
+            res_l[2],                  # pos4: 仅左
+        ]
 
         # ✅ 强制唯一
         seq = self.enforce_unique(seq)
@@ -242,14 +245,6 @@ class VisionNode(Node):
             if res[i]=="N/A" and remain:
                 res[i]=remain.pop(0)
         return res
-
-    def infer_missing_digit(self, seq):
-        valid = {'1','2','3','4','5'}
-        if any(d not in valid for d in seq):
-            return "N/A"
-        if len(set(seq))!=4:
-            return "N/A"
-        return list(valid-set(seq))[0]
 
     def preprocess(self, buf, p):
         avg = np.mean(buf, axis=0).astype(np.uint8)
