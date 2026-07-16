@@ -4,10 +4,12 @@
 #include <stdint.h>
 
 /* 点位脉冲表 (pos_id 1~8, 索引 0~7) */
-#define POS_PULSE(pos) ((uint32_t[]){0, 14382, 28764, 46741, 123325, 101393, 11146, 64000}[(pos) - 1])
+// #define POS_PULSE(pos) ((uint32_t[]){0, 14382, 28764, 46741, 123325, 101393, 11146, 64000}[(pos) - 1])
+#define POS_PULSE(pos) ((uint32_t[]){0, 10667, 21334, 34667, 91468, 75201, 8267, 47467}[(pos) - 1])
 
 /* 环形轨道一圈脉冲数 */
-#define CIRCLE_PULSE 141303
+// #define CIRCLE_PULSE 141303
+#define CIRCLE_PULSE 104802
 
 /**
  * @brief  电机1 环轨点位移动 (一次性, 不等到位)
