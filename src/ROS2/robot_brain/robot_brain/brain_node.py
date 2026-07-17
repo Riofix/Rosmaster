@@ -106,10 +106,8 @@ class BrainNode(Node):
 
         # ======================== 调试控制 ========================
         self.declare_parameter('debug_mode', True)  # launch 可控
-        self.declare_parameter('mock_hardware', False)  # 无下位机时模拟硬件在线
         self.step_mode = self.get_parameter('debug_mode').value
-        self.mock_hardware = self.get_parameter('mock_hardware').value
-        self.get_logger().info(f"debug_mode={self.step_mode} mock_hardware={self.mock_hardware}")
+        self.get_logger().info(f"debug_mode={self.step_mode}")
         self.step_paused = True         # 单步暂停标志
         self.estop_locked = False       # 急停锁定, 只有 reset 能解除
         self._step_prev_state = self.state  # 记录上一步状态, 检测状态变化
@@ -241,8 +239,7 @@ class BrainNode(Node):
     # =================================================================
 
     def state_machine_loop(self):
-        # ── Mock 模式: world_state 不存在也继续 ──
-        if not self.world and not self.mock_hardware:
+        if not self.world:
             return
 
         # ── 急停锁定: 只有 ST_RESET 可以穿透, 其余冻结 ──
@@ -297,17 +294,6 @@ class BrainNode(Node):
 
     def _handle_init(self):
         """逐步执行初始化流程, 每周期推进一次"""
-
-        # ── Mock 模式: 跳过所有硬件初始化, 直达步骤 10 ──
-        if self.mock_hardware:
-            if self.init_step < 10:
-                self.get_logger().info(f"[INIT] Mock模式: 跳过硬件步骤 0~9, 直达步骤 10")
-                self.init_step = 10
-                # 预填视觉序列, 否则步骤 9 会卡住
-                self.target_seq = [1, 2, 3, 4, 5]
-            # 步骤 10: 正常走 — 触发语音播报 → WAIT_START_CMD
-            # (不 return, 让后续 elif 自然匹配)
-
         handles = ["handle_left", "handle_mid", "handle_right"]
 
         # ── 步骤 0: 等待设备数据上线 (固件默认开启上报) ──
