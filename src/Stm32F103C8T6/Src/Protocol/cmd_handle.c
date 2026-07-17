@@ -97,7 +97,7 @@ static void Handle_Pos_Control_Cm(uint8_t *data, uint8_t len)
   uint8_t raF = (data[9] != 0);
   uint8_t snF = (data[10] != 0);
 
-  /* 脉冲换算: 电机1=359.55/cm, 电机2=16000/cm */
+  /* 脉冲换算: 电机1=359.55/cm, 电机2=16000/cm 这里需要修改电机1的脉冲换算*/
   float pulse_per_cm = (addr == 1) ? 359.55f : 16000.0f;
   float cm = (float)dist / 100.0f;
   uint32_t pulse = (uint32_t)(cm * pulse_per_cm + 0.5f);
