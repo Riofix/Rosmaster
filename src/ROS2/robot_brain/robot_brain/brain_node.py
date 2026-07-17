@@ -115,7 +115,9 @@ class BrainNode(Node):
         # ======================== ROS 接口 ========================
         self.create_subscription(String, '/world_state', self.world_cb, 10)
         self.create_subscription(String, '/task_control', self.start_cmd_cb, 10)
+        self.create_subscription(String, '/voice_cmd', self.voice_cmd_cb, 10)
         self.brain_pub = self.create_publisher(String, '/brain_cmd', 10)
+        self.voice_pub = self.create_publisher(String, '/voice_broadcast', 10)
 
         self.create_timer(0.1, self.state_machine_loop)
         self.get_logger().info("Brain Node initialized. Entering INIT state.")
@@ -186,6 +188,20 @@ class BrainNode(Node):
 
         except Exception as e:
             self.get_logger().error(f"StartCmd parse error: {e}")
+
+    def voice_cmd_cb(self, msg):
+        """接收语音模块识别的命令词"""
+        try:
+            data = json.loads(msg.data)
+            cmd_id = data.get("cmd_id", 0)
+
+            # cmd_id=20: 地瓜启动 — 仅在等待启动指令状态有效
+            if cmd_id == 20 and self.state == self.ST_WAIT_START_CMD:
+                self.start_cmd_received = True
+                self.get_logger().info("[VOICE] 语音启动指令「地瓜启动」收到, 进入下一状态")
+
+        except Exception as e:
+            self.get_logger().error(f"VoiceCmd parse error: {e}")
 
     def _do_emergency_stop(self):
         """急停: 底盘刹车 + 三抓手 0x7D"""
@@ -409,6 +425,8 @@ class BrainNode(Node):
         # ── 步骤 10: 完成 → WAIT_START_CMD ──
         elif self.init_step == 10:
             self.get_logger().info("[INIT 10/10] 初始化完成 → WAIT_START_CMD")
+            # 触发语音播报: "好的，已初始化完成"
+            self.voice_pub.publish(String(data=json.dumps({"cmd_id": 21, "label": "地瓜初始化"})))
             self._transition_to(self.ST_WAIT_START_CMD)
 
     # =================================================================

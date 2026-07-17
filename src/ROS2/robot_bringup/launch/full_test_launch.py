@@ -10,6 +10,7 @@
   6. control_node      → PID 控制 + 指令映射
   7. brain_node        → 状态机 (默认单步, step_next 推进)
   8. vision_node       → 视觉识别 (debug 窗口关闭)
+  9. voice_node        → 语音播报与指令识别 (/dev/broadcast)
 
 测试指令:
   ros2 topic pub --once /task_control ... '{"cmd":"step_next"}'
@@ -111,6 +112,19 @@ def generate_launch_description():
             executable='brain_node',
             name='brain_node',
             parameters=[{'debug_mode': debug_mode}],
+            output='screen',
+        ),
+
+        # ── 语音层 ──────────────────────────────────────────
+        # 9. 语音播报与指令识别 (SU-03T, /dev/broadcast)
+        Node(
+            package='robot_voice',
+            executable='voice_node',
+            name='voice_node',
+            parameters=[{
+                'port': '/dev/broadcast',
+                'baudrate': 115200,
+            }],
             output='screen',
         ),
 

@@ -77,4 +77,16 @@ def generate_launch_description():
             name='vision_node',
             output='screen'
         ),
+
+        # 9. 语音层 (robot_voice) - SU-03T 语音播报与指令识别
+        Node(
+            package='robot_voice',
+            executable='voice_node',
+            name='voice_node',
+            parameters=[{
+                'port': '/dev/broadcast',
+                'baudrate': 115200,
+            }],
+            output='screen'
+        ),
     ])
