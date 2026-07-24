@@ -15,7 +15,7 @@ if not os.path.exists(CONFIG_FILE):
 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
     config = json.load(f)
 
-CAM_INDEX = 1  # 右摄像头
+CAM_INDEX = 2  # 右摄像头
 ROIS = config['rois']
 RES_W, RES_H = config['resolution']
 PARAMS = config['preprocessing_params']
@@ -90,6 +90,7 @@ print("\n>>> 右摄像头识别模式启动（已启用投票滤波）")
 
 while True:
     ret, frame = cap.read()
+    frame = cv2.rotate(frame, cv2.ROTATE_180)
     if not ret: break
 
     current_warps = [cv2.warpPerspective(frame, cv2.getPerspectiveTransform(np.array(pts, np.float32), 
