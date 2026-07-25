@@ -854,6 +854,17 @@ class BrainNode(Node):
                 else self._ccw_path_nodes(current[h1], targets[h1])
             path2 = self._cw_path_nodes(current[h2], targets[h2]) if d2 == self.DIR_CW \
                 else self._ccw_path_nodes(current[h2], targets[h2])
+
+            # ---- 配对内碰撞检测: 任一只手路径穿过另一只的目标点 → 跳过 ----
+            steps1 = self._count_stations(current[h1], targets[h1], d1)
+            steps2 = self._count_stations(current[h2], targets[h2], d2)
+            if (targets[h1] in path2 and steps1 <= steps2) or \
+               (targets[h2] in path1 and steps2 <= steps1):
+                self.get_logger().info(
+                    f"[NONIDEAL] 配对({h1},{h2})路径交叉, 跳过"
+                )
+                continue
+
             occupied = set(path1 + path2 + [targets[h1], targets[h2]])
 
             # ---- Step 3: 第三手堵塞检查 ----
