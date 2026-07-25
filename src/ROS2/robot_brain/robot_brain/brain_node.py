@@ -753,7 +753,14 @@ class BrainNode(Node):
             _, direction, hand, s, e = candidates[0]
 
             plans[hand] = (self._pos_to_pulse(e), direction, True)
+            # 锁定目标点 + 路径经过的全部中间节点
             locked.add(e)
+            if direction == self.DIR_CW:
+                for p in self._cw_path_nodes(s, e):
+                    locked.add(p)
+            else:
+                for p in self._ccw_path_nodes(s, e):
+                    locked.add(p)
             hands_done.add(hand)
             current[hand] = e
 
