@@ -21,7 +21,8 @@
  * 脉冲参数
  * ================================================================ */
 // #define SWEEP_PULSE 6472    /* 电机1 横扫 18cm */
-#define SWEEP_PULSE 4800    /* 电机1 横扫 18cm */
+//#define SWEEP_PULSE 4800    /* 电机1 横扫 18cm */
+#define SWEEP_PULSE 3294    /* 电机1 横扫 15cm */
 #define DOWN10_PULSE 160000 /* 电机2 下降 10cm */
 #define DOWN1_PULSE 16000   /* 电机2 下降 1cm */
 #define UP13_PULSE 208000   /* 电机2 上升 13cm */
@@ -31,7 +32,7 @@
  * 速度参数
  * ================================================================ */
 #define VEL_HORIZ 50 /* 电机1 横扫速度 */
-#define VEL_MOVE 200 /* 电机1 点位移动速度 */
+#define VEL_MOVE 100 /* 电机1 点位移动速度 */
 #define VEL_VERT 500 /* 电机2 垂直速度 */
 #define ACC 100      /* 统一加速度 */
 
