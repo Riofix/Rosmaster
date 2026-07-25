@@ -63,8 +63,8 @@
     "preprocessing_params": {
         "CLAHE": 1,
         "Median": 1,
-        "Threshold": 127,
+        "Threshold": 106,
         "Morph_Size": 2,
-        "Center_Dist": 80
+        "Center_Dist": 67
     }
 }

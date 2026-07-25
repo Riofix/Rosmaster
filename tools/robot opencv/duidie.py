@@ -5,7 +5,7 @@ from collections import deque
 
 # --- 1. 初始化配置 ---
 try:
-    with open('l-roi_config.json', 'r') as f:
+    with open('tools\\robot opencv\\l-roi_config.json', 'r') as f:
         config = json.load(f)
     rois = config['rois']
     W_RES, H_RES = config['resolution']
