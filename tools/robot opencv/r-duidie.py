@@ -5,7 +5,7 @@ from collections import deque
 
 # --- 1. 初始化配置 ---
 try:
-    with open('r-roi_config.json', 'r') as f:
+    with open('tools/robot opencv/r-roi_config.json', 'r') as f:
         config = json.load(f)
     rois = config['rois']
     W_RES, H_RES = config['resolution']
@@ -54,7 +54,7 @@ cv2.createTrackbar("Morph_Size", "Tuning_Panel", 2, 10, nothing)
 cv2.createTrackbar("Center_Dist", "Tuning_Panel", 80, 150, nothing) # 实时调节中心判定范围
 
 # --- 4. 启动摄像头 ---
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(1)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, W_RES)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H_RES)
 
