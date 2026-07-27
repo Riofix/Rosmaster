@@ -249,8 +249,13 @@ class VisionNode(Node):
     def preprocess(self, buf, p):
         avg = np.mean(buf, axis=0).astype(np.uint8)
         gray = cv2.cvtColor(avg, cv2.COLOR_BGR2GRAY)
+        if p["CLAHE"] > 0:
+            gray = cv2.createCLAHE(clipLimit=p["CLAHE"], tileGridSize=(8,8)).apply(gray)
         gray = cv2.medianBlur(gray, p["Median"]*2+1)
         _,bin_img = cv2.threshold(gray, p["Threshold"],255,cv2.THRESH_BINARY_INV)
+        if p["Morph_Size"] > 0:
+            bin_img = cv2.morphologyEx(bin_img, cv2.MORPH_OPEN,
+                                       np.ones((p["Morph_Size"], p["Morph_Size"]), np.uint8))
         return bin_img
 
     def get_digit(self, roi, dist_th, tpls):
