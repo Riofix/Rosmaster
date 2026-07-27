@@ -22,7 +22,7 @@ static void App_RGB2HSV(void);
 static void App_EMA(void);
 
 // 底层算法工具函数
-static uint16_t Math_Average_Tool(uint16_t *buffer);
+static uint16_t Math_Median_Tool(uint16_t *buffer, uint8_t size);
 static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
                               uint16_t *h, uint8_t *s, uint8_t *v);
 
@@ -65,11 +65,11 @@ void App_Rgb_Update(void)
 /* ================================================================= */
 
 /**
- * @brief 执行滑动窗口去极值滤波，将结果存入 clean 结构体
+ * @brief 执行 7 样本滑动窗口中值滤波，将结果存入 clean 结构体
  */
 static void App_SlidingWindowFilter(void)
 {
-    static uint16_t red_window[5], green_window[5], blue_window[5], clear_window[5];
+    static uint16_t red_window[7], green_window[7], blue_window[7], clear_window[7];
     static uint8_t pointer = 0;
 
     // 数据入队
@@ -78,14 +78,14 @@ static void App_SlidingWindowFilter(void)
     blue_window[pointer] = g_raw_rgbc.blue;
     clear_window[pointer] = g_raw_rgbc.clear;
 
-    if (++pointer >= 5)
+    if (++pointer >= 7)
         pointer = 0;
 
-    // 调用工具函数计算平均值
-    g_app_rgb_data.clean.red = Math_Average_Tool(red_window);
-    g_app_rgb_data.clean.green = Math_Average_Tool(green_window);
-    g_app_rgb_data.clean.blue = Math_Average_Tool(blue_window);
-    g_app_rgb_data.clean.clear = Math_Average_Tool(clear_window);
+    // 取中值
+    g_app_rgb_data.clean.red   = Math_Median_Tool(red_window, 7);
+    g_app_rgb_data.clean.green = Math_Median_Tool(green_window, 7);
+    g_app_rgb_data.clean.blue  = Math_Median_Tool(blue_window, 7);
+    g_app_rgb_data.clean.clear = Math_Median_Tool(clear_window, 7);
 }
 
 /**
@@ -148,17 +148,20 @@ static void App_EMA(void)
 }
 
 /**
- * @brief 数学工具：去极值求平均算法实现
+ * @brief 数学工具：冒泡排序取中值
+ * @param buffer 输入数组
+ * @param size   数组大小 (奇数)
+ * @return 中值
  */
-static uint16_t Math_Average_Tool(uint16_t *buffer)
+static uint16_t Math_Median_Tool(uint16_t *buffer, uint8_t size)
 {
-    uint16_t sort_array[5];
-    memcpy(sort_array, buffer, sizeof(sort_array));
+    uint16_t sort_array[7];
+    memcpy(sort_array, buffer, size * sizeof(uint16_t));
 
-    // 冒泡排序，用于寻找最大值和最小值
-    for (uint8_t i = 0; i < 4; i++)
+    // 冒泡排序
+    for (uint8_t i = 0; i < size - 1; i++)
     {
-        for (uint8_t j = 0; j < 4 - i; j++)
+        for (uint8_t j = 0; j < size - 1 - i; j++)
         {
             if (sort_array[j] > sort_array[j + 1])
             {
@@ -168,8 +171,8 @@ static uint16_t Math_Average_Tool(uint16_t *buffer)
             }
         }
     }
-    // 抛弃 sort_array[0] 和 sort_array[4]，取中间三个值的均值
-    return (sort_array[1] + sort_array[2] + sort_array[3]) / 3;
+    // 返回中值 (size=7 -> index=3)
+    return sort_array[size / 2];
 }
 
 /**
@@ -221,15 +224,14 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  * @return uint8_t 识别到的豆子 ID (1:白, 2:黄, 3:绿, 0:未知)
  *
  * 判定策略 (以 Saturation 为核心分类器，Hue 为辅助确认):
- * ┌──────────┬───────────┬───────────┬───────────┬───────────┐
- * │   类型   │    H      │    S      │    R%     │    B%     │
- * ├──────────┼───────────┼───────────┼───────────┼───────────┤
- * │  白芸豆  │   ≥90     │  22～30   │  25～35   │  22～30   │
- * │  黄豆    │  50～87   │  32～40   │  30～35   │  18～23   │
- * │  绿豆    │  45～90   │  40～50   │  32～42   │  14～22   │
- * └──────────┴───────────┴───────────┴───────────┴───────────┘
- *
- *   S 区间天然分隔: 白≤30 < 黄32-40 < 绿≥40, 间隙清晰可判
+ * ----------------------------------------------
+ * |   类型   |    H      |    S      |  R%     |  B%     |
+ * |----------|-----------|-----------|---------|---------|
+ * |  白芸豆  |   >=90    |   22-30   |  25-35  |  22-30  |
+ * |  黄豆    |   50-87   |   32-40   |  30-35  |  18-23  |
+ * |  绿豆    |   45-90   |   40-50   |  32-42  |  14-22  |
+ * ----------------------------------------------
+ *   S 区间天然分隔: 白<=30 < 黄32-40 < 绿>=40, 间隙清晰可判
  */
 //uint8_t App_Rgb_Get_Result(void)
 //{
@@ -237,23 +239,23 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
     //uint8_t s = g_app_rgb_data.fused.saturation;
     //uint16_t c = g_app_rgb_data.clean.clear;
 
-    // 基础过滤：总亮度太低 → 无豆
+    // 基础过滤：总亮度太低 -> 无豆
     //if (c < 300)
         //return BEAN_NONE;
 
-    // 第1层：白芸豆 — H ≥ 90 + S ≤ 30（低饱和度，色相偏冷）
+    // 第1层：白芸豆 - H >= 90 + S <= 30（低饱和度，色相偏冷）
     //if (h >= 90 && s <= 30)
         //return BEAN_WHITE; // 3
 
-    // 第2层：绿豆 — S ≥ 40（高饱和度，颜色最鲜艳）
+    // 第2层：绿豆 - S >= 40（高饱和度，颜色最鲜艳）
     //if (s >= 40)
         //return BEAN_GREEN; // 2
 
-    // 第3层：黄豆 — S 32～39（中等饱和度）+ H ≥ 50（暖色调确认）
+    // 第3层：黄豆 - S 32-39（中等饱和度）+ H >= 50（暖色调确认）
     //if (s >= 32 && h >= 50)
         //return BEAN_YELLOW; // 1
 
-    // 落入间隙区 → 保守返回未知
+    // 落入间隙区 -> 保守返回未知
     //return BEAN_NONE; // 0
 //}
 
@@ -266,37 +268,75 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  * - 绿豆:   Hue(60-75), Saturation(40-50), BluePct(20)
  */
 
+//uint8_t App_Rgb_Get_Result(void)
+//{
+//    uint16_t h = g_app_rgb_data.fused.hue;
+//    uint8_t s = g_app_rgb_data.fused.saturation;
+//    uint8_t b_pct = g_app_rgb_data.fused.blue_percent;
+//    uint16_t c = g_app_rgb_data.clean.clear;
+//
+//    // 基础过滤：如果总亮度太低，认为没有放豆子
+//    if (c < 300)
+//        return BEAN_NONE;
+//
+//    // 逻辑 A: 判定白芸豆 (H特征明显)
+//    if (h >= 100 && s <= 28)
+//        return BEAN_WHITE; // 3
+//
+//    // 逻辑 B: 区分绿豆与黄豆 (利用 S 和 B% 的梯度差)
+//    if (h >= 50 && h <= 85)
+//    {
+//        if (s > 40 && b_pct <= 22)
+//            return BEAN_GREEN; // 2 绿豆
+//        if (s <= 40 && b_pct > 22)
+//            return BEAN_YELLOW; // 1 黄豆
+//    }
+//
+//    // 逻辑 C: 冗余补偿 (根据 Clear 亮度做最后兜底)
+//    if (c > 5000)
+//        return BEAN_WHITE; // 3
+//    if (c < 1800)
+//        return BEAN_GREEN; // 2
+//
+//    return BEAN_NONE; // 0
+//}
+
+/**
+ * @brief 根据实测 EMA 融合数据进行物体分类判定 (C-B 差值版)
+ * @return uint8_t 识别到的豆子 ID (0:无, 1:黄豆, 2:绿豆, 3:白芸豆)
+ *
+ * 判定依据 (C-B 差值特征, 三区间天然不重叠):
+ *   绿豆:   C-B 700-1300  + S 40-55  + H 55-82
+ *   黄豆:   C-B 2000-2800 + S 30-35  + H 70-99
+ *   白芸豆: C-B >3500     + S 20-35  + H 110-140
+ *
+ * 决策策略 (C-B 做主分类, H/S 交叉验证):
+ *   C < 300                       -> NONE
+ *   H >= 100  && C-B > 3000       -> WHITE
+ *   C-B <= 1400 && S >= 36        -> GREEN
+ *   C-B >= 1900 && S <= 37        -> YELLOW
+ *   其他                          -> NONE
+ */
 uint8_t App_Rgb_Get_Result(void)
 {
-    uint16_t h = g_app_rgb_data.fused.hue;
-    uint8_t s = g_app_rgb_data.fused.saturation;
-    uint8_t b_pct = g_app_rgb_data.fused.blue_percent;
-    uint16_t c = g_app_rgb_data.clean.clear;
+    uint16_t h  = g_app_rgb_data.fused.hue;
+    uint8_t  s  = g_app_rgb_data.fused.saturation;
+    uint16_t c  = g_app_rgb_data.clean.clear;
+    uint16_t cb = c - g_app_rgb_data.clean.blue;
 
-    // 基础过滤：如果总亮度太低，认为没有放豆子
     if (c < 300)
         return BEAN_NONE;
 
-    // 逻辑 A: 判定白芸豆 (H特征明显)
-    if (h >= 100 && s <= 28)
-        return BEAN_WHITE; // 3
+    if (h >= 100 && cb > 3000)
+        return BEAN_WHITE;
 
-    // 逻辑 B: 区分绿豆与黄豆 (利用 S 和 B% 的梯度差)
-    if (h >= 50 && h <= 85)
-    {
-        if (s > 40 && b_pct <= 22)
-            return BEAN_GREEN; // 2 绿豆
-        if (s <= 40 && b_pct > 22)
-            return BEAN_YELLOW; // 1 黄豆
-    }
+    if (cb <= 1400 && s >= 36)
+        return BEAN_GREEN;
 
-    // 逻辑 C: 冗余补偿 (根据 Clear 亮度做最后兜底)
-    if (c > 5000)
-        return BEAN_WHITE; // 3
-    if (c < 1800)
-        return BEAN_GREEN; // 2
+    if (cb >= 1900 && s <= 37)
+        return BEAN_YELLOW;
 
-    return BEAN_NONE; // 0
+    return BEAN_NONE;
 }
 
 
