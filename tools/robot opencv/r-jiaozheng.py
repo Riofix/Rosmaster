@@ -59,7 +59,7 @@ def mouse_callback(event, x, y, flags, param):
 
 # --- 4. 主程序 ---
 load_config()
-cap = cv2.VideoCapture(1) # 右摄像头
+cap = cv2.VideoCapture(2) # 右摄像头
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
 
@@ -103,7 +103,7 @@ while True:
     cv2.imshow("Realtime_Correction", cv2.vconcat(warped_list))
     cv2.imshow(WIN_NAME, display_frame)
 
-    key = cv2.waitKey(1) & 0xFF
+    key = cv2.waitKey(2) & 0xFF
     if key == ord('s'):
         with open(CONFIG_FILE, 'w') as f:
             json.dump({"rois": rois, "resolution": [W, H]}, f, indent=4)
