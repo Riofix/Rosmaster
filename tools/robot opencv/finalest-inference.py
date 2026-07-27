@@ -14,7 +14,7 @@ cfg_r = load_cfg('tools/robot opencv/right_camera_params.json') #
 ROIS_L, PARAMS_L = cfg_l['rois'], cfg_l['preprocessing_params'] #
 ROIS_R, PARAMS_R = cfg_r['rois'], cfg_r['preprocessing_params'] #
 
-CAM_L_IDX, CAM_R_IDX = 2,1
+CAM_L_IDX, CAM_R_IDX = 1,2
 TW, TH = 300, 120
 STACK_SIZE = 10
 FULL_SEQ_VOTE_SIZE = 10 # 针对最终5位序列的投票深度

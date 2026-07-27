@@ -53,9 +53,9 @@ def generate_launch_description():
             name='tcp_server_node',
             parameters=[{
                 'port': 3456,
-                'ip_left': '10.245.159.251',
-                'ip_mid': '10.245.159.29',
-                'ip_right': '10.245.159.17',
+                'ip_left': '10.245.159.29',
+                'ip_mid': '10.245.159.64',
+                'ip_right': '10.245.159.251',
             }],
             output='screen',
         ),
