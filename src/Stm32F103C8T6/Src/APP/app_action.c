@@ -21,7 +21,7 @@
  * 脉冲参数
  * ================================================================ */
 // #define SWEEP_PULSE 6472    /* 电机1 横扫 18cm */
-//#define SWEEP_PULSE 4800    /* 电机1 横扫 18cm */
+// #define SWEEP_PULSE 4800    /* 电机1 横扫 18cm */
 #define SWEEP_PULSE 3294    /* 电机1 横扫 15cm */
 #define DOWN10_PULSE 160000 /* 电机2 下降 10cm */
 #define DOWN1_PULSE 16000   /* 电机2 下降 1cm */
