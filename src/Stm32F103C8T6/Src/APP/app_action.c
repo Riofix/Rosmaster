@@ -50,9 +50,9 @@ typedef enum
     GRAB_DOWN1_A,   /* 降 1cm (第1次) */
     GRAB_SWEEP_CCW, /* 逆时针横扫 */
     // GRAB_DOWN1_B,   /* 降 1cm (第2次) */
-    // GRAB_SWEEP_CW2, /* 顺时针横扫 (第2组) */
+    GRAB_SWEEP_CW2, /* 顺时针横扫 (第2组) */
     // GRAB_DOWN1_C,    /* 降 1cm (第3次) */
-    GRAB_SWEEP_CCW2,  /* 逆时针横扫 (第2组) */
+    // GRAB_SWEEP_CCW2,  /* 逆时针横扫 (第2组) */
     GRAB_BLDC_OFF, /* 关无刷 */
     GRAB_UP11      /* 升 11cm 回位 */
 } GrabStep_t;
@@ -229,8 +229,8 @@ void App_Action_Grab(void)
     /* 电机1 等待: 横扫 */
     case GRAB_SWEEP_CCW:
     case GRAB_SWEEP_CW:
-        case GRAB_SWEEP_CCW2:
-        // case GRAB_SWEEP_CW2:
+        // case GRAB_SWEEP_CCW2:
+        case GRAB_SWEEP_CW2:
         if (!(g_motors[0].flag & 0x02))
             s_grab_flag_low |= 0x01; /* 见识低位 → 标记"已清零" */
         else if (s_grab_flag_low & 0x01)
@@ -302,17 +302,17 @@ void App_Action_Grab(void)
                 break;
 
                 // 上升 13cm改为上升11，只做一组抓取，若需要多一组，则可以把下面的注释打开
-                case GRAB_SWEEP_CCW2:
-                    /* 电机1 正转(逆时针) 横扫 18cm */
-                    Emm_V5_Pos_Control(1, 0, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
-                    g_motors[0].flag &= ~0x02;
-                    break;
-
-                // case GRAB_SWEEP_CW2:
-                //     /* 电机1 反转(顺时针) 横扫 18cm */
-                //     Emm_V5_Pos_Control(1, 1, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
+                // case GRAB_SWEEP_CCW2:
+                //     /* 电机1 正转(逆时针) 横扫 18cm */
+                //     Emm_V5_Pos_Control(1, 0, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
                 //     g_motors[0].flag &= ~0x02;
                 //     break;
+
+                case GRAB_SWEEP_CW2:
+                    /* 电机1 反转(顺时针) 横扫 18cm */
+                    Emm_V5_Pos_Control(1, 1, VEL_HORIZ, ACC, SWEEP_PULSE, 0, 0);
+                    g_motors[0].flag &= ~0x02;
+                    break;
 
             case GRAB_BLDC_OFF:
                 App_Bldc_Stop();
