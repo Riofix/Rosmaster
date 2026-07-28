@@ -25,7 +25,7 @@ class TwistToControlBridge(Node):
         self.angular_scale = self.declare_parameter('angular_scale', 2000).value
 
         # 限幅
-        self.max_vx = self.declare_parameter('max_vx', 1000).value
+        self.max_vx = self.declare_parameter('max_vx', 1000).value   # 与 PID max_out=1000 对齐
         self.max_vz = self.declare_parameter('max_vz', 3000).value
 
         self.sub = self.create_subscription(Twist, '/cmd_vel', self.twist_cb, 10)
