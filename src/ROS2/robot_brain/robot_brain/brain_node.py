@@ -29,6 +29,7 @@ class BrainNode(Node):
         self.ST_CHASSIS_TO_END    = 10  # 底盘→结束区
         self.ST_DONE              = 11  # 任务完成
         self.ST_RESET             = 12  # 复位: 回起始位 + 编码器清零
+        self.ST_POST_GRAB         = 13  # 合并避障: AVOID_1 + 底盘→drop + AVOID_2
 
         self.state = self.ST_INIT
         self.world = None
@@ -89,6 +90,9 @@ class BrainNode(Node):
         self.target_L = 0                   # 左抓手目标位置
         self.target_M = 0                   # 中抓手目标位置
         self.target_R = 0                   # 右抓手目标位置
+
+        # ======================== 状态 13：合并避障(跳过5~8) ========================
+        self._post_grab_phase = 0          # 0=AVOID_1并发底盘→drop, 1=AVOID_2
 
         # ======================== 状态 9：放豆执行计划 ========================
         self._execute_done = False
@@ -264,6 +268,8 @@ class BrainNode(Node):
             self._handle_move_grab()
         elif self.state == self.ST_GRABBING:
             self._handle_grabbing()
+        elif self.state == self.ST_POST_GRAB:
+            self._handle_post_grab()
         elif self.state == self.ST_HANDS_TO_AVOID_1:
             self._handle_hands_avoid1()
         elif self.state == self.ST_CHASSIS_TO_START:
@@ -551,7 +557,7 @@ class BrainNode(Node):
             f"targets=({self.target_L},{self.target_M},{self.target_R}), "
             f"is_ideal={self.is_ideal}"
         )
-        self._transition_to(self.ST_HANDS_TO_AVOID_1)
+        self._transition_to(self.ST_POST_GRAB)
 
     def _data_fusion(self, grabbed_colors):
         """
@@ -901,13 +907,58 @@ class BrainNode(Node):
         return []   # 兜底：理论上不会到这里
 
     # =================================================================
-    #  状态 5：HANDS_TO_AVOID_1 — 抓手→避障区1
+    #  状态 13：POST_GRAB — 合并避障 (跳过旧状态 5~8)
+    #  Phase0: AVOID_1 三手 + 底盘直通 drop_zone 并发
+    #  Phase1: 底盘经过起始区时触发 AVOID_2 三手, 等到齐 → EXECUTE_TARGET
+    # =================================================================
+
+    def _handle_post_grab(self):
+        if self._post_grab_phase == 0:
+            if not self.has_sent_cmd:
+                self._move_hand_to("handle_left",  5, self.DIR_CW)
+                self._move_hand_to("handle_right", 4, self.DIR_CCW)
+                self._move_hand_to("handle_mid",   1, self.DIR_CCW)
+                self.dispatch_task("chassis", "base", "move_to",
+                                   {"pos": self.POS_DROP_ZONE})
+                self.has_sent_cmd = True
+                self.get_logger().info("[POST_GRAB] Phase0: 3手AVOID_1 + 底盘→drop_zone 并发")
+
+            # 等 1 秒让底盘动起来, 再检测经过起始区
+            if self._arrival_wait < 10:
+                self._arrival_wait += 1
+                return
+
+            enc = self.world.get("chassis", {}).get("motor_encoder", [0, 0, 0, 0])
+            avg = (enc[0] + enc[2]) / 2.0 if len(enc) >= 4 else 0
+            if abs(avg) < 600:  # ±2.5cm 即触发
+                self._post_grab_phase = 1
+                self.has_sent_cmd = False
+                self.get_logger().info(f"[POST_GRAB] 底盘经过起始区 (enc={avg:.0f}), Phase1")
+
+        elif self._post_grab_phase == 1:
+            if not self.has_sent_cmd:
+                self._move_hand_to("handle_left",  5, self.DIR_CW)
+                self._move_hand_to("handle_right", 6, self.DIR_CW)
+                self._move_hand_to("handle_mid",   3, self.DIR_CW)
+                self.has_sent_cmd = True
+                self._start_arrival_wait()
+                self.get_logger().info("[POST_GRAB] Phase1: 3手AVOID_2")
+
+            if self._check_arrival(
+                self._all_hands_arrived()
+                and self.world.get("chassis", {}).get("arrival_done", False)
+            ):
+                self.get_logger().info("[POST_GRAB] 全部到位, → EXECUTE_TARGET")
+                self._transition_to(self.ST_EXECUTE_TARGET)
+
+    # =================================================================
+    #  状态 5：HANDS_TO_AVOID_1 — 抓手→避障区1 (已被 POST_GRAB 取代, 保留备用)
     # =================================================================
 
     def _handle_hands_avoid1(self):
-        """左→8(CCW), 中→1(CCW), 右→4(CCW) — plan_readme 4.7"""
+        """左→5(CW), 中→1(CCW), 右→4(CCW) — plan_readme 4.7"""
         if not self.has_sent_cmd:
-            self._move_hand_to("handle_left",  8, self.DIR_CCW)
+            self._move_hand_to("handle_left",  5, self.DIR_CW)
             self._move_hand_to("handle_right", 4, self.DIR_CCW)
             self._move_hand_to("handle_mid",   1, self.DIR_CCW)
             self.has_sent_cmd = True
@@ -1188,6 +1239,7 @@ class BrainNode(Node):
         self.has_sent_cmd = False
         self._arrival_wait = 0
         self._arrival_stable = 0
+        self._post_grab_phase = 0
 
     def _pulse_to_id(self, pulse):
         """脉冲值 → 最近的 pos_id (1~8)"""
