@@ -33,8 +33,9 @@
  * ================================================================ */
 #define VEL_HORIZ 30 /* 电机1 横扫速度 */
 #define VEL_MOVE 120 /* 电机1 点位移动速度 */
-#define VEL_VERT 800 /* 电机2 垂直速度 */
-#define ACC 100      /* 统一加速度 */
+#define VEL_VERT 1000 /* 电机2 垂直速度 */
+#define ACC 100      /* 电机1 水平加速度 */
+#define ACC_VERT 250 /* 电机2 垂直加速度 */
 
 /* ================================================================
  * Grab 状态机内部枚举 (不暴露给外部)
@@ -191,7 +192,7 @@ void App_Action_Grab(void)
     {
         /* 复位: 电机1/2 回原点 */
         Emm_V5_Pos_Control(1, 0, VEL_MOVE, ACC, origin_pulse_offset, 1, 0);
-        Emm_V5_Pos_Control(2, 0, VEL_VERT, ACC, 0, 1, 0);
+        Emm_V5_Pos_Control(2, 0, VEL_VERT, ACC_VERT, 0, 1, 0);
         g_motors[0].flag &= ~0x02; /* 清到位 */
         g_motors[1].flag &= ~0x02;
         //---- 等待电机1/2 到位 ----
@@ -273,7 +274,7 @@ void App_Action_Grab(void)
             {
             case GRAB_DOWN10:
                 /* 电机2 反转(下降) 10cm */
-                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC, DOWN10_PULSE, 0, 0);
+                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC_VERT, DOWN10_PULSE, 0, 0);
                 g_motors[1].flag &= ~0x02; /* 清到位, 确保清零检测能触发 */
                 break;
 
@@ -291,7 +292,7 @@ void App_Action_Grab(void)
                 // case GRAB_DOWN1_B:
                 // case GRAB_DOWN1_C:
                 /* 电机2 反转(下降) 1cm */
-                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC, DOWN1_PULSE, 0, 0);
+                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC_VERT, DOWN1_PULSE, 0, 0);
                 g_motors[1].flag &= ~0x02;
                 break;
 
@@ -320,7 +321,7 @@ void App_Action_Grab(void)
 
             case GRAB_UP11:
                 /* 电机2 正转(上升) 回到0位置 */
-                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC, 16000, 1, 0);
+                Emm_V5_Pos_Control(2, 1, VEL_VERT, ACC_VERT, 16000, 1, 0);
                 g_motors[1].flag &= ~0x02;
                 break;
 
