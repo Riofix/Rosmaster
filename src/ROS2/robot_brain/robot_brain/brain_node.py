@@ -466,7 +466,7 @@ class BrainNode(Node):
         """
         Phase0(并发): mid→7(CCW) + chassis→grab_zone
         Phase1(底盘到位): left→6(CCW) + right→8(CW)
-        Phase2(全部到位): → GRABBING
+        Phase2(三手全到位+稳定0.5s): → GRABBING
         """
         if self._grab_move_phase == 0:
             if not self.has_sent_cmd:
@@ -495,7 +495,15 @@ class BrainNode(Node):
             left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
             right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
             if self._check_arrival(left_ok and right_ok):
-                self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
+                self.get_logger().info("[MOVE_TO_GRAB] Phase1 完成, 进入 Phase2 全手稳定确认")
+                self._grab_move_phase = 2
+                self.has_sent_cmd = False
+                self._start_arrival_wait()
+
+        elif self._grab_move_phase == 2:
+            # 三手全部到位 + 连续稳定 0.5s 才放行抓取
+            if self._check_arrival(self._all_hands_arrived(), wait_ticks=0, stable_ticks=5):
+                self.get_logger().info("[MOVE_TO_GRAB] Phase2 三手稳定到位, 进入 GRABBING")
                 self._transition_to(self.ST_GRABBING)
 
     # =================================================================
@@ -1085,9 +1093,9 @@ class BrainNode(Node):
             self._drop_step = 1
             self._start_arrival_wait()
 
-        # ──── step 1: 等待 X 轴到位 (两阶段: 先等 reset 传播, 再等信号稳定) ────
+        # ──── step 1: 等待三手 X 轴到位 (连续稳定 0.5s) ────
         elif self._drop_step == 1:
-            if self._check_arrival(self._hands_arrived(hands), wait_ticks=5, stable_ticks=10):
+            if self._check_arrival(self._hands_arrived(hands), wait_ticks=0, stable_ticks=5):
                 if droppers:
                     self.get_logger().info(
                         f"[DROP] 批次{self._drop_batch} X轴到位，放豆 "
@@ -1103,31 +1111,28 @@ class BrainNode(Node):
                     self._drop_step = 0
 
         # ──── step 2: 开→关→开 三段式放豆 ────
-        # 10 ticks = 1s  机械稳定
-        # 25 ticks = 1.5s 后闭合
-        # 35 ticks = 1s   后再张开
-        # 50 ticks = 1.5s 后完成
+        # 到位后立即张开, 1.5s 后闭合, 0.5s 后再张开, 1s 后完成
         elif self._drop_step == 2:
             self._drop_step_timer += 1
-            if self._drop_step_timer == 10:        # 1s 机械稳定 → 张开
+            if self._drop_step_timer == 1:          # 到位后立即张开
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 0})
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 舵机张开 0°"
                 )
-            elif self._drop_step_timer == 25:       # 等 1.5s → 闭合
+            elif self._drop_step_timer == 15:       # 开 1.5s → 闭合
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 90})
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 舵机闭合 90°"
                 )
-            elif self._drop_step_timer == 35:       # 等 1s → 再张开
+            elif self._drop_step_timer == 20:       # 闭 0.5s → 再张开
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 0})
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 舵机再张开 0°"
                 )
-            elif self._drop_step_timer >= 50:       # 等 1.5s → 完成
+            elif self._drop_step_timer >= 30:       # 开 1s → 完成
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 完成"
                 )
