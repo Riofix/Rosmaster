@@ -120,8 +120,8 @@ class ControlNode(Node):
         }
 
         # --- PID 实例初始化 (针对底盘) ---
-        # 调优后: 提速+消超调+消振荡  kp↑ ki↓ kd↑ max_out↑ max_i↓ max_accel↑
-        self.chassis_pid = PositionPID(kp=0.38, ki=0.03, kd=0.25, max_out=1000, max_i=100, max_accel=1800.0)
+        # 上位机实测调优: kp=0.75 ki=0.01 kd=0.3 max_accel=1000
+        self.chassis_pid = PositionPID(kp=0.75, ki=0.01, kd=0.3, max_out=1000, max_i=200, max_accel=1000.0)
         
         # 任务状态管理
         self.current_chassis_task_id = 0
