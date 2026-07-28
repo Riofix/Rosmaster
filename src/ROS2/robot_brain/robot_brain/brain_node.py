@@ -1036,7 +1036,7 @@ class BrainNode(Node):
 
         # ──── step 1: 等待 X 轴到位 (两阶段: 先等 reset 传播, 再等信号稳定) ────
         elif self._drop_step == 1:
-            if self._check_arrival(self._hands_arrived(hands)):
+            if self._check_arrival(self._hands_arrived(hands), wait_ticks=5, stable_ticks=10):
                 if droppers:
                     self.get_logger().info(
                         f"[DROP] 批次{self._drop_batch} X轴到位，放豆 "

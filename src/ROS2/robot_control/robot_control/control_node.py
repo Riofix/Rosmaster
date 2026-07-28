@@ -120,8 +120,8 @@ class ControlNode(Node):
         }
 
         # --- PID 实例初始化 (针对底盘) ---
-        # 上位机实测调优: kp=0.75 ki=0.01 kd=0.3 max_accel=1000
-        self.chassis_pid = PositionPID(kp=0.75, ki=0.01, kd=0.3, max_out=1000, max_i=200, max_accel=1000.0)
+        # 底盘实测调优 (ROS2 通信延迟环境)
+        self.chassis_pid = PositionPID(kp=0.28, ki=0.04, kd=0.10, max_out=1000, max_i=200, max_accel=1000.0)
         
         # 任务状态管理
         self.current_chassis_task_id = 0
