@@ -920,7 +920,7 @@ class BrainNode(Node):
     # =================================================================
     #  状态 13：POST_GRAB — 合并避障 (跳过旧状态 5~8)
     #  Phase0: AVOID_1 三手 + 底盘直通 drop_zone 并发
-    #  Phase1: 底盘经过起始区时触发 AVOID_2 三手, 等到齐 → EXECUTE_TARGET
+    #  Phase1: 底盘经过避障点A时触发 AVOID_2 三手, 等到齐 → EXECUTE_TARGET
     # =================================================================
 
     def _handle_post_grab(self):
@@ -934,17 +934,17 @@ class BrainNode(Node):
                 self.has_sent_cmd = True
                 self.get_logger().info("[POST_GRAB] Phase0: 3手AVOID_1 + 底盘→drop_zone 并发")
 
-            # 等 1 秒让底盘动起来, 再检测经过起始区
+            # 等 1 秒让底盘动起来, 再检测经过避障点A
             if self._arrival_wait < 10:
                 self._arrival_wait += 1
                 return
 
             enc = self.world.get("chassis", {}).get("motor_encoder", [0, 0, 0, 0])
             avg = (enc[0] + enc[2]) / 2.0 if len(enc) >= 4 else 0
-            if abs(avg) < 600:  # ±2.5cm 即触发
+            if abs(avg - self.POS_OBSTACLE_A) < 600:  # 经过避障点A (±2.5cm)
                 self._post_grab_phase = 1
                 self.has_sent_cmd = False
-                self.get_logger().info(f"[POST_GRAB] 底盘经过起始区 (enc={avg:.0f}), Phase1")
+                self.get_logger().info(f"[POST_GRAB] 底盘经过避障点A (enc={avg:.0f}), Phase1")
 
         elif self._post_grab_phase == 1:
             if not self.has_sent_cmd:
@@ -1096,9 +1096,9 @@ class BrainNode(Node):
             self._drop_step = 1
             self._start_arrival_wait()
 
-        # ──── step 1: 等待三手 X 轴到位 (连续稳定 0.5s) ────
+        # ──── step 1: 等待三手 X 轴到位 (先等 reset 传播, 再等信号稳定) ────
         elif self._drop_step == 1:
-            if self._check_arrival(self._hands_arrived(hands), wait_ticks=0, stable_ticks=5):
+            if self._check_arrival(self._hands_arrived(hands), wait_ticks=5, stable_ticks=5):
                 if droppers:
                     self.get_logger().info(
                         f"[DROP] 批次{self._drop_batch} X轴到位，放豆 "
