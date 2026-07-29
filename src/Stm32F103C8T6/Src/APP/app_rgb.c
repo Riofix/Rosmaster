@@ -269,7 +269,6 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  */
 
 // uint8_t App_Rgb_Get_Result(void)
-<<<<<<< HEAD
 //{
 //     uint16_t h = g_app_rgb_data.fused.hue;
 //     uint8_t s = g_app_rgb_data.fused.saturation;
@@ -300,7 +299,6 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
 //         return BEAN_GREEN; // 2
 //
 //     return BEAN_NONE; // 0
-=======
 // {
 //    uint16_t h = g_app_rgb_data.fused.hue;
 //    uint8_t s = g_app_rgb_data.fused.saturation;
@@ -331,7 +329,6 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
 //        return BEAN_GREEN; // 2
 
 //    return BEAN_NONE; // 0
->>>>>>> e1a199b3d4b4359895861ac6efee3478a9a7bc85
 // }
 
 /**
@@ -403,40 +400,6 @@ uint8_t App_Rgb_Get_Result(void)
     uint16_t g = g_app_rgb_data.clean.green;
     uint16_t b = g_app_rgb_data.clean.blue;
 
-<<<<<<< HEAD
-    int16_t cb = (int16_t)(c - b);           /* C-B, 绿/黄主分类器 */
-    int16_t cg = (int16_t)(c - g);           /* C-G, 白豆主特征(C-G≈C-B) */
-    int16_t gb = (int16_t)(g - b);           /* G-B */
-    int16_t rg = (int16_t)(r - g);           /* R-G */
-    int16_t rb = (int16_t)(r - b);           /* R-B */
-    int16_t cg_cb_diff = (int16_t)(cg - cb); /* |C-G - C-B|, 白豆<500 */
-    if (cg_cb_diff < 0)
-        cg_cb_diff = -cg_cb_diff;
-
-    /* ====== 第1层: 白豆识别 ======
-     * 主判: C-G与C-B相近(差值<500), 白豆G,B通道接近
-     * 辅判: C > 5500 (白豆普遍高亮度) */
-    // if (h >= 100 && cb > 3000)
-    //     return BEAN_WHITE;       // 3
-    if (h >= 110 && c > 5500)
-        return BEAN_WHITE; // 3
-
-    /* ====== 第2层: 绿豆 (C-B 600-1500) ====== */
-    // if (cb <= 1500)
-    //     return BEAN_GREEN;       // 2
-    if (cb >= 600 && cb <= 1500)
-        return BEAN_GREEN; // 2
-
-    /* ====== 第3层: 黄豆 (C-B高) ====== */
-    if (cb >= 1900)
-        return BEAN_YELLOW; // 1
-
-    /* ====== 第4层: 间隙区兜底 (1300-1900) ====== */
-    // if (rb > 500)
-    //     return BEAN_YELLOW;      // 1
-    // return BEAN_GREEN;           // 2
-    return BEAN_NONE; // 0
-=======
     int16_t gb = (int16_t)(g - b);  /* G-B */
     int16_t rb = (int16_t)(r - b);  /* R-B */
     int16_t rg = (int16_t)(r - g);  /* R-G */
@@ -476,7 +439,6 @@ uint8_t App_Rgb_Get_Result(void)
 
     /* ====== 间隙区 ====== */
     return BEAN_NONE;            // 0
->>>>>>> e1a199b3d4b4359895861ac6efee3478a9a7bc85
 }
 
 /**

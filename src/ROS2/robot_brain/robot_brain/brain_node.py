@@ -93,6 +93,7 @@ class BrainNode(Node):
 
         # ======================== 状态 13：合并避障(跳过5~8) ========================
         self._post_grab_phase = 0          # 0=AVOID_1并发底盘→drop, 1=AVOID_2
+        self._hand_pos = {"handle_left": 1, "handle_mid": 2, "handle_right": 3}
 
         # ======================== 状态 9：放豆执行计划 ========================
         self._execute_done = False
@@ -1257,6 +1258,11 @@ class BrainNode(Node):
 
     def _move_hand_to(self, hand, pos_id, direction):
         """track_move(0x7A): 环轨点位移动, pos_id 1~8"""
+        # 已在目标位且 track_arrived 有效 → 跳过, 避免绕整圈
+        if (self._hand_pos.get(hand) == pos_id and
+            self.world.get("handles", {}).get(hand, {}).get("track_arrived", False)):
+            return
+        self._hand_pos[hand] = pos_id
         clockwise = 1 if direction == self.DIR_CW else 0
         self.dispatch_task(hand, "stepper_x", "track_move",
                            {"pos_id": pos_id, "clockwise": clockwise})
