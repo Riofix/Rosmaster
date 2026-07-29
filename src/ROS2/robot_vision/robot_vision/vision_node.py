@@ -67,7 +67,8 @@ class VisionNode(Node):
         self.params_r = cfg['right_camera']['preprocessing']
 
         # ---------- 状态 ----------
-        self.started = False              # 等待 brain 启动信号
+        self.declare_parameter('auto_start', True)  # 独立测试时自动启动
+        self.started = self.get_parameter('auto_start').value
 
         self.buf_l = deque(maxlen=self.stack_size)
         self.buf_r = deque(maxlen=self.stack_size)
