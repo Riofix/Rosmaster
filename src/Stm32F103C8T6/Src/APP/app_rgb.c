@@ -268,21 +268,21 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  * - 绿豆:   Hue(60-75), Saturation(40-50), BluePct(20)
  */
 
-//uint8_t App_Rgb_Get_Result(void)
-//{
+// uint8_t App_Rgb_Get_Result(void)
+// {
 //    uint16_t h = g_app_rgb_data.fused.hue;
 //    uint8_t s = g_app_rgb_data.fused.saturation;
 //    uint8_t b_pct = g_app_rgb_data.fused.blue_percent;
 //    uint16_t c = g_app_rgb_data.clean.clear;
-//
+
 //    // 基础过滤：如果总亮度太低，认为没有放豆子
 //    if (c < 300)
 //        return BEAN_NONE;
-//
+
 //    // 逻辑 A: 判定白芸豆 (H特征明显)
 //    if (h >= 100 && s <= 28)
 //        return BEAN_WHITE; // 3
-//
+
 //    // 逻辑 B: 区分绿豆与黄豆 (利用 S 和 B% 的梯度差)
 //    if (h >= 50 && h <= 85)
 //    {
@@ -291,15 +291,15 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
 //        if (s <= 40 && b_pct > 22)
 //            return BEAN_YELLOW; // 1 黄豆
 //    }
-//
+
 //    // 逻辑 C: 冗余补偿 (根据 Clear 亮度做最后兜底)
 //    if (c > 5000)
 //        return BEAN_WHITE; // 3
 //    if (c < 1800)
 //        return BEAN_GREEN; // 2
-//
+
 //    return BEAN_NONE; // 0
-//}
+// }
 
 /**
  * @brief 根据实测 EMA 融合数据进行物体分类判定 (C-B 差值版)
@@ -340,28 +340,28 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
 //}
 
 /**
- * @brief 根据实测 RGBC 原始通道差值进行豆子分类判定 (纯差值版)
+ * @brief 根据实测 RGBC 原始通道差值进行豆子分类判定
  * @return uint8_t 识别到的豆子 ID (0:无, 1:黄豆, 2:绿豆, 3:白芸豆)
  *
- * ── 实测数据范围 ──
+ * ── 实测数据范围 (2026-07-29 最新, 4组: 环境光/绿豆/黄豆/白豆) ──
+ *   环境光:
+ *     C: 468 (恒定, 极低)
  *   绿豆:
- *     C-B: 700-1300,   G-B: 50-400,    R-G: -200~100,   R-B: 0-250
+ *     C: 773-2952,  R-G: -510~-97,  G-B: 157-743,   R-B: -80~253
  *   黄豆:
- *     C-B: 2000-2800,  G-B: 300-800,   R-G: -400~200,   R-B: 100-2600
+ *     C: 682-8363,  R-G: -1462~-47, G-B: 105-1615,  R-B: -83~524
  *   白豆:
- *     G-B: 1000-1600,  R-G: -1600~-100, R-B: -550~300,
- *     C-G与C-B差值<500 (G,B接近)
+ *     C: 2943-10240,R-G: -3184~-424,G-B: 369-1845,  R-B: -1538~58
  *
- * ── 决策策略 (纯通道差值, 不依赖绝对C值和HSV) ──
- *   第1层 白豆: G-B > 900  或  R-G < -500    → WHITE
- *        (白豆 G-B 1000-1600, 绿豆≤400, 黄豆≤800, 900是安全分界)
- *        (白豆 R-G ≤-100, 绿豆≥-200, 黄豆≥-400, -500是安全分界)
- *   第2层 绿豆: C-B ≤ 1500                    → GREEN
- *        (绿豆 700-1300, 黄豆下沿2000, 1500留500余量)
- *   第3层 黄豆: C-B ≥ 1900                    → YELLOW
- *        (黄豆 2000-2800, 绿豆上沿1300, 1900留600余量)
- *   第4层 间隙: R-B > 500 → YELLOW, 否则 → GREEN
- *        (C-B在1300-2000间隙极少出现, R-B兜底: 黄豆可达2600 vs 绿豆≤250)
+ * ── 决策策略 (每种豆有独立判定条件) ──
+ *   环境光: C < 600 (各豆下界 ≥ 682, 安全)
+ *   白豆:   R-B ≤ -100  (白豆独有, 绿豆≥-80, 黄豆≥-83)
+ *           R-G ≤ -1800 (白豆兜底, 黄豆≥-1462, 绿豆≥-510)
+ *   黄豆:   R-G ≤ -600  (黄豆可到-1462, 绿豆最负-510)
+ *           G-B ≥ 750   (黄豆可到1615, 绿豆最高743)
+ *           R-B > 300   (黄豆可到524, 绿豆最高253)
+ *   绿豆:   R-G ≥ -550  且  G-B ≤ 750  (绿豆专属区间)
+ *   间隙:   其余 → NONE
  */
 uint8_t App_Rgb_Get_Result(void)
 {
@@ -369,39 +369,46 @@ uint8_t App_Rgb_Get_Result(void)
     uint16_t r = g_app_rgb_data.clean.red;
     uint16_t g = g_app_rgb_data.clean.green;
     uint16_t b = g_app_rgb_data.clean.blue;
-    uint16_t h = g_app_rgb_data.fused.hue;
 
-    int16_t cb = (int16_t)(c - b);  /* C-B, 绿/黄主分类器 */
-    int16_t cg = (int16_t)(c - g);  /* C-G, 白豆主特征(C-G≈C-B) */
     int16_t gb = (int16_t)(g - b);  /* G-B */
-    int16_t rg = (int16_t)(r - g);  /* R-G */
     int16_t rb = (int16_t)(r - b);  /* R-B */
-    int16_t cg_cb_diff = (int16_t)(cg - cb);  /* |C-G - C-B|, 白豆<500 */
-    if (cg_cb_diff < 0) cg_cb_diff = -cg_cb_diff;
+    int16_t rg = (int16_t)(r - g);  /* R-G */
 
-    /* ====== 第1层: 白豆识别 ======
-     * 主判: C-G与C-B相近(差值<500), 白豆G,B通道接近
-     * 辅判: C > 5500 (白豆普遍高亮度) */
-    //if (h >= 100 && cb > 3000)
-    //    return BEAN_WHITE;       // 3
-    if (h >= 110 && c>5500)
-        return BEAN_WHITE;       // 3
+    /* ====== 环境光: C 极低 ====== */
+    if (c < 600)
+        return BEAN_NONE;        // 0
 
-    /* ====== 第2层: 绿豆 (C-B 600-1500) ====== */
-    //if (cb <= 1500)
-    //    return BEAN_GREEN;       // 2
-    if (cb >= 600 && cb <= 1500)
-        return BEAN_GREEN;       // 2
+    /* ====== 白豆 (西配楼参数) ====== */
+    if (rb <= -100)
+       return BEAN_WHITE;       // 3
+    /* 兜底: R-G 极负 (白豆可到-3184) */
+    if (rg <= -1800)
+       return BEAN_WHITE;       // 3
 
-    /* ====== 第3层: 黄豆 (C-B高) ====== */
-    if (cb >= 1900)
+    /* ====== 白豆 (比赛参数) ======
+     *   R-B ≤ -100  : 白豆独有负R-B区间 (新旧白豆均适用)
+     *   R-G > 0     : 新白豆R>G独有 (绿豆≤-97, 黄豆≤-47)
+     *   G-B < 0     : 新白豆B>G独有 (绿豆≥157, 黄豆≥105)
+    //  *   兜底 R-G ≤ -1800 : 极负R-G (白豆可到-3184) */
+    // if (rb <= -100 || rg > 0 || gb < 0)
+    //     return BEAN_WHITE;       // 3
+    // if (rg <= -1800)
+    //     return BEAN_WHITE;       // 3
+
+    /* ====== 黄豆: 三条独立特征 ====== */
+    if (rg <= -600)              /* R-G 极度负偏, 绿豆最负-510 */
+        return BEAN_YELLOW;      // 1
+    if (gb >= 750)               /* G-B 高值, 绿豆最高743 */
+        return BEAN_YELLOW;      // 1
+    if (rb > 300)                /* R-B 高值, 绿豆最高253 */
         return BEAN_YELLOW;      // 1
 
-    /* ====== 第4层: 间隙区兜底 (1300-1900) ====== */
-    //if (rb > 500)
-    //    return BEAN_YELLOW;      // 1
-    //return BEAN_GREEN;           // 2
-    return BEAN_NONE;           // 0
+    /* ====== 绿豆: R-G不极负 + G-B不过高 ====== */
+    if (rg >= -550 && gb <= 750)
+        return BEAN_GREEN;       // 2
+
+    /* ====== 间隙区 ====== */
+    return BEAN_NONE;            // 0
 }
 
 
