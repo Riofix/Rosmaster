@@ -446,7 +446,7 @@ class BrainNode(Node):
             return
 
         seq = self.world.get("vision", {}).get("sequence", [])
-        if seq and len(seq) == 5:
+        if seq and len(seq) == 5 and all(int(x) in (1, 2, 3, 4, 5) for x in seq):
             self.target_seq = [int(x) for x in seq]
             self.get_logger().info(f"[WAIT_VISION] 视觉序列: {seq} → MOVE_TO_GRAB_ZONE")
             self._transition_to(self.ST_MOVE_TO_GRAB_ZONE)
