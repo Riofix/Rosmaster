@@ -67,6 +67,8 @@ class VisionNode(Node):
         self.params_r = cfg['right_camera']['preprocessing']
 
         # ---------- 状态 ----------
+        self.started = False              # 等待 brain 启动信号
+
         self.buf_l = deque(maxlen=self.stack_size)
         self.buf_r = deque(maxlen=self.stack_size)
         self.global_sequence_history = deque(maxlen=self.full_seq_vote_size)
@@ -94,6 +96,7 @@ class VisionNode(Node):
 
         # ---------- ROS ----------
         self.pub = self.create_publisher(String, '/vision_detections', 10)
+        self.create_subscription(String, '/vision_control', self.control_cb, 10)
         self.create_timer(0.03, self.vision_engine)
         self.declare_parameter('broadcast_enabled', True)
         if self.get_parameter('broadcast_enabled').value:
@@ -122,6 +125,8 @@ class VisionNode(Node):
 
     # ================= 主循环 =================
     def vision_engine(self):
+        if not self.started:
+            return
         if self.is_published:
             return
 
@@ -281,6 +286,23 @@ class VisionNode(Node):
                         best_s,best_l=s,l
             return best_l
         return "N/A"
+
+    def control_cb(self, msg):
+        """接收 brain 的控制指令: {"cmd": "start"} 启动识别"""
+        try:
+            data = json.loads(msg.data)
+            if data.get("cmd") == "start":
+                self.started = True
+                self.is_published = False
+                self.retry_count = 0
+                self.final_result_msg = None
+                self.buf_l.clear()
+                self.buf_r.clear()
+                self.global_sequence_history.clear()
+                self.start_time = time.time()
+                self.get_logger().info("[CONTROL] 收到启动指令, 开始识别")
+        except Exception as e:
+            self.get_logger().error(f"ControlCB parse error: {e}")
 
     def publish_result(self, seq, mode):
         msg = String()

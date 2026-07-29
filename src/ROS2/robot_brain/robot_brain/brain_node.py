@@ -72,7 +72,7 @@ class BrainNode(Node):
         }
 
         # ======================== 状态 0：初始化 (plan_readme 4.2) ========================
-        self.init_step = 0              # 步骤 0~10
+        self.init_step = 0              # 步骤 0~9
         self.init_step_cmd_sent = False
         self._init_stall_state = {}     # {hand: 0=等堵转, 1=停, 2=清零, 3=done}
 
@@ -122,6 +122,7 @@ class BrainNode(Node):
         self.create_subscription(String, '/voice_cmd', self.voice_cmd_cb, 10)
         self.brain_pub = self.create_publisher(String, '/brain_cmd', 10)
         self.voice_pub = self.create_publisher(String, '/voice_broadcast', 10)
+        self.vision_ctrl_pub = self.create_publisher(String, '/vision_control', 10)
 
         self.create_timer(0.1, self.state_machine_loop)
         self.get_logger().info("Brain Node initialized. Entering INIT state.")
@@ -295,7 +296,7 @@ class BrainNode(Node):
             )
 
     # =================================================================
-    #  状态 0：INIT — 初始化 (plan_readme 4.2, 步骤 0~10)
+    #  状态 0：INIT — 初始化 (plan_readme 4.2, 步骤 0~9)
     # =================================================================
 
     def _handle_init(self):
@@ -308,7 +309,7 @@ class BrainNode(Node):
             hw = self.world.get("handles", {})
             h_ok = all(bool(hw.get(h, {})) for h in handles)
             if chassis_ok and h_ok:
-                self.get_logger().info("[INIT 0/10] 设备全部在线")
+                self.get_logger().info("[INIT 0/9] 设备全部在线")
                 self.init_step = 0.5
                 self.init_step_cmd_sent = False
             else:
@@ -327,7 +328,7 @@ class BrainNode(Node):
                     self.dispatch_task(h, "stream", "step_enable", {"enable": 1})
                     self.dispatch_task(h, "stream", "pwm_enable", {"enable": 1})
                 self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 0.5/10] 自动上报已开启")
+                self.get_logger().info("[INIT 0.5/9] 自动上报已开启")
             self.init_step = 0.6
             self.init_step_cmd_sent = False
 
@@ -337,7 +338,7 @@ class BrainNode(Node):
                 for h in handles:
                     self.dispatch_task(h, "stream", "oled_mode", {"mode": 9})
                 self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 0.6/10] OLED → 智能模式")
+                self.get_logger().info("[INIT 0.6/9] OLED → 智能模式")
             self.init_step = 1
             self.init_step_cmd_sent = False
 
@@ -352,7 +353,7 @@ class BrainNode(Node):
                     self.dispatch_task(h, "stepper_x", "set_origin",
                                        {"pos_id": pos_id})
                     self.init_step_cmd_sent = True
-                    self.get_logger().info(f"[INIT {self.init_step}/10] {h} 校准原点 pos={pos_id}")
+                    self.get_logger().info(f"[INIT {self.init_step}/9] {h} 校准原点 pos={pos_id}")
                 # set_origin 是即时指令, 等下个周期推进
                 self.init_step = self.init_step + 1
                 self.init_step_cmd_sent = False
@@ -366,7 +367,7 @@ class BrainNode(Node):
                                        {"dir": 0, "speed": 500, "acc": 100})
                 self._init_stall_state = {h: 0 for h in handles}
                 self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 4/10] 电机2上升, 各抓手独立检测...")
+                self.get_logger().info("[INIT 4/9] 电机2上升, 各抓手独立检测...")
 
             for h in handles:
                 state = self._init_stall_state.get(h, 0)
@@ -382,30 +383,30 @@ class BrainNode(Node):
                     if flag & 0x08:
                         self.dispatch_task(h, "stepper_z", "stop", {})
                         self._init_stall_state[h] = 1
-                        self.get_logger().info(f"[INIT 4/10] {h} 堵转保护触发 → 停止")
+                        self.get_logger().info(f"[INIT 4/9] {h} 堵转保护触发 → 停止")
 
                 elif state == 1:
                     self.dispatch_task(h, "stepper_z", "reset_encoder", {})
                     self._init_stall_state[h] = 2
-                    self.get_logger().info(f"[INIT 4/10] {h} 编码器清零")
+                    self.get_logger().info(f"[INIT 4/9] {h} 编码器清零")
 
                 elif state == 2:
                     self.dispatch_task(h, "stepper_z", "reset_clog", {})
                     self._init_stall_state[h] = 3
-                    self.get_logger().info(f"[INIT 4/10] {h} 发0x6B解保护")
+                    self.get_logger().info(f"[INIT 4/9] {h} 发0x6B解保护")
 
                 elif state == 3:
                     # 确认堵转保护已解除 (flag bit3 清零)
                     if not (flag & 0x08):
                         self._init_stall_state[h] = 4
-                        self.get_logger().info(f"[INIT 4/10] {h} 堵转保护已解除, 完成")
+                        self.get_logger().info(f"[INIT 4/9] {h} 堵转保护已解除, 完成")
                     else:
                         self.dispatch_task(h, "stepper_z", "reset_clog", {})
-                        self.get_logger().info(f"[INIT 4/10] {h} 堵转保护未解除, 重发0x6B")
+                        self.get_logger().info(f"[INIT 4/9] {h} 堵转保护未解除, 重发0x6B")
 
             # 全部完成 → 步骤 8
             if all(s >= 4 for s in self._init_stall_state.values()):
-                self.get_logger().info("[INIT 4/10] 三抓手堵转回零全部完成")
+                self.get_logger().info("[INIT 4/9] 三抓手堵转回零全部完成")
                 self.init_step = 8
                 self.init_step_cmd_sent = False
 
@@ -415,48 +416,50 @@ class BrainNode(Node):
                 for h in handles:
                     self.dispatch_task(h, "servo", "move_to", {"angle": 90})
                 self.init_step_cmd_sent = True
-                self.get_logger().info("[INIT 8/10] 舵机闭合 90°")
+                self.get_logger().info("[INIT 8/9] 舵机闭合 90°")
             self.init_step = 9
             self.init_step_cmd_sent = False
 
-        # ── 步骤 9: 获取视觉序列 ──
+        # ── 步骤 9: 完成 → WAIT_START_CMD ──
         elif self.init_step == 9:
-            seq = self.world.get("vision", {}).get("sequence", [])
-            if seq and len(seq) == 5:
-                self.target_seq = [int(x) for x in seq]
-                self.get_logger().info(f"[INIT 9/10] 视觉序列: {seq}")
-                self.init_step = 10
-                self.init_step_cmd_sent = False
-
-        # ── 步骤 10: 完成 → WAIT_START_CMD ──
-        elif self.init_step == 10:
-            self.get_logger().info("[INIT 10/10] 初始化完成 → WAIT_START_CMD")
+            self.get_logger().info("[INIT 9/9] 初始化完成 → WAIT_START_CMD")
             # 触发语音播报: "好的，已初始化完成"
             self.voice_pub.publish(String(data=json.dumps({"cmd_id": 21, "label": "地瓜初始化"})))
             self._transition_to(self.ST_WAIT_START_CMD)
 
     # =================================================================
-    #  状态 1：WAIT_VISION — 等待视觉识别结果
+    #  状态 1：WAIT_VISION — 启动视觉 + 等待识别结果
     # =================================================================
 
     def _handle_wait_vision(self):
-        """检查视觉节点是否存活，瞬间通过"""
-        if "vision" in self.world and self.world["vision"]:
-            self.get_logger().info("[WAIT_VISION] 视觉节点在线，进入 WAIT_START_CMD")
-            self._transition_to(self.ST_WAIT_START_CMD)
-        else:
-            # 异常仅记录，不阻塞，不处理
-            self.get_logger().warn("[WAIT_VISION] vision 字段不存在")
+        """Phase0: 发 start → Phase1: 等视觉序列结果 → MOVE_TO_GRAB_ZONE"""
+        # ── Phase 0: 发送启动指令给视觉节点 ──
+        if not self.has_sent_cmd:
+            self.vision_ctrl_pub.publish(String(data=json.dumps({"cmd": "start"})))
+            self.has_sent_cmd = True
+            self._vision_wait_ticks = 0
+            self.get_logger().info("[WAIT_VISION] Phase0: 视觉启动指令已发送")
+
+        # ── Phase 1: 等待视觉结果 ──
+        self._vision_wait_ticks += 1
+        if self._vision_wait_ticks < 5:  # 至少等 0.5s 让视觉开始处理
+            return
+
+        seq = self.world.get("vision", {}).get("sequence", [])
+        if seq and len(seq) == 5:
+            self.target_seq = [int(x) for x in seq]
+            self.get_logger().info(f"[WAIT_VISION] 视觉序列: {seq} → MOVE_TO_GRAB_ZONE")
+            self._transition_to(self.ST_MOVE_TO_GRAB_ZONE)
 
     # =================================================================
     #  状态 2：WAIT_START_CMD — 等待启动指令
     # =================================================================
 
     def _handle_wait_start(self):
-        """等待外部 /task_control 下发 {"cmd":"start"}"""
+        """等待外部 /task_control 下发 {"cmd":"start"} → 启动视觉"""
         if self.start_cmd_received:
-            self.get_logger().info("[WAIT_START_CMD] 启动指令已收到，进入 MOVE_TO_GRAB_ZONE")
-            self._transition_to(self.ST_MOVE_TO_GRAB_ZONE)
+            self.get_logger().info("[WAIT_START_CMD] 启动指令已收到，进入 WAIT_VISION")
+            self._transition_to(self.ST_WAIT_VISION)
 
     # =================================================================
     #  状态 3：MOVE_TO_GRAB_ZONE — 底盘→抓豆区 + 抓手预定位
