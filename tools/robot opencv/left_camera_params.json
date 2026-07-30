@@ -43,28 +43,28 @@
         ],
         [
             [
-                847,
+                824,
+                408
+            ],
+            [
+                826,
+                452
+            ],
+            [
+                896,
+                457
+            ],
+            [
+                896,
                 410
-            ],
-            [
-                848,
-                454
-            ],
-            [
-                916,
-                460
-            ],
-            [
-                915,
-                412
             ]
         ]
     ],
     "preprocessing_params": {
         "CLAHE": 1,
         "Median": 1,
-        "Threshold": 106,
+        "Threshold": 127,
         "Morph_Size": 2,
-        "Center_Dist": 67
+        "Center_Dist": 80
     }
 }

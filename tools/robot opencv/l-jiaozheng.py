@@ -51,7 +51,7 @@ def mouse_callback(event, x, y, flags, param):
 # --- 主程序 ---
 load_config()
 
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(1)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, W)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, H)
 
