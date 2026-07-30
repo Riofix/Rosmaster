@@ -8,6 +8,7 @@
 #include "bsp_mpu6050.h"
 #include "Emm_V5.h"
 #include "app_action.h"
+#include "bsp_systick.h"
 #include "oled.h"
 #include <stdio.h>
 #include <string.h>
@@ -54,11 +55,12 @@ void App_Tick(void)
     }
 
     // ---- 2. 电机状态轮询 (2 tick = 4ms/次, 每电机 8ms/次 = 125Hz) ----
-    if (tick_count % 10 == 0)
-    {
-        App_Motor_RequestState(1);
-        App_Motor_RequestState(2);
-    }
+		if (tick_count % 10 == 0)
+		{
+				static uint8_t poll_motor_id = 1;
+				App_Motor_RequestState(poll_motor_id);
+				poll_motor_id = (poll_motor_id == 1) ? 2 : 1;
+		}
 
     // ---- 3.自动上报 (频率控制, 避免 USART2 阻塞) ----
     if (g_app_context.mpu_stream == 1 && tick_count % 50 == 0)

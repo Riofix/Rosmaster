@@ -727,8 +727,8 @@ class BrainNode(Node):
         返回 drop_plan: [批次0: {hand: (pulse_target, direction, drop)}]
         理想情况只有一批，三个手各一条指令，全部 drop=True。
         """
-        # AVOID_2 终点 = 状态9起点
-        current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
+        # AVOID_2 终点 = 状态9起点, 使用上位机维护的位置表
+        current = dict(self._hand_pos)
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
@@ -835,7 +835,7 @@ class BrainNode(Node):
         4. 第三手算最优方向+站数 → 全员同向同站数伴飞
         """
         hands = ["handle_left", "handle_mid", "handle_right"]
-        current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
+        current = dict(self._hand_pos)
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
@@ -1305,7 +1305,10 @@ class BrainNode(Node):
         return mapping[min(mapping, key=lambda p: abs(p - pulse))]
 
     def _move_hand_to(self, hand, pos_id, direction):
-        """track_move(0x7A): 环轨点位移动, pos_id 1~8, 始终下发不跳过"""
+        """track_move(0x7A): 环轨点位移动, pos_id 1~8, 已在目标位则跳过"""
+        if self._hand_pos.get(hand) == pos_id:
+            self.get_logger().info(f"[SKIP] {hand} 已在 pos={pos_id}, 不下发")
+            return
         self._hand_pos[hand] = pos_id
         clockwise = 1 if direction == self.DIR_CW else 0
         self.dispatch_task(hand, "stepper_x", "track_move",
