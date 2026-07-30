@@ -54,7 +54,9 @@
 #define CMD_TX_STREAM_MPU 0x5A   // MPU 自动上报
 #define CMD_TX_STREAM_STEP 0x5B  // 步进电机自动上报
 #define CMD_TX_STREAM_STATE 0x5C // 无刷/舵机状态自动上报
-#define CMD_TX_STREAM_COLOR 0x5D // 颜色传感器自动上报
+#define CMD_TX_STREAM_COLOR 0x5D     // 颜色传感器识别结果自动上报
+#define CMD_TX_STREAM_COLOR_RAW 0x5E // 颜色传感器原始RGBC自动上报
+#define CMD_TX_STREAM_COLOR_CLN 0x5F // 颜色传感器滤波后RGBC自动上报
 
 // ======================== 错误码 ==========================
 #define ERR_PARAM_INVALID 0x02

@@ -106,6 +106,43 @@ void App_Tick(void)
         tx_buf[1] = validated_id;        // 稳定的豆子 ID
 
         Protocol_PackAndSend(tx_buf, 2);
+
+        // 追加：发送滤波后 RGBC + C叉 + RGB互差 (共 21 字节)
+        {
+            uint16_t cr = g_app_rgb_data.clean.clear - g_app_rgb_data.clean.red;
+            uint16_t cg = g_app_rgb_data.clean.clear - g_app_rgb_data.clean.green;
+            uint16_t cb = g_app_rgb_data.clean.clear - g_app_rgb_data.clean.blue;
+            int16_t  rg = (int16_t)g_app_rgb_data.clean.red - (int16_t)g_app_rgb_data.clean.green;
+            int16_t  rb = (int16_t)g_app_rgb_data.clean.red - (int16_t)g_app_rgb_data.clean.blue;
+            int16_t  gb = (int16_t)g_app_rgb_data.clean.green - (int16_t)g_app_rgb_data.clean.blue;
+
+            uint8_t cln_buf[21];
+            cln_buf[0] = CMD_TX_STREAM_COLOR_CLN;
+            // RGBC (uint16 LE, 8 bytes)
+            cln_buf[1]  = (uint8_t)(g_app_rgb_data.clean.red & 0xFF);
+            cln_buf[2]  = (uint8_t)((g_app_rgb_data.clean.red >> 8) & 0xFF);
+            cln_buf[3]  = (uint8_t)(g_app_rgb_data.clean.green & 0xFF);
+            cln_buf[4]  = (uint8_t)((g_app_rgb_data.clean.green >> 8) & 0xFF);
+            cln_buf[5]  = (uint8_t)(g_app_rgb_data.clean.blue & 0xFF);
+            cln_buf[6]  = (uint8_t)((g_app_rgb_data.clean.blue >> 8) & 0xFF);
+            cln_buf[7]  = (uint8_t)(g_app_rgb_data.clean.clear & 0xFF);
+            cln_buf[8]  = (uint8_t)((g_app_rgb_data.clean.clear >> 8) & 0xFF);
+            // C-R, C-G, C-B (uint16 LE, 6 bytes)
+            cln_buf[9]  = (uint8_t)(cr & 0xFF);
+            cln_buf[10] = (uint8_t)((cr >> 8) & 0xFF);
+            cln_buf[11] = (uint8_t)(cg & 0xFF);
+            cln_buf[12] = (uint8_t)((cg >> 8) & 0xFF);
+            cln_buf[13] = (uint8_t)(cb & 0xFF);
+            cln_buf[14] = (uint8_t)((cb >> 8) & 0xFF);
+            // R-G, R-B, G-B (int16 LE, 6 bytes, 可为负)
+            cln_buf[15] = (uint8_t)(rg & 0xFF);
+            cln_buf[16] = (uint8_t)((rg >> 8) & 0xFF);
+            cln_buf[17] = (uint8_t)(rb & 0xFF);
+            cln_buf[18] = (uint8_t)((rb >> 8) & 0xFF);
+            cln_buf[19] = (uint8_t)(gb & 0xFF);
+            cln_buf[20] = (uint8_t)((gb >> 8) & 0xFF);
+            Protocol_PackAndSend(cln_buf, sizeof(cln_buf));
+        }
     }
     if (g_app_context.pwm_state_stream == 1)
     {

@@ -7,6 +7,7 @@ import select
 import struct
 import sys
 import threading
+import csv, os
 from collections import deque
 
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
@@ -46,6 +47,8 @@ CMD_NAMES = {
     0x5B: "步进自动上报",
     0x5C: "PWM状态上报",
     0x5D: "颜色自动上报",
+    0x5E: "颜色原始上报",
+    0x5F: "颜色滤波上报",
     0x60: "步进使能",
     0x61: "速度控制",
     0x62: "位置控制",
@@ -170,6 +173,15 @@ def describe_payload(data):
             return f"{name}: 电机{addr}, 当前位置 {pos}"
         if cmd == 0x87 and len(p) in (1, 2, 4):
             return f"{name}: {fmt_hex(p)}"
+        if cmd == 0x5D and len(p) >= 1:
+            names = {0: "无豆", 1: "黄豆", 2: "绿豆", 3: "白芸豆", 255: "检测中"}
+            return names.get(p[0], f"未知({p[0]})")
+        if cmd in (0x5E, 0x5F) and len(p) >= 8:
+            r = p[0] | (p[1] << 8)
+            g = p[2] | (p[3] << 8)
+            b = p[4] | (p[5] << 8)
+            c = p[6] | (p[7] << 8)
+            return f"{name}: R{r} G{g} B{b} C{c}"
     except Exception:
         pass
     return f"{name}: {fmt_hex(p)}"
@@ -724,6 +736,9 @@ class SensorPage(QWidget):
         super().__init__()
         self.mon = monitor
         self.dev_combo = dev_combo
+        self.rec_label = None    # 当前记录的豆种标签
+        self.rec_count = 0       # 已记录条数
+        self.rec_data = []       # 内存中暂存的数据行
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 14, 14, 14)
         layout.setSpacing(12)
@@ -825,25 +840,223 @@ class SensorPage(QWidget):
         lay = QGridLayout(box)
         self.color_state = QLabel("未检测")
         self.color_state.setObjectName("strongLabel")
-        lay.addWidget(self.color_state, 0, 0, 1, 2)
+        self.color_state.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.color_state.setMinimumHeight(32)
+        lay.addWidget(self.color_state, 0, 0, 1, 4)
+        self.color_detail = QLabel("C-B:--  G-B:--  R-G:--")
+        self.color_detail.setObjectName("subLabel")
+        self.color_detail.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lay.addWidget(self.color_detail, 1, 0, 1, 4)
         enable = QPushButton("开关传感器")
         enable.clicked.connect(lambda: self.mon.send_cmd(0x6F, [1], self.dev_combo.currentIndex()))
         raw = QPushButton("查询原始")
         raw.clicked.connect(lambda: self.mon.send_cmd(0x82, [], self.dev_combo.currentIndex()))
         res = QPushButton("查询结果")
         res.clicked.connect(lambda: self.mon.send_cmd(0x83, [], self.dev_combo.currentIndex()))
-        lay.addWidget(enable, 1, 0)
-        lay.addWidget(raw, 1, 1)
-        lay.addWidget(res, 1, 2)
+        lay.addWidget(enable, 2, 0)
+        lay.addWidget(raw, 2, 1)
+        lay.addWidget(res, 2, 2, 1, 2)
+
+        # ---- 数据记录区 ----
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        lay.addWidget(sep, 3, 0, 1, 4)
+
+        rec_label_title = QLabel("📝 数据采集")
+        rec_label_title.setObjectName("subLabel")
+        lay.addWidget(rec_label_title, 4, 0, 1, 4)
+
+        for col, (text, label) in enumerate([("绿豆", "green"), ("黄豆", "yellow"), ("白豆", "white")]):
+            btn = QPushButton(text)
+            btn.clicked.connect(lambda _, lb=label: self._start_record(lb))
+            lay.addWidget(btn, 5, col)
+        stop_btn = QPushButton("⏹ 停止")
+        stop_btn.clicked.connect(self._stop_record)
+        lay.addWidget(stop_btn, 5, 3)
+
+        self.save_btn = QPushButton("💾 保存")
+        self.save_btn.clicked.connect(self._save_record)
+        self.save_btn.setVisible(False)
+        lay.addWidget(self.save_btn, 5, 3)
+
+        self.rec_status = QLabel("就绪")
+        self.rec_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.rec_status.setObjectName("subLabel")
+        lay.addWidget(self.rec_status, 6, 0, 1, 4)
         return box
+
+    def _start_record(self, label):
+        self.rec_label = label
+        self.rec_count = 0
+        self.rec_data = []  # 清空内存数据
+        self.save_btn.setVisible(False)
+        self.rec_status.setText(f"⏺ 记录【{label}】中… 0 条")
+
+    def _stop_record(self):
+        if self.rec_label:
+            self.rec_status.setText(f"⏹ 已停止，共 {self.rec_count} 条 → 请点「💾 保存」存为文件")
+            self.save_btn.setVisible(True)
+        else:
+            self.rec_status.setText("就绪")
+        self.rec_label = None
+        self.rec_count = 0
+
+    def _save_record(self):
+        from PyQt6.QtWidgets import QFileDialog
+        if not self.rec_data:
+            self.rec_status.setText("❌ 无数据可保存")
+            return
+        default_fn = f"bean_data_{datetime.datetime.now():%m%d_%H%M%S}.csv"
+        fn, _ = QFileDialog.getSaveFileName(self, "保存颜色数据", default_fn, "CSV文件 (*.csv)")
+        if not fn:
+            return
+        with open(fn, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["label", "R", "G", "B", "C", "C-R", "C-G", "C-B", "R-G", "R-B", "G-B"])
+            for row in self.rec_data:
+                w.writerow(row)
+        self.rec_status.setText(f"💾 已保存 {len(self.rec_data)} 条 → {os.path.basename(fn)}")
+        self.save_btn.setVisible(False)
+
+    BEAN_COLORS = {
+        0: ("未检测",         "#9E9E9E", "#FFF"),
+        1: ("🟡 黄豆",       "#F9A825", "#333"),
+        2: ("🟢 绿豆",       "#43A047", "#FFF"),
+        3: ("⚪ 白芸豆",     "#ECEFF1", "#333"),
+        255: ("⏳ 检测中...", "#78909C", "#FFF"),
+    }
 
     def _on_packet(self, dev, data):
         if not data:
             return
         if data[0] in (0x5A, 0x80) and len(data) >= 7:
             self.mpu_text.setText(describe_payload(data))
-        elif data[0] in (0x82, 0x83, 0x5D):
+        elif data[0] == 0x5D and len(data) >= 2:
+            bean_id = data[1]
+            name, bg, fg = self.BEAN_COLORS.get(bean_id,
+                                                (f"未知({bean_id})", "#9E9E9E", "#FFF"))
+            self.color_state.setText(name)
+            self.color_state.setStyleSheet(
+                f"background:{bg};color:{fg};font-size:14px;font-weight:bold;"
+                f"border-radius:4px;padding:4px;"
+            )
+        elif data[0] in (0x82, 0x83):
             self.color_state.setText(f"D{dev + 1} {describe_payload(data)}")
+        elif data[0] == 0x5F and len(data) >= 21:
+            try:
+                # Parse 10 channels
+                r   = data[1]  | (data[2]  << 8)
+                g   = data[3]  | (data[4]  << 8)
+                bl  = data[5]  | (data[6]  << 8)
+                cl  = data[7]  | (data[8]  << 8)
+                cr  = data[9]  | (data[10] << 8)
+                cg  = data[11] | (data[12] << 8)
+                cb  = i16_le(data[13:15])
+                rg  = i16_le(data[15:17])
+                rb  = i16_le(data[17:19])
+                gb  = i16_le(data[19:21])
+                self.color_detail.setText(f"C-B:{cb}  G-B:{gb}  R-G:{rg}  R-B:{rb}")
+
+                # 数据采集模式 (内存暂存)
+                if self.rec_label is not None:
+                    self.rec_data.append([self.rec_label, r, g, bl, cl, cr, cg, cb, rg, rb, gb])
+                    self.rec_count += 1
+                    self.rec_status.setText(f"⏺ 记录【{self.rec_label}】中… {self.rec_count} 条")
+            except Exception:
+                pass
+
+
+class ColorDataPage(QWidget):
+    """颜色传感器 滤波 RGBC + C叉 + RGB互差 (10 通道)"""
+
+    NAMES = ["Red", "Green", "Blue", "Clear",
+             "C-R", "C-G", "C-B",
+             "R-G", "R-B", "G-B"]
+    PENS = [
+        (220, 64, 64), (46, 125, 50), (25, 118, 210), (140, 140, 140),
+        (255, 152, 0), (0, 188, 212), (156, 39, 176),
+        (255, 193, 7), (233, 30, 99), (0, 150, 136),
+    ]
+    DASH = [False] * 7 + [True, True, True]  # RGB 互差用虚线
+
+    def __init__(self, monitor, dev_combo):
+        super().__init__()
+        self.mon = monitor
+        self.dev_combo = dev_combo
+        self.data = [deque(maxlen=500) for _ in range(10)]
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(8)
+
+        # ---- 开关栏 ----
+        bar = QHBoxLayout()
+        cb = QCheckBox("颜色传感器自动上报")
+        cb.setChecked(True)
+        cb.toggled.connect(lambda v: self._set_stream(0x75, v))
+        bar.addWidget(cb)
+        bar.addStretch()
+        self.val_label = QLabel("等待数据...")
+        self.val_label.setObjectName("strongLabel")
+        bar.addWidget(self.val_label)
+        layout.addLayout(bar)
+
+        # ---- 曲线图 ----
+        try:
+            import pyqtgraph as pg
+
+            self.plot = pg.PlotWidget(title="颜色传感器 滤波 RGBC + 差值 (虚线=RGB互差)")
+            self.plot.showGrid(x=True, y=True, alpha=0.3)
+            self.plot.setLabel("left", "ADC 值")
+            self.plot.setLabel("bottom", "采样帧")
+            self.plot.addLegend()
+
+            self.curves = []
+            for i in range(10):
+                pen = pg.mkPen(self.PENS[i], style=Qt.PenStyle.DashLine if self.DASH[i] else Qt.PenStyle.SolidLine)
+                self.curves.append(self.plot.plot(pen=pen, name=self.NAMES[i]))
+
+            layout.addWidget(self.plot)
+        except Exception:
+            layout.addWidget(QLabel("未安装 pyqtgraph，曲线图不可用"))
+            self.curves = []
+
+        self.mon.packet_decoded.connect(self._on_packet)
+
+    def _set_stream(self, cmd, enabled):
+        dev = self.dev_combo.currentIndex()
+        payload = [1 if enabled else 0]
+        if dev == 0:
+            self.mon.send_online_all(cmd, payload, "颜色上报开关")
+        else:
+            self.mon.send_cmd(cmd, payload, dev)
+
+    def _on_packet(self, dev, data):
+        if not data or data[0] != 0x5F or len(data) < 21:
+            return
+        payload = data[1:]
+
+        def u16(off):
+            return payload[off] | (payload[off + 1] << 8)
+
+        def i16(off):
+            val = payload[off] | (payload[off + 1] << 8)
+            return val - 0x10000 if val >= 0x8000 else val
+
+        r  = u16(0);  g  = u16(2);  b  = u16(4);  c  = u16(6)
+        cr = u16(8);  cg = u16(10); cb = u16(12)
+        rg = i16(14); rb = i16(16); gb = i16(18)
+
+        values = [r, g, b, c, cr, cg, cb, rg, rb, gb]
+        for idx, v in enumerate(values):
+            self.data[idx].append(v)
+            if self.curves:
+                self.curves[idx].setData(list(self.data[idx]))
+        self.val_label.setText(
+            f"D{dev + 1}  R={r} G={g} B={b} C={c}  |  "
+            f"C-R={cr} C-G={cg} C-B={cb}  |  "
+            f"R-G={rg:+d} R-B={rb:+d} G-B={gb:+d}"
+        )
 
 
 class DataPage(QWidget):
@@ -895,6 +1108,7 @@ class DataPage(QWidget):
             self.step_plot.showGrid(x=True, y=True, alpha=0.3)
             colors = [(216, 67, 21), (239, 108, 0), (0, 137, 123), (67, 160, 71), (57, 73, 171), (94, 53, 177)]
             self.step_curves = [self.step_plot.plot(pen=color, name=f"D{i // 2 + 1}M{i % 2 + 1}") for i, color in enumerate(colors)]
+
             plot_layout.addWidget(self.mpu_plot)
             plot_layout.addWidget(self.step_plot)
         except Exception:
@@ -1190,6 +1404,7 @@ class MainWindow(QMainWindow):
         tabs.addTab(self._wrap(SensorPage(self.monitor, self.dev_combo)), "传感器与外设")
         tabs.addTab(self._wrap(MachineTextPage(self.monitor, self.dev_combo)), "整机数据")
         tabs.addTab(self._wrap(DataPage(self.monitor, self.dev_combo)), "数据监测")
+        tabs.addTab(self._wrap(ColorDataPage(self.monitor, self.dev_combo)), "颜色曲线")
         tabs.addTab(self._wrap(StatusPage(self.monitor, self.dev_combo)), "批量调试")
         tabs.addTab(self.monitor, "通信日志")
         self.setCentralWidget(tabs)
