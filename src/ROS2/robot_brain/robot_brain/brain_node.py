@@ -752,12 +752,16 @@ class BrainNode(Node):
                 for p in self._cw_path_nodes(s, e):
                     if p in locked:
                         cw += 10.0
+                if e in locked:
+                    cw += 10.0  # 目标点被其他手路径占用
 
                 # CCW 代价
                 ccw = self._ccw_cost(s, e)
                 for p in self._ccw_path_nodes(s, e):
                     if p in locked:
                         ccw += 10.0
+                if e in locked:
+                    ccw += 10.0
 
                 best_cost = min(cw, ccw)
                 best_dir = self.DIR_CW if cw <= ccw else self.DIR_CCW
