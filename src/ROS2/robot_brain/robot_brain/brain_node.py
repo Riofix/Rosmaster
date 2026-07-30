@@ -1296,7 +1296,6 @@ class BrainNode(Node):
         self._ch_saw_low = False
         self._post_grab_phase = 0
         self._grab_move_phase = 0
-        self._hand_pos = {"handle_left": 1, "handle_mid": 2, "handle_right": 3}
 
     def _pulse_to_id(self, pulse):
         """脉冲值 → 最近的 pos_id (1~8)"""
