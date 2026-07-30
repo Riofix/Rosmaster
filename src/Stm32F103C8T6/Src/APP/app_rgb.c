@@ -393,6 +393,67 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  *   绿豆:   R-G ≥ -550  且  G-B ≤ 750  (绿豆专属区间)
  *   间隙:   其余 → NONE
  */
+// /**
+//  * @brief 根据实测 RGBC 原始通道差值进行豆子分类判定 (旧版 v6, 已废弃)
+//  * ── 废弃原因: 新白豆数据 R-B 大面积转正(最高+723), 旧阈值全部失效 ──
+//  */
+// uint8_t App_Rgb_Get_Result(void)
+// {
+//     uint16_t c = g_app_rgb_data.clean.clear;
+//     uint16_t r = g_app_rgb_data.clean.red;
+//     uint16_t g = g_app_rgb_data.clean.green;
+//     uint16_t b = g_app_rgb_data.clean.blue;
+//
+//     int16_t gb = (int16_t)(g - b);  /* G-B */
+//     int16_t rb = (int16_t)(r - b);  /* R-B */
+//     int16_t rg = (int16_t)(r - g);  /* R-G */
+//
+//     if (c < 600)
+//         return BEAN_NONE;
+//
+//     if (rb <= -100)
+//        return BEAN_WHITE;
+//     if (rg <= -1800)
+//        return BEAN_WHITE;
+//
+//     if (rg <= -600)
+//         return BEAN_YELLOW;
+//     if (gb >= 750)
+//         return BEAN_YELLOW;
+//     if (rb > 300)
+//         return BEAN_YELLOW;
+//
+//     if (rg >= -550 && gb <= 750)
+//         return BEAN_GREEN;
+//
+//     return BEAN_NONE;
+// }
+
+/**
+ * @brief 根据 B/G 比值进行豆子分类判定 (v7, 当前版本)
+ * @return uint8_t 识别到的豆子 ID (0:无, 1:黄豆, 2:绿豆, 3:白芸豆)
+ *
+ * ── 实测数据范围 (2026-07-31 最新, 同环境三豆对比) ──
+ *               R-G           R-B           G-B         B/G×100
+ *   绿豆:   -105 ~ +21     73 ~ 206      80 ~ 315      49 ~ 63
+ *   黄豆:   -561 ~ +175   144 ~ 887     165 ~ 1157     49 ~ 74
+ *   白豆:  -1826 ~ +296  -1034 ~ +489    56 ~ 1446     66 ~ 85
+ *
+ * ── 物理原理 ──
+ *   绿豆:  吸收红蓝, 反射绿 → G 压倒性优势 → B/G 最低
+ *   黄豆:  吸收蓝, 反射红绿  → R≈G, B 弱     → B/G 中等
+ *   白芸豆: 全波段均匀反射    → R≈G≈B         → B/G 最高
+ *   B/G 是比值, 对传感器到物体的距离变化不敏感
+ *
+ * ── 决策策略 ──
+ *   环境光: C < 600 (信号太弱)
+ *   白豆:   R-B < 0        (蓝>红, 白豆独有)
+ *           B/G ≥ 72       (通道均衡, 高蓝占比)
+ *           64<B/G<72, R<G (偏绿但绿光不过分)
+ *   绿豆:   B/G ≤ 64       (绿光压倒性)
+ *   黄豆:   64<B/G<72, R>G (偏绿但红光偏强)
+ *           B/G 虽≤64 但按R>G已在上层判定
+ */
 uint8_t App_Rgb_Get_Result(void)
 {
     uint16_t c = g_app_rgb_data.clean.clear;
@@ -400,45 +461,33 @@ uint8_t App_Rgb_Get_Result(void)
     uint16_t g = g_app_rgb_data.clean.green;
     uint16_t b = g_app_rgb_data.clean.blue;
 
-    int16_t gb = (int16_t)(g - b);  /* G-B */
-    int16_t rb = (int16_t)(r - b);  /* R-B */
-    int16_t rg = (int16_t)(r - g);  /* R-G */
+    int16_t rb = (int16_t)(r - b);
+    int16_t rg = (int16_t)(r - g);
 
-    /* ====== 环境光: C 极低 ====== */
+    /* ====== 环境光 / 信号太弱 ====== */
     if (c < 600)
-        return BEAN_NONE;        // 0
+        return BEAN_NONE;
 
-    /* ====== 白豆 (西配楼参数) ====== */
-    if (rb <= -100)
-       return BEAN_WHITE;       // 3
-    /* 兜底: R-G 极负 (白豆可到-3184) */
-    if (rg <= -1800)
-       return BEAN_WHITE;       // 3
+    /* B/G 比值 (×100, 整数运算避免浮点) */
+    uint8_t bg = (uint8_t)((b * 100) / g);
 
-    /* ====== 白豆 (比赛参数) ======
-     *   R-B ≤ -100  : 白豆独有负R-B区间 (新旧白豆均适用)
-     *   R-G > 0     : 新白豆R>G独有 (绿豆≤-97, 黄豆≤-47)
-     *   G-B < 0     : 新白豆B>G独有 (绿豆≥157, 黄豆≥105)
-    //  *   兜底 R-G ≤ -1800 : 极负R-G (白豆可到-3184) */
-    // if (rb <= -100 || rg > 0 || gb < 0)
-    //     return BEAN_WHITE;       // 3
-    // if (rg <= -1800)
-    //     return BEAN_WHITE;       // 3
+    /* ====== 白芸豆①: 蓝光压倒红光 (白豆独有特征) ====== */
+    if (rb < 0)
+        return BEAN_WHITE;
 
-    /* ====== 黄豆: 三条独立特征 ====== */
-    if (rg <= -600)              /* R-G 极度负偏, 绿豆最负-510 */
-        return BEAN_YELLOW;      // 1
-    if (gb >= 750)               /* G-B 高值, 绿豆最高743 */
-        return BEAN_YELLOW;      // 1
-    if (rb > 300)                /* R-B 高值, 绿豆最高253 */
-        return BEAN_YELLOW;      // 1
+    /* ====== 绿豆: 绿光压倒性优势, B/G ≤ 64% ====== */
+    if (bg <= 64)
+        return BEAN_GREEN;
 
-    /* ====== 绿豆: R-G不极负 + G-B不过高 ====== */
-    if (rg >= -550 && gb <= 750)
-        return BEAN_GREEN;       // 2
+    /* ====== 白芸豆②: 通道均衡, B/G ≥ 72% ====== */
+    if (bg >= 72)
+        return BEAN_WHITE;
 
-    /* ====== 间隙区 ====== */
-    return BEAN_NONE;            // 0
+    /* ====== 灰色地带 (64 < B/G < 72): 看红绿谁大 ====== */
+    if (rg < 0)
+        return BEAN_WHITE;      /* G > R → 白豆 (绿光不过分) */
+    else
+        return BEAN_YELLOW;     /* R > G → 黄豆 (暖色调) */
 }
 
 /**
