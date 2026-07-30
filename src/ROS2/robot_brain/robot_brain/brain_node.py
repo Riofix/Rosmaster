@@ -938,9 +938,14 @@ class BrainNode(Node):
                 self._start_hand_arrival(["handle_left", "handle_right", "handle_mid"])
                 self.get_logger().info("[POST_GRAB] Phase0: left→5 + right→4 + mid→1 + chassis→drop")
 
-            # 盲等 200ms 让底盘动起来
+            # 盲等 200ms 让底盘动起来, 期间持续喂 hand_arrival 观测 saw_low
             if self._arrival_wait < 10:
                 self._arrival_wait += 1
+                self._check_hand_arrival({
+                    "handle_left":  self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False),
+                    "handle_right": self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False),
+                    "handle_mid":   self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False),
+                })
                 return
 
             # 三手到位(新消抖) + 底盘经过避障点A
