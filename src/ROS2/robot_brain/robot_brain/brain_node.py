@@ -953,12 +953,12 @@ class BrainNode(Node):
         elif self._post_grab_phase == 1:
             if not self.has_sent_cmd:
                 # left 不动
-                self._move_hand_to("handle_right", 8, self.DIR_CW)
+                self._move_hand_to("handle_right", 6, self.DIR_CW)
                 self._move_hand_to("handle_mid",   3, self.DIR_CW)
                 self.has_sent_cmd = True
                 self._start_hand_arrival(["handle_right", "handle_mid"])
                 self._start_arrival_wait()
-                self.get_logger().info("[POST_GRAB] Phase1: left不动 + right→8 + mid→3")
+                self.get_logger().info("[POST_GRAB] Phase1: left不动 + right→6 + mid→3")
 
             if (self._check_hand_arrival({
                     "handle_right": self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False),
