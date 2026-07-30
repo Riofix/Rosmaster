@@ -493,19 +493,14 @@ class BrainNode(Node):
                 self._move_hand_to("handle_left",  6, self.DIR_CCW)
                 self._move_hand_to("handle_right", 8, self.DIR_CW)
                 self.has_sent_cmd = True
-                self._avoid_saw_low = False
-                self._grab_move_timer = 0
+                self._start_arrival_wait()
                 self.get_logger().info("[MOVE_TO_GRAB] Phase1: left→6 + right→8")
 
             left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
             right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
-            if not (left_ok and right_ok):
-                self._avoid_saw_low = True          # 见低: 指令已发出, track_arrived 开始清零
-            elif self._avoid_saw_low:               # 再见高: 真正到位
-                self._grab_move_timer += 1
-                if self._grab_move_timer >= 10:     # 1s 稳定
-                    self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
-                    self._transition_to(self.ST_GRABBING)
+            if self._check_arrival(left_ok and right_ok, wait_ticks=5, stable_ticks=10):
+                self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
+                self._transition_to(self.ST_GRABBING)
 
     # =================================================================
     #  状态 4：GRABBING — 抓取 + 颜色数据融合 + 理想状态判定
@@ -1219,18 +1214,24 @@ class BrainNode(Node):
         """每次下发移动指令后调用"""
         self._arrival_wait = 0
         self._arrival_stable = 0
+        self._arrival_saw_low = False   # 必须见到信号为低, 才认为电机确实开始运动
 
     def _check_arrival(self, arrived, wait_ticks=3, stable_ticks=3):
         """
-        两阶段到达检测，返回 True 表示确认到位。
-        wait_ticks: 指令下发后最少等待 tick 数
-        stable_ticks: 到位信号需连续保持的 tick 数
+        三相到达检测，返回 True 表示确认到位。
+        phase1 — wait_ticks: 等待 reset 消息 + 电机启动 (不判断)
+        phase2 — saw_low:    必须观察到信号为 False (确认电机确实动了)
+        phase3 — stable:     信号连续 True 满 stable_ticks
         """
         self._arrival_wait += 1
+        if not arrived:
+            self._arrival_saw_low = True   # 记录"见过低"
+
         if self._arrival_wait < wait_ticks:
-            return False
-        if arrived:
-            self._arrival_stable += 1
+            return False                   # phase1: 盲等
+
+        if arrived and self._arrival_saw_low:
+            self._arrival_stable += 1      # phase3: 先见低再见高才计数
             return self._arrival_stable >= stable_ticks
         else:
             self._arrival_stable = 0
@@ -1241,12 +1242,15 @@ class BrainNode(Node):
     # =================================================================
 
     def _transition_to(self, new_state):
-        """状态切换，重置状态锁 + 到达检测"""
+        """状态切换，重置状态锁 + 到达检测 + 分阶段变量"""
         self.state = new_state
         self.has_sent_cmd = False
         self._arrival_wait = 0
         self._arrival_stable = 0
+        self._arrival_saw_low = False
         self._post_grab_phase = 0
+        self._grab_move_phase = 0
+        self._hand_pos = {"handle_left": 1, "handle_mid": 2, "handle_right": 3}
 
     def _pulse_to_id(self, pulse):
         """脉冲值 → 最近的 pos_id (1~8)"""
