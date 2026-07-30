@@ -493,29 +493,12 @@ class BrainNode(Node):
                 self._move_hand_to("handle_left",  6, self.DIR_CCW)
                 self._move_hand_to("handle_right", 8, self.DIR_CW)
                 self.has_sent_cmd = True
-<<<<<<< HEAD
-                self._start_arrival_wait()
-=======
                 self._avoid_saw_low = False
                 self._grab_move_timer = 0
->>>>>>> 845d3de4601fd99ddbf44c15309371e012898075
                 self.get_logger().info("[MOVE_TO_GRAB] Phase1: left→6 + right→8")
 
             left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
             right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
-<<<<<<< HEAD
-            if self._check_arrival(left_ok and right_ok):
-                self.get_logger().info("[MOVE_TO_GRAB] Phase1 完成, 进入 Phase2 全手稳定确认")
-                self._grab_move_phase = 2
-                self.has_sent_cmd = False
-                self._start_arrival_wait()
-
-        elif self._grab_move_phase == 2:
-            # 三手全部到位 + 连续稳定 0.5s 才放行抓取
-            if self._check_arrival(self._all_hands_arrived(), wait_ticks=0, stable_ticks=5):
-                self.get_logger().info("[MOVE_TO_GRAB] Phase2 三手稳定到位, 进入 GRABBING")
-                self._transition_to(self.ST_GRABBING)
-=======
             if not (left_ok and right_ok):
                 self._avoid_saw_low = True          # 见低: 指令已发出, track_arrived 开始清零
             elif self._avoid_saw_low:               # 再见高: 真正到位
@@ -523,7 +506,6 @@ class BrainNode(Node):
                 if self._grab_move_timer >= 10:     # 1s 稳定
                     self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
                     self._transition_to(self.ST_GRABBING)
->>>>>>> 845d3de4601fd99ddbf44c15309371e012898075
 
     # =================================================================
     #  状态 4：GRABBING — 抓取 + 颜色数据融合 + 理想状态判定
