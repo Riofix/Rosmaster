@@ -727,8 +727,8 @@ class BrainNode(Node):
         返回 drop_plan: [批次0: {hand: (pulse_target, direction, drop)}]
         理想情况只有一批，三个手各一条指令，全部 drop=True。
         """
-        # AVOID_2 终点 = 状态9起点, 使用上位机维护的位置表
-        current = dict(self._hand_pos)
+        # AVOID_2 终点 = 状态9起点 (POST_GRAB 终态, 固定)
+        current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
@@ -839,7 +839,8 @@ class BrainNode(Node):
         4. 第三手算最优方向+站数 → 全员同向同站数伴飞
         """
         hands = ["handle_left", "handle_mid", "handle_right"]
-        current = dict(self._hand_pos)
+        # POST_GRAB 终态 (固定起点)
+        current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
