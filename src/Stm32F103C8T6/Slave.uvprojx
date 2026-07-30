@@ -621,14 +621,14 @@
           <GroupName>BSP</GroupName>
           <Files>
             <File>
-              <FileName>bsp_esp8266.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\BSP\bsp_esp8266.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_esp8266.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Src\BSP\bsp_esp8266.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_esp8266.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\BSP\bsp_esp8266.c</FilePath>
             </File>
             <File>
               <FileName>bsp_iic.c</FileName>
