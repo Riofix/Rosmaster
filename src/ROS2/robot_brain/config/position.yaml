@@ -24,6 +24,6 @@ chassis:
   obstacle_b: 27945       # 避障点B 1150mm (放置区方向)
   drop_zone: 30375        # 放置区 1250mm (W方向)
   obstacle_a: -40095      # 避障点A 1650mm (S方向, 编码器减小)
-  grab_zone: -48114       # 抓取区 1980mm (S方向, 编码器减小)
+  grab_zone: -49000       # 抓取区 (S方向, 编码器减小)
   end_zone: 0             # 结束区 0mm
 

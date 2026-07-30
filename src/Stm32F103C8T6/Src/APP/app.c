@@ -46,65 +46,56 @@ void App_Tick(void)
     static uint32_t tick_count = 0;
     tick_count++;
 
-    // ---- 1.数据轮询处理 ----  10个主循环周期更新一次
+    // ---- 1.传感器更新 ----  10个主循环周期更新一次 (20ms)
     if (tick_count % 10 == 0)
     {
         APP_IMU_Update(); // 更新mpu原始数据
-
         App_Rgb_Update(); // 更新RGB传感器数据
+    }
 
-        // ---- 2. 电机状态轮询 (5x 频率周期) ----
+    // ---- 2. 电机状态轮询 (2 tick = 4ms/次, 每电机 8ms/次 = 125Hz) ----
+    if (tick_count % 4 == 0)
+    {
         static uint8_t poll_motor_id = 1;
         App_Motor_RequestState(poll_motor_id);
         poll_motor_id = (poll_motor_id == 1) ? 2 : 1;
     }
 
-    // ---- 2.自动上报 ---------
-    if (g_app_context.mpu_stream == 1)
+    // ---- 3.自动上报 (频率控制, 避免 USART2 阻塞) ----
+    if (g_app_context.mpu_stream == 1 && tick_count % 50 == 0)
     {
-        // 打包数据
+        // MPU 姿态: 10Hz (不重要)
         IMU_PacketData_t att_data;
         APP_IMU_GetPacketData(&att_data);
         uint8_t tx_buf[7];
-        tx_buf[0] = CMD_TX_STREAM_MPU; // MPU数据上报指令
-
-        // 3. 严谨的小端序拆解打包 (低字节在前，高字节在后)
+        tx_buf[0] = CMD_TX_STREAM_MPU;
         tx_buf[1] = (uint8_t)(att_data.roll & 0xFF);
         tx_buf[2] = (uint8_t)((att_data.roll >> 8) & 0xFF);
-
         tx_buf[3] = (uint8_t)(att_data.pitch & 0xFF);
         tx_buf[4] = (uint8_t)((att_data.pitch >> 8) & 0xFF);
-
         tx_buf[5] = (uint8_t)(att_data.yaw & 0xFF);
         tx_buf[6] = (uint8_t)((att_data.yaw >> 8) & 0xFF);
-
-        Protocol_PackAndSend(tx_buf, sizeof(tx_buf)); // 发送数据
+        Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
     }
-    if (g_app_context.stepmotor_stream == 1)
+    if (g_app_context.stepmotor_stream == 1 && tick_count % 10 == 0)
     {
-        // 先上报电机1的参数，再上报电机2的参数
-        // 打包数据
+        // 电机状态: 50Hz (重要)
         uint8_t tx_buf[24];
-        tx_buf[0] = CMD_TX_STREAM_STEP;                         // 电机数据上报指令
-        memcpy(tx_buf + 1, &g_motors[0], sizeof(MotorState_t)); // 电机1数据
+        tx_buf[0] = CMD_TX_STREAM_STEP;
+        memcpy(tx_buf + 1, &g_motors[0], sizeof(MotorState_t));
+        Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
 
-        Protocol_PackAndSend(tx_buf, sizeof(tx_buf)); // 发送数据
-        // 打包数据
-        tx_buf[0] = CMD_TX_STREAM_STEP;                         // 电机数据上报指令
-        memcpy(tx_buf + 1, &g_motors[1], sizeof(MotorState_t)); // 电机2数据
-
-        Protocol_PackAndSend(tx_buf, sizeof(tx_buf)); // 发送数据
+        tx_buf[0] = CMD_TX_STREAM_STEP;
+        memcpy(tx_buf + 1, &g_motors[1], sizeof(MotorState_t));
+        Protocol_PackAndSend(tx_buf, sizeof(tx_buf));
     }
-    if (g_app_context.rgb_serson_stream == 1)
+    if (g_app_context.rgb_serson_stream == 1 && tick_count % 25 == 0)
     {
+        // RGB 颜色结果: 20Hz (重要)
         uint8_t tx_buf[2];
-
-        // 获取校验后的结果 (0:空, 1:白, 2:黄, 3:绿, 255:检测中)
         uint8_t validated_id = App_Rgb_Get_Validated_Result();
-
-        tx_buf[0] = CMD_TX_STREAM_COLOR; // 识别结果命令字
-        tx_buf[1] = validated_id;        // 稳定的豆子 ID
-
+        tx_buf[0] = CMD_TX_STREAM_COLOR;
+        tx_buf[1] = validated_id;
         Protocol_PackAndSend(tx_buf, 2);
 
         // 追加：发送滤波后 RGBC + C叉 + RGB互差 (共 21 字节)
@@ -144,15 +135,15 @@ void App_Tick(void)
             Protocol_PackAndSend(cln_buf, sizeof(cln_buf));
         }
     }
-    if (g_app_context.pwm_state_stream == 1)
+    if (g_app_context.pwm_state_stream == 1 && tick_count % 50 == 0)
     {
+        // 舵机/无刷 PWM 状态: 10Hz
         uint8_t tx_buf[5];
         tx_buf[0] = CMD_TX_STREAM_STATE;
         tx_buf[1] = g_servos[0].angle;
         tx_buf[2] = g_servos[1].angle;
-        tx_buf[3] = g_bldc.duty; // 只发占空比
-
-        Protocol_PackAndSend(tx_buf, 5); // 发送 5 字节
+        tx_buf[3] = g_bldc.duty;
+        Protocol_PackAndSend(tx_buf, 5);
     }
 
     // ---- 3. OLED 显示逻辑执行 (取代 cmd_handle 中的直接显示) ----

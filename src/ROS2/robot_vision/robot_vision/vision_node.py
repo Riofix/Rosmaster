@@ -67,6 +67,9 @@ class VisionNode(Node):
         self.params_r = cfg['right_camera']['preprocessing']
 
         # ---------- 状态 ----------
+        self.declare_parameter('auto_start', True)  # 独立测试时自动启动
+        self.started = self.get_parameter('auto_start').value
+
         self.buf_l = deque(maxlen=self.stack_size)
         self.buf_r = deque(maxlen=self.stack_size)
         self.global_sequence_history = deque(maxlen=self.full_seq_vote_size)
@@ -94,6 +97,7 @@ class VisionNode(Node):
 
         # ---------- ROS ----------
         self.pub = self.create_publisher(String, '/vision_detections', 10)
+        self.create_subscription(String, '/vision_control', self.control_cb, 10)
         self.create_timer(0.03, self.vision_engine)
         self.declare_parameter('broadcast_enabled', True)
         if self.get_parameter('broadcast_enabled').value:
@@ -122,6 +126,8 @@ class VisionNode(Node):
 
     # ================= 主循环 =================
     def vision_engine(self):
+        if not self.started:
+            return
         if self.is_published:
             return
 
@@ -249,8 +255,13 @@ class VisionNode(Node):
     def preprocess(self, buf, p):
         avg = np.mean(buf, axis=0).astype(np.uint8)
         gray = cv2.cvtColor(avg, cv2.COLOR_BGR2GRAY)
+        if p["CLAHE"] > 0:
+            gray = cv2.createCLAHE(clipLimit=p["CLAHE"], tileGridSize=(8,8)).apply(gray)
         gray = cv2.medianBlur(gray, p["Median"]*2+1)
         _,bin_img = cv2.threshold(gray, p["Threshold"],255,cv2.THRESH_BINARY_INV)
+        if p["Morph_Size"] > 0:
+            bin_img = cv2.morphologyEx(bin_img, cv2.MORPH_OPEN,
+                                       np.ones((p["Morph_Size"], p["Morph_Size"]), np.uint8))
         return bin_img
 
     def get_digit(self, roi, dist_th, tpls):
@@ -276,6 +287,23 @@ class VisionNode(Node):
                         best_s,best_l=s,l
             return best_l
         return "N/A"
+
+    def control_cb(self, msg):
+        """接收 brain 的控制指令: {"cmd": "start"} 启动识别"""
+        try:
+            data = json.loads(msg.data)
+            if data.get("cmd") == "start":
+                self.started = True
+                self.is_published = False
+                self.retry_count = 0
+                self.final_result_msg = None
+                self.buf_l.clear()
+                self.buf_r.clear()
+                self.global_sequence_history.clear()
+                self.start_time = time.time()
+                self.get_logger().info("[CONTROL] 收到启动指令, 开始识别")
+        except Exception as e:
+            self.get_logger().error(f"ControlCB parse error: {e}")
 
     def publish_result(self, seq, mode):
         msg = String()

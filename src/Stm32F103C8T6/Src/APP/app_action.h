@@ -31,17 +31,17 @@ void App_Action_MoveTo(uint8_t pos_id, uint8_t clockwise);
  * 抓取序列:
  *      降10cm →
  *      开无刷 →
- *      顺扫18cm →
+ *      顺扫 →
  *      降1cm →
- *      逆扫18cm →
+ *      逆扫 →
+ *      降1cm →
+ *      顺扫 →
  *      ----取消这里的步骤-------若需要则把注释打开
  *      降1cm →
- *      逆扫18cm →
- *      降1cm →
- *      顺扫18cm →
+ *      逆扫 →
  *      ----取消这里的步骤-------
+ *      升11cm →
  *      关无刷 →
- *      升12cm →
  *      完成
  */
 void App_Action_Grab(void);                /* 内部状态机, App_Tick 末尾周期调用 */

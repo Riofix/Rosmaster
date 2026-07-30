@@ -10,8 +10,8 @@
       <TargetName>Target_1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>5060528::V5.06 update 5 (build 528)::ARMCC</pArmCC>
-      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -185,6 +185,9 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
+            <nBranchProt>0</nBranchProt>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -325,6 +328,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
+            <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
             <v6LangP>3</v6LangP>
@@ -350,7 +354,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <uClangAs>0</uClangAs>
+            <ClangAsOpt>4</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -572,14 +576,14 @@
               <FilePath>.\Src\APP\app_motor.c</FilePath>
             </File>
             <File>
-              <FileName>app_rgb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\APP\app_rgb.c</FilePath>
-            </File>
-            <File>
               <FileName>app_rgb.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Src\APP\app_rgb.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_rgb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\APP\app_rgb.c</FilePath>
             </File>
             <File>
               <FileName>app_bldc.c</FileName>
@@ -617,14 +621,14 @@
           <GroupName>BSP</GroupName>
           <Files>
             <File>
-              <FileName>bsp_esp8266.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\BSP\bsp_esp8266.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_esp8266.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Src\BSP\bsp_esp8266.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_esp8266.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\BSP\bsp_esp8266.c</FilePath>
             </File>
             <File>
               <FileName>bsp_iic.c</FileName>

@@ -53,9 +53,9 @@ def generate_launch_description():
             name='tcp_server_node',
             parameters=[{
                 'port': 3456,
-                'ip_left': '10.245.159.29',
-                'ip_mid': '10.245.159.64',
-                'ip_right': '10.245.159.251',
+                'ip_left': '10.222.42.29',
+                'ip_mid': '10.222.42.64',
+                'ip_right': '10.222.42.251',
             }],
             output='screen',
         ),
@@ -101,7 +101,7 @@ def generate_launch_description():
             package='robot_vision',
             executable='vision_node',
             name='vision_node',
-            parameters=[{'debug_mode': False, 'broadcast_enabled': False}],
+            parameters=[{'debug_mode': False, 'broadcast_enabled': False, 'auto_start': False}],
             output='screen',
         ),
 

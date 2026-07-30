@@ -120,8 +120,8 @@ class ControlNode(Node):
         }
 
         # --- PID 实例初始化 (针对底盘) ---
-        # 参数建议：Kp=0.28, Ki=0.08, Kd=0.1, MaxAccel=1000 (根据你demo)
-        self.chassis_pid = PositionPID(kp=0.28, ki=0.08, kd=0.1, max_out=600, max_i=200, max_accel=1200.0)
+        # 底盘实测调优 (ROS2 通信延迟环境)
+        self.chassis_pid = PositionPID(kp=0.2, ki=0.04, kd=0.10, max_out=1000, max_i=200, max_accel=1000.0)
         
         # 任务状态管理
         self.current_chassis_task_id = 0
@@ -228,7 +228,7 @@ class ControlNode(Node):
                 
                 # 3. 终点防抖与到位判定
                 # 判定标准：误差 < 50 且 速度指令趋于 0 (停稳)（PID死区）
-                if abs(self.chassis_pid.error) < 50 and abs(vx_cmd) < 10:
+                if abs(self.chassis_pid.error) < 60 and abs(vx_cmd) < 15:
                     self.stop_chassis()
                     self.notify_protocol_arrival("chassis", self.current_chassis_task_id)
                     self.is_chassis_moving = False

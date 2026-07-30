@@ -75,6 +75,7 @@ def generate_launch_description():
             package='robot_vision',
             executable='vision_node',
             name='vision_node',
+            parameters=[{'auto_start': False}],
             output='screen'
         ),
 

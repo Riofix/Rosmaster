@@ -82,9 +82,9 @@ static void App_SlidingWindowFilter(void)
         pointer = 0;
 
     // 取中值
-    g_app_rgb_data.clean.red   = Math_Median_Tool(red_window, 7);
+    g_app_rgb_data.clean.red = Math_Median_Tool(red_window, 7);
     g_app_rgb_data.clean.green = Math_Median_Tool(green_window, 7);
-    g_app_rgb_data.clean.blue  = Math_Median_Tool(blue_window, 7);
+    g_app_rgb_data.clean.blue = Math_Median_Tool(blue_window, 7);
     g_app_rgb_data.clean.clear = Math_Median_Tool(clear_window, 7);
 }
 
@@ -233,30 +233,30 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  * ----------------------------------------------
  *   S 区间天然分隔: 白<=30 < 黄32-40 < 绿>=40, 间隙清晰可判
  */
-//uint8_t App_Rgb_Get_Result(void)
+// uint8_t App_Rgb_Get_Result(void)
 //{
-    //uint16_t h = g_app_rgb_data.fused.hue;
-    //uint8_t s = g_app_rgb_data.fused.saturation;
-    //uint16_t c = g_app_rgb_data.clean.clear;
+// uint16_t h = g_app_rgb_data.fused.hue;
+// uint8_t s = g_app_rgb_data.fused.saturation;
+// uint16_t c = g_app_rgb_data.clean.clear;
 
-    // 基础过滤：总亮度太低 -> 无豆
-    //if (c < 300)
-        //return BEAN_NONE;
+// 基础过滤：总亮度太低 -> 无豆
+// if (c < 300)
+// return BEAN_NONE;
 
-    // 第1层：白芸豆 - H >= 90 + S <= 30（低饱和度，色相偏冷）
-    //if (h >= 90 && s <= 30)
-        //return BEAN_WHITE; // 3
+// 第1层：白芸豆 - H >= 90 + S <= 30（低饱和度，色相偏冷）
+// if (h >= 90 && s <= 30)
+// return BEAN_WHITE; // 3
 
-    // 第2层：绿豆 - S >= 40（高饱和度，颜色最鲜艳）
-    //if (s >= 40)
-        //return BEAN_GREEN; // 2
+// 第2层：绿豆 - S >= 40（高饱和度，颜色最鲜艳）
+// if (s >= 40)
+// return BEAN_GREEN; // 2
 
-    // 第3层：黄豆 - S 32-39（中等饱和度）+ H >= 50（暖色调确认）
-    //if (s >= 32 && h >= 50)
-        //return BEAN_YELLOW; // 1
+// 第3层：黄豆 - S 32-39（中等饱和度）+ H >= 50（暖色调确认）
+// if (s >= 32 && h >= 50)
+// return BEAN_YELLOW; // 1
 
-    // 落入间隙区 -> 保守返回未知
-    //return BEAN_NONE; // 0
+// 落入间隙区 -> 保守返回未知
+// return BEAN_NONE; // 0
 //}
 
 /**
@@ -269,6 +269,36 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  */
 
 // uint8_t App_Rgb_Get_Result(void)
+//{
+//     uint16_t h = g_app_rgb_data.fused.hue;
+//     uint8_t s = g_app_rgb_data.fused.saturation;
+//     uint8_t b_pct = g_app_rgb_data.fused.blue_percent;
+//     uint16_t c = g_app_rgb_data.clean.clear;
+//
+//     // 基础过滤：如果总亮度太低，认为没有放豆子
+//     if (c < 300)
+//         return BEAN_NONE;
+//
+//     // 逻辑 A: 判定白芸豆 (H特征明显)
+//     if (h >= 100 && s <= 28)
+//         return BEAN_WHITE; // 3
+//
+//     // 逻辑 B: 区分绿豆与黄豆 (利用 S 和 B% 的梯度差)
+//     if (h >= 50 && h <= 85)
+//     {
+//         if (s > 40 && b_pct <= 22)
+//             return BEAN_GREEN; // 2 绿豆
+//         if (s <= 40 && b_pct > 22)
+//             return BEAN_YELLOW; // 1 黄豆
+//     }
+//
+//     // 逻辑 C: 冗余补偿 (根据 Clear 亮度做最后兜底)
+//     if (c > 5000)
+//         return BEAN_WHITE; // 3
+//     if (c < 1800)
+//         return BEAN_GREEN; // 2
+//
+//     return BEAN_NONE; // 0
 // {
 //    uint16_t h = g_app_rgb_data.fused.hue;
 //    uint8_t s = g_app_rgb_data.fused.saturation;
@@ -317,27 +347,27 @@ static void Math_Convert_Tool(uint16_t r, uint16_t g, uint16_t b,
  *   C-B >= 1900 && S <= 37        -> YELLOW
  *   其他                          -> NONE
  */
-//uint8_t App_Rgb_Get_Result(void)
+// uint8_t App_Rgb_Get_Result(void)
 //{
-//    uint16_t h  = g_app_rgb_data.fused.hue;
-//    uint8_t  s  = g_app_rgb_data.fused.saturation;
-//    uint16_t c  = g_app_rgb_data.clean.clear;
-//    uint16_t cb = c - g_app_rgb_data.clean.blue;
+//     uint16_t h  = g_app_rgb_data.fused.hue;
+//     uint8_t  s  = g_app_rgb_data.fused.saturation;
+//     uint16_t c  = g_app_rgb_data.clean.clear;
+//     uint16_t cb = c - g_app_rgb_data.clean.blue;
 //
-//    if (c < 300)
-//        return BEAN_NONE;
+//     if (c < 300)
+//         return BEAN_NONE;
 //
-//    if (h >= 100 && cb > 3000)
-//        return BEAN_WHITE;
+//     if (h >= 100 && cb > 3000)
+//         return BEAN_WHITE;
 //
-//    if (cb <= 1400 && s >= 36)
-//        return BEAN_GREEN;
+//     if (cb <= 1400 && s >= 36)
+//         return BEAN_GREEN;
 //
-//    if (cb >= 1900 && s <= 37)
-//        return BEAN_YELLOW;
+//     if (cb >= 1900 && s <= 37)
+//         return BEAN_YELLOW;
 //
-//    return BEAN_NONE;
-//}
+//     return BEAN_NONE;
+// }
 
 /**
  * @brief 根据实测 RGBC 原始通道差值进行豆子分类判定
@@ -410,7 +440,6 @@ uint8_t App_Rgb_Get_Result(void)
     /* ====== 间隙区 ====== */
     return BEAN_NONE;            // 0
 }
-
 
 /**
  * @brief 带置信度校验的结果输出函数
