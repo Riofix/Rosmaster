@@ -934,21 +934,10 @@ class BrainNode(Node):
                 self.dispatch_task("chassis", "base", "move_to",
                                    {"pos": self.POS_DROP_ZONE})
                 self.has_sent_cmd = True
-                self._arrival_wait = 0
                 self._start_hand_arrival(["handle_left", "handle_right", "handle_mid"])
                 self.get_logger().info("[POST_GRAB] Phase0: left→5 + right→4 + mid→1 + chassis→drop")
 
-            # 盲等 200ms 让底盘动起来, 期间持续喂 hand_arrival 观测 saw_low
-            if self._arrival_wait < 10:
-                self._arrival_wait += 1
-                self._check_hand_arrival({
-                    "handle_left":  self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False),
-                    "handle_right": self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False),
-                    "handle_mid":   self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False),
-                })
-                return
-
-            # 三手到位(新消抖) + 底盘经过避障点A
+            # 三手到位(新消抖) + 底盘越过避障点A (编码器判断)
             hands_ok = self._check_hand_arrival({
                 "handle_left":  self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False),
                 "handle_right": self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False),
@@ -956,7 +945,7 @@ class BrainNode(Node):
             })
             enc = self.world.get("chassis", {}).get("motor_encoder", [0, 0, 0, 0])
             avg = (enc[0] + enc[2]) / 2.0 if len(enc) >= 4 else 0
-            if hands_ok and abs(avg - self.POS_OBSTACLE_A) < 600:
+            if hands_ok and avg >= self.POS_OBSTACLE_A:
                 self._post_grab_phase = 1
                 self.has_sent_cmd = False
                 self.get_logger().info(f"[POST_GRAB] Phase0 完成 (enc={avg:.0f}), → Phase1")
