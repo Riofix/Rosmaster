@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 import json
-from collections import Counter
+from collections import Counter, deque
 from ament_index_python.packages import get_package_share_directory
 
 # =====================================================================
@@ -105,6 +105,12 @@ class BrainNode(Node):
         # ======================== 统一到达检测 ========================
         self._arrival_wait = 0         # 指令下发后等待计数 (确保 reset 已传播)
         self._arrival_stable = 0       # 到达信号稳定计数 (连续为 True 的 tick 数)
+        # 抓手独立消抖 (saw_low + 滑动窗口投票)
+        self._hand_arrival = {}
+        # 底盘独立消抖
+        self._ch_wait = 0
+        self._ch_stable = 0
+        self._ch_saw_low = False
 
         # ======================== 全局指令计数器 ========================
         self._task_counter = 0        # 自增 task_id
@@ -469,8 +475,10 @@ class BrainNode(Node):
     def _handle_move_grab(self):
         """
         Phase0(并发): mid→7(CCW) + chassis→grab_zone
-        Phase1(底盘到位): left→6(CCW) + right→8(CW)
-        Phase2(三手全到位+稳定0.5s): → GRABBING
+          抓手 mid: saw_low + 滑动窗口投票
+          底盘:     旧机制 (wait_ticks + saw_low + stable_ticks)
+        Phase1: left→6(CCW) + right→8(CW)
+          两个抓手各自独立: saw_low + 滑动窗口投票
         """
         if self._grab_move_phase == 0:
             if not self.has_sent_cmd:
@@ -478,12 +486,13 @@ class BrainNode(Node):
                 self.dispatch_task("chassis", "base", "move_to",
                                    {"pos": self.POS_GRAB_ZONE})
                 self.has_sent_cmd = True
+                self._start_hand_arrival(["handle_mid"])
                 self._start_arrival_wait()
                 self.get_logger().info("[MOVE_TO_GRAB] Phase0: mid→7 + chassis→grab")
 
             mid_ok = self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False)
             chassis_ok = self.world.get("chassis", {}).get("arrival_done", False)
-            if self._check_arrival(mid_ok and chassis_ok):
+            if self._check_hand_arrival({"handle_mid": mid_ok}) and self._check_arrival(chassis_ok):
                 self.get_logger().info("[MOVE_TO_GRAB] Phase0 完成, 进入 Phase1")
                 self._grab_move_phase = 1
                 self.has_sent_cmd = False
@@ -493,12 +502,12 @@ class BrainNode(Node):
                 self._move_hand_to("handle_left",  6, self.DIR_CCW)
                 self._move_hand_to("handle_right", 8, self.DIR_CW)
                 self.has_sent_cmd = True
-                self._start_arrival_wait()
+                self._start_hand_arrival(["handle_left", "handle_right"])
                 self.get_logger().info("[MOVE_TO_GRAB] Phase1: left→6 + right→8")
 
             left_ok = self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False)
             right_ok = self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False)
-            if self._check_arrival(left_ok and right_ok, wait_ticks=5, stable_ticks=10):
+            if self._check_hand_arrival({"handle_left": left_ok, "handle_right": right_ok}):
                 self.get_logger().info("[MOVE_TO_GRAB] 全部到位, 进入 GRABBING")
                 self._transition_to(self.ST_GRABBING)
 
@@ -925,33 +934,45 @@ class BrainNode(Node):
                 self.dispatch_task("chassis", "base", "move_to",
                                    {"pos": self.POS_DROP_ZONE})
                 self.has_sent_cmd = True
-                self.get_logger().info("[POST_GRAB] Phase0: 3手AVOID_1 + 底盘→drop_zone 并发")
+                self._arrival_wait = 0
+                self._start_hand_arrival(["handle_left", "handle_right", "handle_mid"])
+                self.get_logger().info("[POST_GRAB] Phase0: left→5 + right→4 + mid→1 + chassis→drop")
 
-            # 等 1 秒让底盘动起来, 再检测经过避障点A
+            # 盲等 200ms 让底盘动起来
             if self._arrival_wait < 10:
                 self._arrival_wait += 1
                 return
 
+            # 三手到位(新消抖) + 底盘经过避障点A
+            hands_ok = self._check_hand_arrival({
+                "handle_left":  self.world.get("handles", {}).get("handle_left", {}).get("track_arrived", False),
+                "handle_right": self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False),
+                "handle_mid":   self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False),
+            })
             enc = self.world.get("chassis", {}).get("motor_encoder", [0, 0, 0, 0])
             avg = (enc[0] + enc[2]) / 2.0 if len(enc) >= 4 else 0
-            if abs(avg - self.POS_OBSTACLE_A) < 600:  # 经过避障点A (±2.5cm)
+            if hands_ok and abs(avg - self.POS_OBSTACLE_A) < 600:
                 self._post_grab_phase = 1
                 self.has_sent_cmd = False
-                self.get_logger().info(f"[POST_GRAB] 底盘经过避障点A (enc={avg:.0f}), Phase1")
+                self.get_logger().info(f"[POST_GRAB] Phase0 完成 (enc={avg:.0f}), → Phase1")
 
         elif self._post_grab_phase == 1:
             if not self.has_sent_cmd:
-                self._move_hand_to("handle_left",  5, self.DIR_CW)
-                self._move_hand_to("handle_right", 6, self.DIR_CW)
+                # left 不动
+                self._move_hand_to("handle_right", 8, self.DIR_CW)
                 self._move_hand_to("handle_mid",   3, self.DIR_CW)
                 self.has_sent_cmd = True
+                self._start_hand_arrival(["handle_right", "handle_mid"])
                 self._start_arrival_wait()
-                self.get_logger().info("[POST_GRAB] Phase1: 3手AVOID_2")
+                self.get_logger().info("[POST_GRAB] Phase1: left不动 + right→8 + mid→3")
 
-            if self._check_arrival(
-                self._all_hands_arrived()
-                and self.world.get("chassis", {}).get("arrival_done", False)
-            ):
+            if (self._check_hand_arrival({
+                    "handle_right": self.world.get("handles", {}).get("handle_right", {}).get("track_arrived", False),
+                    "handle_mid":   self.world.get("handles", {}).get("handle_mid", {}).get("track_arrived", False),
+                })
+                    and self._check_arrival(
+                        self.world.get("chassis", {}).get("arrival_done", False)
+                    )):
                 self.get_logger().info("[POST_GRAB] 全部到位, → EXECUTE_TARGET")
                 self._transition_to(self.ST_EXECUTE_TARGET)
 
@@ -1088,11 +1109,14 @@ class BrainNode(Node):
                     f"[DROP] 批次{self._drop_batch} {hand} → pos={target} dir={direction}"
                 )
             self._drop_step = 1
-            self._start_arrival_wait()
+            self._start_hand_arrival(hands)
 
-        # ──── step 1: 等待三手 X 轴到位 (先等 reset 传播, 再等信号稳定) ────
+        # ──── step 1: 等待 hands X 轴到位 (滑动窗口消抖) ────
         elif self._drop_step == 1:
-            if self._check_arrival(self._hands_arrived(hands), wait_ticks=5, stable_ticks=5):
+            if self._check_hand_arrival({
+                h: self.world.get("handles", {}).get(h, {}).get("track_arrived", False)
+                for h in hands
+            }):
                 if droppers:
                     self.get_logger().info(
                         f"[DROP] 批次{self._drop_batch} X轴到位，放豆 "
@@ -1238,6 +1262,34 @@ class BrainNode(Node):
             return False
 
     # =================================================================
+    #  到达检测 — 抓手独立 (saw_low + 滑动窗口投票 8tick/75%)
+    # =================================================================
+
+    def _start_hand_arrival(self, hands):
+        for h in hands:
+            self._hand_arrival[h] = {
+                "deque": deque([False] * 8, maxlen=8),
+                "saw_low": False,
+            }
+
+    def _check_hand_arrival(self, hand_states):
+        """hand_states: {name: bool}, 所有手都通过才返回 True"""
+        all_ok = True
+        for h, arrived in hand_states.items():
+            st = self._hand_arrival.get(h)
+            if st is None:
+                continue
+            if not arrived:
+                st["saw_low"] = True
+            if not st["saw_low"]:
+                all_ok = False
+                continue
+            st["deque"].append(arrived)
+            if sum(st["deque"]) / 8 < 0.75:
+                all_ok = False
+        return all_ok
+
+    # =================================================================
     #  工具方法
     # =================================================================
 
@@ -1248,6 +1300,10 @@ class BrainNode(Node):
         self._arrival_wait = 0
         self._arrival_stable = 0
         self._arrival_saw_low = False
+        self._hand_arrival = {}
+        self._ch_wait = 0
+        self._ch_stable = 0
+        self._ch_saw_low = False
         self._post_grab_phase = 0
         self._grab_move_phase = 0
         self._hand_pos = {"handle_left": 1, "handle_mid": 2, "handle_right": 3}

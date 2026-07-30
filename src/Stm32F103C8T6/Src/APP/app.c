@@ -54,7 +54,7 @@ void App_Tick(void)
     }
 
     // ---- 2. 电机状态轮询 (2 tick = 4ms/次, 每电机 8ms/次 = 125Hz) ----
-    if (tick_count % 4 == 0)
+    if (tick_count % 10 == 0)
     {
         static uint8_t poll_motor_id = 1;
         App_Motor_RequestState(poll_motor_id);

@@ -189,10 +189,44 @@ void App_Action_Grab(void)
         return;
     }
 
-    /* ---- 死区等待: 发指令后跳过若干 tick, 等硬件 flag 真实翻转 ---- */
+    /* ---- 死区等待: 发指令后跳过若干 tick, 等硬件 flag 真实翻转 ----
+     *
+     *   BUG FIX: 死区期间仅抑制"推进状态", 但仍然检测 flag=0 并记录。
+     *   否则如果电机在死区内完成了 flag: 1→0→1 的过渡, 或者电机响应
+     *   延迟导致死区结束后 flag 仍为 1, 就会永远错过"见 0"而导致卡死。
+     * ------------------------------------------------------------ */
     if (s_grab_deadtime > 0)
     {
         s_grab_deadtime--;
+        /* 只记录"见 0", 不推进状态 (GRAB_RESET走自己的逻辑, 此处跳过) */
+        if (s_grab_step != GRAB_RESET)
+        {
+            switch (s_grab_step)
+            {
+            /* 电机2: 降/升 */
+            case GRAB_DOWN10:
+            case GRAB_DOWN1_A:
+            case GRAB_DOWN1_B:
+            // case GRAB_DOWN1_C:
+            case GRAB_UP11:
+                if (!(g_motors[1].flag & 0x02))
+                    s_grab_flag_low |= 0x02;
+                break;
+
+            /* 电机1: 横扫 */
+            case GRAB_SWEEP_CCW:
+            case GRAB_SWEEP_CW:
+            case GRAB_SWEEP_CW2:
+                // case GRAB_SWEEP_CCW2:
+                if (!(g_motors[0].flag & 0x02))
+                    s_grab_flag_low |= 0x01;
+                break;
+
+            /* 无刷启停: 无需等电机到位, 不处理 */
+            default:
+                break;
+            }
+        }
         return;
     }
 

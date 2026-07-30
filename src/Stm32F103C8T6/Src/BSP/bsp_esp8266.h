@@ -20,33 +20,18 @@
 // #define SERVER_IP       "192.168.1.1"
 // #define SERVER_PORT     "8080"
 // STA 模式参数
-<<<<<<< HEAD
- #define WIFI_SSID       "ll"
- #define WIFI_PWD        "xy119125"
- #define SERVER_IP       "192.168.43.167"
- #define SERVER_PORT     "3456"
-//#define WIFI_SSID "Redmi K70"
-//#define WIFI_PWD "44704470"
-//#define SERVER_IP "10.245.159.63"
-// #define SERVER_PORT "3456"
-//#define WIFI_SSID "Redmi K70"
-//#define WIFI_PWD "44704470"
-//#define SERVER_IP "10.245.159.63"
-//#define SERVER_PORT "3456"
-=======
 // #define WIFI_SSID       "ll"
 // #define WIFI_PWD        "xy119125"
 // #define SERVER_IP       "192.168.43.167"
 // #define SERVER_PORT     "3456"
-//#define WIFI_SSID "Redmi K70"
-//#define WIFI_PWD "44704470"
-//#define SERVER_IP "10.222.42.175"
-//#define SERVER_PORT "3456"
- #define WIFI_SSID "Redmi K70"
- #define WIFI_PWD "44704470"
- #define SERVER_IP "10.222.42.63"
- #define SERVER_PORT "3456"
->>>>>>> d8d04d41778d4129254138e3485503276e7ca933
+// #define WIFI_SSID "Redmi K70"
+// #define WIFI_PWD "44704470"
+// #define SERVER_IP "10.222.42.175"
+// #define SERVER_PORT "3456"
+#define WIFI_SSID "Redmi K70"
+#define WIFI_PWD "44704470"
+#define SERVER_IP "10.222.42.63"
+#define SERVER_PORT "3456"
 #else
 // AP 模式参数
 #define AP_SSID "STM32_Robot"
@@ -60,5 +45,6 @@
 
 /* ==================== 接口声明 ==================== */
 uint8_t ESP8266_Init(void);
+
 
 #endif /* _BSP_ESP8266_H */
