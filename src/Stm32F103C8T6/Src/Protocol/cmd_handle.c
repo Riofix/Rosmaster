@@ -126,6 +126,7 @@ static void Handle_Action_Move(uint8_t *data, uint8_t len)
   if (len < 2)
     return;
   App_Action_MoveTo(data[0], data[1]);
+  App_Motor_MarkTrackPending();
   Send_Ok_Ack(data[0], CMD_RX_ACTION_MOVE);
 }
 

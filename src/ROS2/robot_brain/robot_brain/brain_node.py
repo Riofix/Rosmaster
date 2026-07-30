@@ -1263,19 +1263,15 @@ class BrainNode(Node):
         for h in hands:
             self._hand_arrival[h] = {
                 "deque": deque([False] * 8, maxlen=8),
-                "saw_low": False,
             }
 
     def _check_hand_arrival(self, hand_states):
-        """hand_states: {name: bool}, 所有手都通过才返回 True"""
+        """hand_states: {name: bool}, 纯滑动窗口投票 (8tick/75%)，不再需要 saw_low。
+        track_arrived 由 STM32 的 0x7E 主动上报，是权威到位信号。"""
         all_ok = True
         for h, arrived in hand_states.items():
             st = self._hand_arrival.get(h)
             if st is None:
-                continue
-            if not arrived:
-                st["saw_low"] = True
-            if not st["saw_low"]:
                 all_ok = False
                 continue
             st["deque"].append(arrived)
@@ -1309,11 +1305,7 @@ class BrainNode(Node):
         return mapping[min(mapping, key=lambda p: abs(p - pulse))]
 
     def _move_hand_to(self, hand, pos_id, direction):
-        """track_move(0x7A): 环轨点位移动, pos_id 1~8"""
-        # 已在目标位且 track_arrived 有效 → 跳过, 避免绕整圈
-        if (self._hand_pos.get(hand) == pos_id and
-            self.world.get("handles", {}).get(hand, {}).get("track_arrived", False)):
-            return
+        """track_move(0x7A): 环轨点位移动, pos_id 1~8, 始终下发不跳过"""
         self._hand_pos[hand] = pos_id
         clockwise = 1 if direction == self.DIR_CW else 0
         self.dispatch_task(hand, "stepper_x", "track_move",

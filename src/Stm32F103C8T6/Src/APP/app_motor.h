@@ -68,4 +68,9 @@ void App_Motor_UpdateCallback(Emm_Feedback_t *msg);
  */
 void App_Motor_RequestState(uint8_t addr);
 
+/**
+ * @brief track_move 下发后标记等待到位返回
+ */
+void App_Motor_MarkTrackPending(void);
+
 #endif

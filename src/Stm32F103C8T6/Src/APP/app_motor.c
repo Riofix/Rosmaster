@@ -1,9 +1,14 @@
 #include "app_motor.h"
 #include "bsp_usart.h"
+#include "protocol.h"
+#include "cmd_handle.h"
 #include <string.h>
 
 // 定义两个电机对象
 MotorState_t g_motors[2];
+
+// track_move 到位返回标记
+static uint8_t s_track_pending = 0;
 
 // ======================= 解析函数定义 =======================
 
@@ -60,6 +65,11 @@ void App_Motor_Init(void)
     Protocol_Emm_Init(App_Motor_UpdateCallback);
 }
 
+void App_Motor_MarkTrackPending(void)
+{
+    s_track_pending = 1;
+}
+
 void App_Motor_UpdateCallback(Emm_Feedback_t *msg)
 {
     uint8_t idx = 0xFF;
@@ -75,6 +85,17 @@ void App_Motor_UpdateCallback(Emm_Feedback_t *msg)
     if (msg->func == 0x43)
     {
         Parse_SystemState(idx, msg->data, msg->len);
+    }
+
+    // 到位返回 (0xFD + 0x9F): 电机主动通知已到达目标位置
+    if (msg->func == 0xFD && msg->len >= 1 && msg->data[0] == 0x9F)
+    {
+        if (msg->addr == 1 && s_track_pending)
+        {
+            s_track_pending = 0;
+            uint8_t done = CMD_TX_TRACK_DONE;
+            Protocol_PackAndSend(&done, 1);
+        }
     }
 }
 

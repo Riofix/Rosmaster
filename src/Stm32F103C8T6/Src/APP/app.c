@@ -56,9 +56,8 @@ void App_Tick(void)
     // ---- 2. 电机状态轮询 (2 tick = 4ms/次, 每电机 8ms/次 = 125Hz) ----
     if (tick_count % 10 == 0)
     {
-        static uint8_t poll_motor_id = 1;
-        App_Motor_RequestState(poll_motor_id);
-        poll_motor_id = (poll_motor_id == 1) ? 2 : 1;
+        App_Motor_RequestState(1);
+        App_Motor_RequestState(2);
     }
 
     // ---- 3.自动上报 (频率控制, 避免 USART2 阻塞) ----
@@ -103,23 +102,23 @@ void App_Tick(void)
             uint16_t cr = g_app_rgb_data.clean.clear - g_app_rgb_data.clean.red;
             uint16_t cg = g_app_rgb_data.clean.clear - g_app_rgb_data.clean.green;
             uint16_t cb = g_app_rgb_data.clean.clear - g_app_rgb_data.clean.blue;
-            int16_t  rg = (int16_t)g_app_rgb_data.clean.red - (int16_t)g_app_rgb_data.clean.green;
-            int16_t  rb = (int16_t)g_app_rgb_data.clean.red - (int16_t)g_app_rgb_data.clean.blue;
-            int16_t  gb = (int16_t)g_app_rgb_data.clean.green - (int16_t)g_app_rgb_data.clean.blue;
+            int16_t rg = (int16_t)g_app_rgb_data.clean.red - (int16_t)g_app_rgb_data.clean.green;
+            int16_t rb = (int16_t)g_app_rgb_data.clean.red - (int16_t)g_app_rgb_data.clean.blue;
+            int16_t gb = (int16_t)g_app_rgb_data.clean.green - (int16_t)g_app_rgb_data.clean.blue;
 
             uint8_t cln_buf[21];
             cln_buf[0] = CMD_TX_STREAM_COLOR_CLN;
             // RGBC (uint16 LE, 8 bytes)
-            cln_buf[1]  = (uint8_t)(g_app_rgb_data.clean.red & 0xFF);
-            cln_buf[2]  = (uint8_t)((g_app_rgb_data.clean.red >> 8) & 0xFF);
-            cln_buf[3]  = (uint8_t)(g_app_rgb_data.clean.green & 0xFF);
-            cln_buf[4]  = (uint8_t)((g_app_rgb_data.clean.green >> 8) & 0xFF);
-            cln_buf[5]  = (uint8_t)(g_app_rgb_data.clean.blue & 0xFF);
-            cln_buf[6]  = (uint8_t)((g_app_rgb_data.clean.blue >> 8) & 0xFF);
-            cln_buf[7]  = (uint8_t)(g_app_rgb_data.clean.clear & 0xFF);
-            cln_buf[8]  = (uint8_t)((g_app_rgb_data.clean.clear >> 8) & 0xFF);
+            cln_buf[1] = (uint8_t)(g_app_rgb_data.clean.red & 0xFF);
+            cln_buf[2] = (uint8_t)((g_app_rgb_data.clean.red >> 8) & 0xFF);
+            cln_buf[3] = (uint8_t)(g_app_rgb_data.clean.green & 0xFF);
+            cln_buf[4] = (uint8_t)((g_app_rgb_data.clean.green >> 8) & 0xFF);
+            cln_buf[5] = (uint8_t)(g_app_rgb_data.clean.blue & 0xFF);
+            cln_buf[6] = (uint8_t)((g_app_rgb_data.clean.blue >> 8) & 0xFF);
+            cln_buf[7] = (uint8_t)(g_app_rgb_data.clean.clear & 0xFF);
+            cln_buf[8] = (uint8_t)((g_app_rgb_data.clean.clear >> 8) & 0xFF);
             // C-R, C-G, C-B (uint16 LE, 6 bytes)
-            cln_buf[9]  = (uint8_t)(cr & 0xFF);
+            cln_buf[9] = (uint8_t)(cr & 0xFF);
             cln_buf[10] = (uint8_t)((cr >> 8) & 0xFF);
             cln_buf[11] = (uint8_t)(cg & 0xFF);
             cln_buf[12] = (uint8_t)((cg >> 8) & 0xFF);

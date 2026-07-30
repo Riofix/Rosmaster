@@ -46,6 +46,7 @@ class ProtocolNode(Node):
             0x5C: self.parse_handle_pwm,
             0x5D: self.parse_handle_color,
             0x7C: self.parse_action_done,
+            0x7E: self.parse_track_done,
         }
 
         self.chassis_cmd_table = {
@@ -125,13 +126,8 @@ class ProtocolNode(Node):
                 "flag": flag
             }
 
-            # 双电机到位检测：X轴(0x01) 和 Z轴(0x02) 的 flag bit1 都为 1
-            motors = self.handle_states[name]["stepmotor"]
-            x_flag = motors.get(0x01, {}).get("flag", 0)
-            z_flag = motors.get(0x02, {}).get("flag", 0)
-            self.handle_states[name]["track_arrived"] = bool(
-                (x_flag & 0x02) and (z_flag & 0x02)
-            )
+            # 双电机到位检测已迁移至 STM32 主动上报 (0x7E), 不再从 odom flag 计算
+            # track_arrived 仅由 parse_track_done 置 True, internal_cmd_cb 置 False
 
     def parse_handle_pwm(self, name, data):
         """
@@ -149,6 +145,9 @@ class ProtocolNode(Node):
 
     def parse_action_done(self, name, data):
         self.handle_states[name]["action_done"] = True
+
+    def parse_track_done(self, name, data):
+        self.handle_states[name]["track_arrived"] = True
 
     # ======================== 底盘句柄 ========================
     def parse_chassis_status(self, data):

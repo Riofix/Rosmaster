@@ -6,8 +6,8 @@
  *   App_Action_MoveTo  →  cmd_handle 收到 0x7A 时直接调用, 算路径发指令即返回
  *   App_Action_Grab    →  App_Tick 末尾周期调用, 内部状态机推进抓取序列
  *
- *   到位检测: 电机驱动 ACK 可能携带旧 move 的到位标志,
- *   因此必须"先见 flag bit1=0, 再见 bit1=1"才算真正到位。
+ *   到位检测: 死区等待(100ms) 后, flag bit1 连续 10 tick (20ms) 为 1 才算到位。
+ *   不再依赖"先见低再見高", 避免 flag 跳变过快导致卡死。
  */
 
 #include "app_action.h"
@@ -60,11 +60,12 @@ typedef enum
 
 /* Grab 静态状态 */
 static GrabStep_t s_grab_step = GRAB_IDLE; /* 当前步骤 */
-static uint8_t s_grab_flag_low = 0;        /* 到位清零检测 (bit0=电机1, bit1=电机2) */
+static uint8_t s_grab_stable = 0;          /* 连续到位计数 (flag bit1 连续为1的tick数) */
 static uint32_t s_grab_timeout = 0;        /* 超时计数 */
 static uint16_t s_grab_deadtime = 0;       /* 死区计数 (发指令后跳过检测的tick数) */
 #define GRAB_TIMEOUT 30000                 /* 30 秒超时 (tick数) */
 #define GRAB_DEADTIME 50                   /* 死区 50 tick × 2ms = 100ms */
+#define GRAB_STABLE_TICKS 10               /* 连续 10 tick (20ms) 稳定置位才算到位 */
 
 /* ================================================================
  * 原点偏移量: 上电后编码器归零, 但抓手实际在某一物理位上。
@@ -191,42 +192,12 @@ void App_Action_Grab(void)
 
     /* ---- 死区等待: 发指令后跳过若干 tick, 等硬件 flag 真实翻转 ----
      *
-     *   BUG FIX: 死区期间仅抑制"推进状态", 但仍然检测 flag=0 并记录。
-     *   否则如果电机在死区内完成了 flag: 1→0→1 的过渡, 或者电机响应
-     *   延迟导致死区结束后 flag 仍为 1, 就会永远错过"见 0"而导致卡死。
+     *   死区期间不检测到位, 只等待。电机需要时间响应指令让 flag 从1翻到0。
+     *   死区结束后再用连续稳定计数判断到位, 不再依赖"先见低"。
      * ------------------------------------------------------------ */
     if (s_grab_deadtime > 0)
     {
         s_grab_deadtime--;
-        /* 只记录"见 0", 不推进状态 (GRAB_RESET走自己的逻辑, 此处跳过) */
-        if (s_grab_step != GRAB_RESET)
-        {
-            switch (s_grab_step)
-            {
-            /* 电机2: 降/升 */
-            case GRAB_DOWN10:
-            case GRAB_DOWN1_A:
-            case GRAB_DOWN1_B:
-            // case GRAB_DOWN1_C:
-            case GRAB_UP11:
-                if (!(g_motors[1].flag & 0x02))
-                    s_grab_flag_low |= 0x02;
-                break;
-
-            /* 电机1: 横扫 */
-            case GRAB_SWEEP_CCW:
-            case GRAB_SWEEP_CW:
-            case GRAB_SWEEP_CW2:
-                // case GRAB_SWEEP_CCW2:
-                if (!(g_motors[0].flag & 0x02))
-                    s_grab_flag_low |= 0x01;
-                break;
-
-            /* 无刷启停: 无需等电机到位, 不处理 */
-            default:
-                break;
-            }
-        }
         return;
     }
 
@@ -241,7 +212,7 @@ void App_Action_Grab(void)
         if (g_motors[0].flag & 0x02 && g_motors[1].flag & 0x02)
         {
             s_grab_step = GRAB_IDLE;
-            s_grab_flag_low = 0;
+            s_grab_stable = 0;
             s_grab_timeout = 0;
             //---- 复位后清零编码器位置 ----
             Emm_V5_Reset_CurPos_To_Zero(1);
@@ -252,8 +223,9 @@ void App_Action_Grab(void)
 
     /* ---- 到位检测: 电机1 (横扫) / 电机2 (升降) ----
      *
-     *   必须先见 flag bit1 清零(电机开始移动), 再见置位(到达新位置)。
-     *   这是为了防止指令发出后 ACK 里的旧到位标志被误判。
+     *   死区结束后, 用连续稳定计数判定: flag bit1 连续为 1 满
+     *   GRAB_STABLE_TICKS 个 tick 才算真正到位。不再依赖"先见低"。
+     *   避免 flag 跳变 1→0→1 过快导致永远错过低位而卡死。
      * ------------------------------------------------------------ */
     switch (s_grab_step)
     {
@@ -263,10 +235,15 @@ void App_Action_Grab(void)
     case GRAB_DOWN1_B:
     // case GRAB_DOWN1_C:
     case GRAB_UP11:
-        if (!(g_motors[1].flag & 0x02))
-            s_grab_flag_low |= 0x02; /* 见识低位 → 标记"已清零" */
-        else if (s_grab_flag_low & 0x02)
-            s_grab_step++; /* 见识置位 + 已清零 → 到位, 推进 */
+        if (g_motors[1].flag & 0x02) {
+            s_grab_stable++;
+            if (s_grab_stable >= GRAB_STABLE_TICKS) {
+                s_grab_step++;
+                s_grab_stable = 0;
+            }
+        } else {
+            s_grab_stable = 0;
+        }
         break;
 
     /* 电机1 等待: 横扫 */
@@ -274,10 +251,15 @@ void App_Action_Grab(void)
     case GRAB_SWEEP_CW:
     case GRAB_SWEEP_CW2:
         // case GRAB_SWEEP_CCW2:
-        if (!(g_motors[0].flag & 0x02))
-            s_grab_flag_low |= 0x01; /* 见识低位 → 标记"已清零" */
-        else if (s_grab_flag_low & 0x01)
-            s_grab_step++; /* 见识置位 + 已清零 → 到位, 推进 */
+        if (g_motors[0].flag & 0x02) {
+            s_grab_stable++;
+            if (s_grab_stable >= GRAB_STABLE_TICKS) {
+                s_grab_step++;
+                s_grab_stable = 0;
+            }
+        } else {
+            s_grab_stable = 0;
+        }
         break;
 
     /* 无刷启停: 不用等, 下一步立即执行 */
@@ -296,7 +278,7 @@ void App_Action_Grab(void)
         uint8_t done = CMD_TX_ACTION_DONE;
         Protocol_PackAndSend(&done, 1); /* 通知上位机抓取完成 */
         s_grab_step = GRAB_IDLE;
-        s_grab_flag_low = 0;
+        s_grab_stable = 0;
         s_grab_timeout = 0;
         return;
     }
@@ -309,7 +291,7 @@ void App_Action_Grab(void)
         if (s_grab_step != s_last_sent)
         {
             s_last_sent = s_grab_step;
-            s_grab_flag_low = 0; /* 新状态重新开始到位检测 */
+            s_grab_stable = 0; /* 新状态重新开始连续到位计数 */
             s_grab_timeout = 0;  /* 重置超时 */
             s_grab_deadtime = GRAB_DEADTIME; /* 设死区: 等硬件 flag 真实翻转后再检测 */
 
@@ -376,7 +358,7 @@ void App_Action_GrabStart(void)
     if (s_grab_step == GRAB_IDLE)
     {
         s_grab_step = GRAB_DOWN10;
-        s_grab_flag_low = 0;
+        s_grab_stable = 0;
         s_grab_timeout = 0;
         s_grab_deadtime = 0;
     }
