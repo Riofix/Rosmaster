@@ -40,8 +40,8 @@ def load_tpls(path):
                     tpls[label].append(img)
     return tpls
 
-templates_l = load_tpls('newdataset-l') #
-templates_r = load_tpls('newdataset-r') #
+templates_l = load_tpls('dataset-l') #
+templates_r = load_tpls('dataset-r') #
 
 # --- 3. 核心算法 ---
 def preprocess(buf, p):
