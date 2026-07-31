@@ -31,11 +31,11 @@
 /* ================================================================
  * 速度参数
  * ================================================================ */
-#define VEL_HORIZ 25 /* 电机1 横扫速度 */
-#define VEL_MOVE 120 /* 电机1 点位移动速度 */
+#define VEL_HORIZ 25  /* 电机1 横扫速度 */
+#define VEL_MOVE 120  /* 电机1 点位移动速度 */
 #define VEL_VERT 1000 /* 电机2 垂直速度 */
-#define ACC 100      /* 电机1 水平加速度 */
-#define ACC_VERT 250 /* 电机2 垂直加速度 */
+#define ACC 100       /* 电机1 水平加速度 */
+#define ACC_VERT 250  /* 电机2 垂直加速度 */
 
 /* ================================================================
  * Grab 状态机内部枚举 (不暴露给外部)
@@ -54,8 +54,8 @@ typedef enum
     GRAB_SWEEP_CW2, /* 顺时针横扫 (第2组) */
     // GRAB_DOWN1_C,    /* 降 1cm (第3次) */
     // GRAB_SWEEP_CCW2,  /* 逆时针横扫 (第2组) */
-    GRAB_UP11,     /* 升 11cm 回位 */
-    GRAB_BLDC_OFF  /* 关无刷 */
+    GRAB_UP11,    /* 升 11cm 回位 */
+    GRAB_BLDC_OFF /* 关无刷 */
 } GrabStep_t;
 
 /* Grab 静态状态 */
@@ -235,13 +235,17 @@ void App_Action_Grab(void)
     case GRAB_DOWN1_B:
     // case GRAB_DOWN1_C:
     case GRAB_UP11:
-        if (g_motors[1].flag & 0x02) {
+        if (g_motors[1].flag & 0x02)
+        {
             s_grab_stable++;
-            if (s_grab_stable >= GRAB_STABLE_TICKS) {
+            if (s_grab_stable >= GRAB_STABLE_TICKS)
+            {
                 s_grab_step++;
                 s_grab_stable = 0;
             }
-        } else {
+        }
+        else
+        {
             s_grab_stable = 0;
         }
         break;
@@ -251,13 +255,17 @@ void App_Action_Grab(void)
     case GRAB_SWEEP_CW:
     case GRAB_SWEEP_CW2:
         // case GRAB_SWEEP_CCW2:
-        if (g_motors[0].flag & 0x02) {
+        if (g_motors[0].flag & 0x02)
+        {
             s_grab_stable++;
-            if (s_grab_stable >= GRAB_STABLE_TICKS) {
+            if (s_grab_stable >= GRAB_STABLE_TICKS)
+            {
                 s_grab_step++;
                 s_grab_stable = 0;
             }
-        } else {
+        }
+        else
+        {
             s_grab_stable = 0;
         }
         break;
@@ -291,8 +299,8 @@ void App_Action_Grab(void)
         if (s_grab_step != s_last_sent)
         {
             s_last_sent = s_grab_step;
-            s_grab_stable = 0; /* 新状态重新开始连续到位计数 */
-            s_grab_timeout = 0;  /* 重置超时 */
+            s_grab_stable = 0;               /* 新状态重新开始连续到位计数 */
+            s_grab_timeout = 0;              /* 重置超时 */
             s_grab_deadtime = GRAB_DEADTIME; /* 设死区: 等硬件 flag 真实翻转后再检测 */
 
             switch (s_grab_step)

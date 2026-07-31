@@ -1130,8 +1130,8 @@ class BrainNode(Node):
                     self._drop_batch += 1
                     self._drop_step = 0
 
-        # ──── step 2: 开→关→开 三段式放豆 ────
-        # 到位后立即张开, 1.5s 后闭合, 0.5s 后再张开, 1s 后完成
+        # ──── step 2: 开→关→开→关 四段式放豆 ────
+        # 到位后立即张开, 1.5s 后闭合, 0.5s 后再张开, 1s 后闭合并完成
         elif self._drop_step == 2:
             self._drop_step_timer += 1
             if self._drop_step_timer == 1:          # 到位后立即张开
@@ -1152,9 +1152,11 @@ class BrainNode(Node):
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 舵机再张开 0°"
                 )
-            elif self._drop_step_timer >= 30:       # 开 1s → 完成
+            elif self._drop_step_timer >= 30:       # 开 1s → 闭合并完成
+                for hand in droppers:
+                    self.dispatch_task(hand, "servo", "move_to", {"angle": 90})
                 self.get_logger().info(
-                    f"[DROP] 批次{self._drop_batch} 完成"
+                    f"[DROP] 批次{self._drop_batch} 舵机关闭 90°，完成"
                 )
                 self._drop_batch += 1
                 self._drop_step = 0
