@@ -18,7 +18,7 @@ CAM_L_IDX, CAM_R_IDX = 1,2
 TW, TH = 300, 120
 STACK_SIZE = 10
 FULL_SEQ_VOTE_SIZE = 10 # 针对最终5位序列的投票深度
-MATCH_SIZE = (64, 64)
+MATCH_SIZE = (32, 32)
 
 # 缓冲区
 buf_l, buf_r = deque(maxlen=STACK_SIZE), deque(maxlen=STACK_SIZE)
