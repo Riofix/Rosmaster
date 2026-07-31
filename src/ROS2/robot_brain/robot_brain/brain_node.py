@@ -723,67 +723,26 @@ class BrainNode(Node):
 
     def _plan_ideal_paths(self):
         """
-        贪心+10 路径规划。
-        返回 drop_plan: [批次0: {hand: (pulse_target, direction, drop)}]
-        理想情况只有一批，三个手各一条指令，全部 drop=True。
+        理想路径规划：All-CW vs All-CCW，选总代价小的，全员同向单批。
+        同向保证无对穿碰撞。
         """
-        # AVOID_2 终点 = 状态9起点 (POST_GRAB 终态, 固定)
         current = {"handle_left": 5, "handle_mid": 3, "handle_right": 6}
         targets = {
             "handle_left":  self.target_L,
             "handle_mid":   self.target_M,
             "handle_right": self.target_R,
         }
+        hands = ["handle_left", "handle_mid", "handle_right"]
 
-        locked = set()      # 已锁定目标点位(POS索引)
-        plans = {}          # {hand: (pulse, dir)}
-        hands_done = set()
+        cw_total = sum(self._cw_cost(current[h], targets[h]) for h in hands)
+        ccw_total = sum(self._ccw_cost(current[h], targets[h]) for h in hands)
+        direction = self.DIR_CW if cw_total <= ccw_total else self.DIR_CCW
 
-        while len(hands_done) < 3:
-            candidates = []
-            for hand in ["handle_left", "handle_mid", "handle_right"]:
-                if hand in hands_done:
-                    continue
-                s = current[hand]
-                e = targets[hand]
+        plan = {}
+        for h in hands:
+            plan[h] = (self._pos_to_pulse(targets[h]), direction, True)
 
-                # CW 代价
-                cw = self._cw_cost(s, e)
-                for p in self._cw_path_nodes(s, e):
-                    if p in locked:
-                        cw += 10.0
-                if e in locked:
-                    cw += 10.0  # 目标点被其他手路径占用
-
-                # CCW 代价
-                ccw = self._ccw_cost(s, e)
-                for p in self._ccw_path_nodes(s, e):
-                    if p in locked:
-                        ccw += 10.0
-                if e in locked:
-                    ccw += 10.0
-
-                best_cost = min(cw, ccw)
-                best_dir = self.DIR_CW if cw <= ccw else self.DIR_CCW
-                candidates.append((best_cost, best_dir, hand, s, e))
-
-            # 代价最小者优先
-            candidates.sort(key=lambda x: x[0])
-            _, direction, hand, s, e = candidates[0]
-
-            plans[hand] = (self._pos_to_pulse(e), direction, True)
-            # 锁定目标点 + 路径经过的全部中间节点
-            locked.add(e)
-            if direction == self.DIR_CW:
-                for p in self._cw_path_nodes(s, e):
-                    locked.add(p)
-            else:
-                for p in self._ccw_path_nodes(s, e):
-                    locked.add(p)
-            hands_done.add(hand)
-            current[hand] = e
-
-        return [{hand: plans[hand] for hand in ["handle_left", "handle_mid", "handle_right"]}]
+        return [{h: plan[h] for h in hands}]
 
     # =================================================================
     #  路径规划 — 非理想（两批次）
