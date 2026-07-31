@@ -237,20 +237,38 @@ class VisionNode(Node):
         self.start_time = time.time()
 
     def enforce_unique(self, seq):
-        valid = ['1','2','3','4','5']
-        used = set()
-        res = ['N/A']*5
+        """
+        校验并补全序列。
+        - 5 位全唯一 → 直接通过
+        - 4 位唯一 + 1 位 N/A → 逻辑推演第 5 位（数学上确定）
+        - 有重复 → 不修复，保持原样（后续校验会拒绝，不进投票池）
+        """
+        valid = {'1', '2', '3', '4', '5'}
+        seen = {}          # digit → position
+        na_positions = []
 
-        for i,d in enumerate(seq):
-            if d in valid and d not in used:
-                res[i]=d
-                used.add(d)
+        for i, d in enumerate(seq):
+            if d in valid:
+                if d in seen:
+                    # 发现重复 → 无法确定哪个位置是对的，放弃修复
+                    return seq
+                seen[d] = i
+            else:
+                na_positions.append(i)
 
-        remain = [d for d in valid if d not in used]
-        for i in range(5):
-            if res[i]=="N/A" and remain:
-                res[i]=remain.pop(0)
-        return res
+        # 5 位全部唯一合法
+        if len(seen) == 5:
+            return seq
+
+        # 4 位唯一 + 1 位缺失 → 逻辑推演
+        if len(seen) == 4 and len(na_positions) == 1:
+            missing = list(valid - set(seen.keys()))[0]
+            result = list(seq)
+            result[na_positions[0]] = missing
+            return result
+
+        # 其他情况（多个 N/A、多个重复等）→ 不修复
+        return seq
 
     def preprocess(self, buf, p):
         avg = np.mean(buf, axis=0).astype(np.uint8)

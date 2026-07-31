@@ -1089,22 +1089,20 @@ class BrainNode(Node):
                     self._drop_batch += 1
                     self._drop_step = 0
 
-        # ──── step 2: 张开 + 无刷100%, 3s 后闭合 + 关无刷 ────
+        # ──── step 2: 张开 5s 后闭合 ────
         elif self._drop_step == 2:
             self._drop_step_timer += 1
-            if self._drop_step_timer == 1:          # 到位后立即张开 + 开无刷100%
+            if self._drop_step_timer == 1:          # 到位后立即张开
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 0})
-                    self.dispatch_task(hand, "bldc", "start", {"duty": 100})
                 self.get_logger().info(
-                    f"[DROP] 批次{self._drop_batch} 舵机张开 0° + 无刷启动100%"
+                    f"[DROP] 批次{self._drop_batch} 舵机张开 0°"
                 )
-            elif self._drop_step_timer >= 30:       # 开 3s → 闭合 + 关无刷
+            elif self._drop_step_timer >= 50:       # 开 5s → 闭合
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 90})
-                    self.dispatch_task(hand, "bldc", "stop", {})
                 self.get_logger().info(
-                    f"[DROP] 批次{self._drop_batch} 舵机关闭 90° + 无刷停止，完成"
+                    f"[DROP] 批次{self._drop_batch} 舵机关闭 90°，完成"
                 )
                 self._drop_batch += 1
                 self._drop_step = 0
