@@ -110,7 +110,7 @@ class VisionNode(Node):
         tpls = {'L': {}, 'R': {}}
         pkg_dir = get_package_share_directory('robot_vision')
 
-        for side, folder in [('L', 'dataset-l'), ('R', 'dataset-r')]:
+        for side, folder in [('L', 'dataset_left'), ('R', 'dataset_right')]:
             path = os.path.join(pkg_dir, folder)
             if not os.path.exists(path):
                 continue
