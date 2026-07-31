@@ -1028,8 +1028,8 @@ class BrainNode(Node):
             self.execute_drop()
 
         if self._execute_done:
-            self.get_logger().info("[EXECUTE_TARGET] 执行完毕，进入 CHASSIS_TO_END")
-            self._transition_to(self.ST_CHASSIS_TO_END)
+            self.get_logger().info("[EXECUTE_TARGET] 执行完毕，任务完成")
+            self._transition_to(self.ST_DONE)
 
     # =================================================================
     #  execute_drop — 批次驱动放豆执行
@@ -1099,19 +1099,7 @@ class BrainNode(Node):
                 self.get_logger().info(
                     f"[DROP] 批次{self._drop_batch} 舵机张开 0°"
                 )
-            elif self._drop_step_timer == 15:       # 开 1.5s → 闭合
-                for hand in droppers:
-                    self.dispatch_task(hand, "servo", "move_to", {"angle": 90})
-                self.get_logger().info(
-                    f"[DROP] 批次{self._drop_batch} 舵机闭合 90°"
-                )
-            elif self._drop_step_timer == 20:       # 闭 0.5s → 再张开
-                for hand in droppers:
-                    self.dispatch_task(hand, "servo", "move_to", {"angle": 0})
-                self.get_logger().info(
-                    f"[DROP] 批次{self._drop_batch} 舵机再张开 0°"
-                )
-            elif self._drop_step_timer >= 30:       # 开 1s → 闭合并完成
+            elif self._drop_step_timer >= 30:       # 开 3s → 闭合并完成
                 for hand in droppers:
                     self.dispatch_task(hand, "servo", "move_to", {"angle": 90})
                 self.get_logger().info(
